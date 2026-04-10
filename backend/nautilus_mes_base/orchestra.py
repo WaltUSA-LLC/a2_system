@@ -78,8 +78,8 @@ class NAUTimeOrchestra:
                 print(f"finished mes {current_dt} shift {shift}")
             current_dt += timedelta(days=1)
         all_df = pd.concat(dfs, ignore_index=True)
-        output_path = self.writer.to_excel(all_df, start_dt, end_dt)
-        return output_path
+        #output_path = self.writer.to_excel(all_df, start_dt, end_dt)
+        return all_df
     
 class NAUStopOrchestra:
     def __init__(
