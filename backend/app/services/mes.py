@@ -16,6 +16,7 @@ def get_weights(start_time:str, end_time:str)->pd.DataFrame:
     df = mes.generate_mes(start_dt, end_dt)
     df["shift_start_time"] = df["shift_start_time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df = df.reset_index(names="id")
+    df = df.astype(object).where(pd.notnull(df), None)
     return df
 
 
