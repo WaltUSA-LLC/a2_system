@@ -1,7 +1,16 @@
 from fastapi import FastAPI
-from api.base import router as base
+from app.api.base import router as base
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(base, prefix="/base")
 
