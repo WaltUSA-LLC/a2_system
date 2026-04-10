@@ -7,8 +7,8 @@ import { DataGrid } from '@mui/x-data-grid';
 
 
 function WeightsView() {
-    const [rec, setRec] = useState(null);
-    const [col, setCol] = useState(null);
+    const [rec, setRec] = useState([]);
+    const [col, setCol] = useState([]);
 
     useEffect(()=>{
         axios.get("http://localhost:8000/base/mes")
@@ -22,24 +22,26 @@ function WeightsView() {
         });
     },[]);
 
+    if (!rec.length || !col.length) {
+        return <div>Loading...</div>;
+    }
+
     return (
-        rec?
         <Box sx={{ height: 800, width: '100%' }}>
             <DataGrid
                 rows={rec}
                 columns={col}
                 initialState={{
-                pagination: {
-                    paginationModel: {
-                    pageSize: 10,
+                    pagination: {
+                        paginationModel: {
+                            pageSize: 10,
+                        },
                     },
-                },
                 }}
-                pageSizeOptions={[10,20,30]}
+                pageSizeOptions={[10, 20, 30]}
                 disableRowSelectionOnClick
             />
-        </Box>:
-        <div>Loading...</div>
+        </Box>
     );
 }
 
