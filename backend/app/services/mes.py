@@ -3,7 +3,7 @@ from nautilus_mes_base import MESOrchestra
 from nautilus_mes_base.utils import parse_start_date
 import pandas as pd
 
-def get_weights(start_time:str, end_time:str)->pd.DataFrame:
+def handle_weight_data(start_time:str, end_time:str)->pd.DataFrame:
     config = AppConfig.from_env()
     mes = MESOrchestra.from_config(config)
 

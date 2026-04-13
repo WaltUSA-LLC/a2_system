@@ -1,6 +1,8 @@
+import BaseTableView from "./BaseTableView"
+
 function MachsView() {
     return (
-        <div>machs view</div>
+        <BaseTableView url="http://localhost:8000/base/nau/time" />
     );
 }
 

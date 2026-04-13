@@ -45,7 +45,7 @@ class MESOrchestra:
                 df = self.cleaner.clean(df)
                 df = self.calculator.append_weight_est(df)
                 dfs.append(df)
-                print(f"finished {current_dt} shift {shift}")
+                print(f"finished mes {current_dt} shift {shift}")
             current_dt += timedelta(days=1)
         all_df = pd.concat(dfs, ignore_index=True)
         all_df.drop(columns=["NAU_prs", "Prs_Weight"], inplace=True)
@@ -75,7 +75,7 @@ class NAUTimeOrchestra:
             for shift in range(1, 3):
                 df = self.repository.fetch_shift_data(current_dt, shift)
                 dfs.append(df)
-                print(f"finished mes {current_dt} shift {shift}")
+                print(f"finished nau time {current_dt} shift {shift}")
             current_dt += timedelta(days=1)
         all_df = pd.concat(dfs, ignore_index=True)
         #output_path = self.writer.to_excel(all_df, start_dt, end_dt)
@@ -109,5 +109,5 @@ class NAUStopOrchestra:
                 print(f"finished nau stop {current_dt} shift {shift}")
             current_dt += timedelta(days=1)
         all_df = pd.concat(dfs, ignore_index=True)
-        output_path = self.writer.to_excel(all_df, start_dt, end_dt)
-        return output_path
+        #output_path = self.writer.to_excel(all_df, start_dt, end_dt)
+        return all_df

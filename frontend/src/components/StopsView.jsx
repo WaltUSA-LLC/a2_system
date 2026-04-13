@@ -1,6 +1,8 @@
+import BaseTableView from "./BaseTableView"
+
 function StopsView() {
     return (
-        <div>stops view</div>
+        <BaseTableView url="http://localhost:8000/base/nau/stop" />
     );
 }
 
