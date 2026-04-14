@@ -101,12 +101,11 @@ class NAUStopOrchestra:
         dfs = []
         current_dt = start_dt
         while current_dt <= end_dt:
-            for shift in range(1, 3):
-                df = self.repository.fetch_shift_data(current_dt, shift)
-                df["dur_minute"] = TimeCalculator.estimate_time_duration(df["Stop_time"], df["Recover_time"])
-                df = df.sort_values(by=["MachID", "dur_minute"], ascending=[True, False])
-                dfs.append(df)
-                print(f"finished nau stop {current_dt} shift {shift}")
+            df = self.repository.fetch_shift_data(current_dt)
+            df["dur_minute"] = TimeCalculator.estimate_time_duration(df["Stop_time"], df["Recover_time"])
+            df = df.sort_values(by=["MachID", "dur_minute"], ascending=[True, False])
+            dfs.append(df)
+            print(f"finished nau stop {current_dt}")
             current_dt += timedelta(days=1)
         all_df = pd.concat(dfs, ignore_index=True)
         #output_path = self.writer.to_excel(all_df, start_dt, end_dt)

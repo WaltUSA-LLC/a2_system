@@ -81,7 +81,6 @@ ORDER BY MachID;
 NAU_STOP_QUERY = """
 DECLARE @Start DATETIME2(0) = :start_dt;
 DECLARE @End   DATETIME2(0) = DATEADD(HOUR, 24, @Start);
-DECLARE @Shift  INT = :shift;
 
 SELECT
     sm.Shift AS Shift,
@@ -93,7 +92,6 @@ SELECT
 FROM dbNautilus.dbo.STOPS_MONITOR AS sm, dbNautilus.dbo.STOPS AS s 
 WHERE sm.DateRec > @Start
     AND sm.DateRec <=  @End
-    AND sm.Shift  = @Shift
     AND sm.StopCode = 0
     AND sm.LastStopCode = s.StopCode 
 ORDER BY MachID;
