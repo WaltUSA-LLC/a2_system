@@ -59,7 +59,6 @@ ORDER BY mach ASC;
 NAU_RUN_TIME_QUERY = """
 DECLARE @Start DATETIME2(0) = :start_dt;
 DECLARE @End   DATETIME2(0) = DATEADD(HOUR, 24, @Start);
-DECLARE @Shift  INT = :shift;
 
 SELECT
     pm.MachCode AS MachID,
@@ -71,11 +70,9 @@ SELECT
 FROM dbNautilus.dbo.PRODUCTIONS_MONITOR AS pm
 WHERE pm.DateRec > @Start
     AND pm.DateRec <=  @End
-    AND pm.Shift  = @Shift
     AND pm.Pieces >= 0
     AND pm.Pieces < 500  ---clean mach mes data
 GROUP BY pm.MachCode, pm.Shift, pm.StyleCode
-ORDER BY MachID;
 """
 
 NAU_STOP_QUERY = """

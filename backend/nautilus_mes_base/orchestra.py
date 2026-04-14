@@ -72,10 +72,9 @@ class NAUTimeOrchestra:
         dfs = []
         current_dt = start_dt
         while current_dt <= end_dt:
-            for shift in range(1, 3):
-                df = self.repository.fetch_shift_data(current_dt, shift)
-                dfs.append(df)
-                print(f"finished nau time {current_dt} shift {shift}")
+            df = self.repository.fetch_shift_data(current_dt)
+            dfs.append(df)
+            print(f"finished nau time {current_dt}")
             current_dt += timedelta(days=1)
         all_df = pd.concat(dfs, ignore_index=True)
         #output_path = self.writer.to_excel(all_df, start_dt, end_dt)
