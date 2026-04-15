@@ -8,7 +8,7 @@ router = APIRouter()
 @router.get("/mes")
 def get_mes(start:str, end:str):
     df = handle_mach_view(start, end)
-    return {"columns": [{ "field": col, "headerName": col, "width": 130, "align": 'center', "headerAlign": 'center', } for col in df.columns.to_list()],
+    return {"columns": [{ "field": col, "headerName": col, "flex": 1, "align": 'center', "headerAlign": 'center', } for col in df.columns.to_list()],
             "content": df.to_dict(orient="records")}
 
 '''@router.get("/nau/time")

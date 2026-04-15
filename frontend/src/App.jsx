@@ -1,6 +1,6 @@
 import TopBar from './components/TopBar';
 import Navigation from './components/Navigation';
-import WeightsView from './components/WeightsView';
+import SKUView from './components/SKUView';
 import MachsView from './components/MachsView';
 import StopsView from './components/StopsView';
 import { Route, Routes } from "react-router-dom";
@@ -13,8 +13,8 @@ function App() {
             <div className='nav-and-content'>
                 <Navigation />
                 <Routes>
-                    <Route path="/weights-view" element={<WeightsView />} />
-                    <Route path="/machs-view" element={<MachsView />} />
+                    <Route path="/weights-view" element={<MachsView />} />
+                    <Route path="/machs-view" element={<SKUView />} />
                     <Route path="/stops-view" element={<StopsView />} />
                 </Routes>
             </div>

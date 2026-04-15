@@ -9,14 +9,14 @@ function formatDate(date) {
     return date.toISOString().split('T')[0];
 }
 
-function BaseTableView({url}){
+function BaseTableView({url, col}){
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const defaultDate = formatDate(yesterday);
     const [start, setStart] = useState(defaultDate);
     const [end, setEnd] = useState(defaultDate);
     const [rec, setRec] = useState([]);
-    const [col, setCol] = useState([]);
+    //const [col, setCol] = useState([]);
     const [loading, setLoading] = useState(false);
 
     function handleImportData() {
@@ -28,12 +28,12 @@ function BaseTableView({url}){
             },
         })
             .then((resp) => {
-                setCol((resp.data.columns ?? []).filter((column) => column.field !== 'id'));
+                //setCol((resp.data.columns ?? []).filter((column) => column.field !== 'id'));
                 setRec(resp.data.content ?? []);
             })
             .catch((err) => {
                 console.error(err);
-                setCol([]);
+                //setCol([]);
                 setRec([]);
             })
             .finally(() => {
@@ -98,6 +98,11 @@ function BaseTableView({url}){
                         pageSizeOptions={[10, 20, 30]}
                         disableRowSelectionOnClick
                         showToolbar
+                        sx={{
+                            '& .MuiDataGrid-columnHeaderTitle': {
+                            fontWeight: 'bold',
+                            },
+                        }}
                     />
                 </Box>
             )}
