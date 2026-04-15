@@ -4,8 +4,8 @@ import "./Navigation.css";
 function Navigation() {
     return (
         <div className="nav">
-            <Link to="/weights-view">View Weights</Link>
             <Link to="/machs-view">View Machs</Link>
+            <Link to="/sku-view">View SKU</Link>
             <Link to="/stops-view">View Stops</Link>
         </div>
     );

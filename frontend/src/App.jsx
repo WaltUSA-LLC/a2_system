@@ -13,8 +13,8 @@ function App() {
             <div className='nav-and-content'>
                 <Navigation />
                 <Routes>
-                    <Route path="/weights-view" element={<MachsView />} />
-                    <Route path="/machs-view" element={<SKUView />} />
+                    <Route path="/machs-view" element={<MachsView />} />
+                    <Route path="/sku-view" element={<SKUView />} />
                     <Route path="/stops-view" element={<StopsView />} />
                 </Routes>
             </div>
