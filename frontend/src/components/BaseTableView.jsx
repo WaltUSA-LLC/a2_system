@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from "axios";
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { DataGrid } from '@mui/x-data-grid';
 
@@ -16,9 +17,10 @@ function BaseTableView({url}){
     const [end, setEnd] = useState(defaultDate);
     const [rec, setRec] = useState([]);
     const [col, setCol] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
+    function handleImportData() {
+        setLoading(true);
         axios.get(url, {
             params: {
                 start,
@@ -37,15 +39,13 @@ function BaseTableView({url}){
             .finally(() => {
                 setLoading(false);
             });
-    }, [start, end]);
+    }
 
     function handleStartChange(event) {
-        setLoading(true);
         setStart(event.target.value);
     }
 
     function handleEndChange(event) {
-        setLoading(true);
         setEnd(event.target.value);
     }
 
@@ -73,6 +73,12 @@ function BaseTableView({url}){
                     onChange={handleEndChange}
                     slotProps={{ inputLabel: { shrink: true } }}
                 />
+                <Button
+                    variant="contained"
+                    onClick={handleImportData}
+                >
+                    Import Data
+                </Button>
             </Box>
 
             {loading ? (
