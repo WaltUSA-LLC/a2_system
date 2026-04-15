@@ -3,4 +3,5 @@ backend/app/__pycache__
 backend/app/api/__pycache__
 backend/app/services/__pycache__
 backend/nautilus_mes_base/__pycache__
+backend/base_outputs/*
 .vscode
