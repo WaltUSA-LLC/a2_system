@@ -20,9 +20,13 @@ WITH mach_info AS(
     SELECT
         pm.MachCode AS MachID,
         pm.Shift as shift_no,
-        MIN(pm.DateStartShift) as shift_start_time,
-        pm.StyleCode as style_code,
-        SUM(pm.Pieces) / 2 as NAU_prs
+        MIN(pm.DateStartShift) as Shift_Start_Time,
+        pm.StyleCode as Style_Code,
+        SUM(pm.Pieces) / 2 as NAU_prs,
+        SUM(pm.Discards) / 2 as Discard_prs,
+        CAST(AVG(CASE WHEN pm.Cycle <> 0 THEN pm.Cycle END) AS INT) AS Avg_Cycle,
+        SUM(pm.TimeOn) AS ON_Time,
+        SUM(pm.TimeOff) AS OFF_Time
     FROM dbNautilus.dbo.PRODUCTIONS_MONITOR AS pm
     WHERE pm.DateRec > @Start
       AND pm.DateRec <=  @End
@@ -48,10 +52,14 @@ product_down_mach AS(
     WHERE eq.FItemID = pd.FMachineID
 )
 SELECT MachID,
-       shift_start_time,
-       style_code,
+       Shift_Start_Time,
+       Style_Code,
        pdm.FWeight AS Weight,
-       NAU_prs
+       NAU_prs,
+       Discard_prs,
+       Avg_Cycle,
+       ON_Time,
+       OFF_Time
 FROM mach_info as m  LEFT JOIN   product_down_mach as pdm ON pdm.mach=m.MachID
 ORDER BY MachID ASC;
 """

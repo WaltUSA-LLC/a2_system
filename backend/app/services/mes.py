@@ -14,7 +14,7 @@ def handle_weight_data(start_time:str, end_time:str)->pd.DataFrame:
         raise SystemExit("End date must be on or after the start date.")
     
     df = mes.generate_mes(start_dt, end_dt)
-    df["shift_start_time"] = df["shift_start_time"].dt.strftime("%Y-%m-%d %H:%M:%S")
+    df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df = df.reset_index(names="id")
     df = df.astype(object).where(pd.notnull(df), None)
     return df

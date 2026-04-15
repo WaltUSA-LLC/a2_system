@@ -27,7 +27,7 @@ class WeightCalculator:
         return style+'-'+size
 
     def estimate_prs_from_weight(self, rec: pd.Series) -> float:
-        style = WeightCalculator.normalize_style(rec["style_code"])
+        style = WeightCalculator.normalize_style(rec["Style_Code"])
         weight = rec["Weight"]
 
         if pd.isna(weight):
@@ -45,8 +45,8 @@ class WeightCalculator:
 
     def append_weight_est(self, df: pd.DataFrame) -> pd.DataFrame:
         enriched = df.copy()
-        enriched["Prs_Weight"] = enriched["style_code"].apply(lambda x: self.sku_weight.get(WeightCalculator.normalize_style(x),np.nan))
-        enriched["MES_prs"] = enriched[["style_code", "Weight"]].apply(self.estimate_prs_from_weight, axis=1)
+        enriched["Prs_Weight"] = enriched["Style_Code"].apply(lambda x: self.sku_weight.get(WeightCalculator.normalize_style(x),np.nan))
+        enriched["MES_prs"] = enriched[["Style_Code", "Weight"]].apply(self.estimate_prs_from_weight, axis=1)
         return enriched
 
 class TimeCalculator:
