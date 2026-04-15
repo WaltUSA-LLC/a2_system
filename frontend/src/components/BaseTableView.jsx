@@ -22,7 +22,7 @@ function BaseTableView({url}){
         axios.get(url, {
             params: {
                 start,
-                end:start,
+                end,
             },
         })
             .then((resp) => {
@@ -60,19 +60,19 @@ function BaseTableView({url}){
                 }}
             >
                 <TextField
-                    label="Time"
+                    label="Start Time"
                     type="date"
                     value={start}
                     onChange={handleStartChange}
                     slotProps={{ inputLabel: { shrink: true } }}
                 />
-                {/* <TextField
+                <TextField
                     label="End Time"
                     type="date"
                     value={end}
                     onChange={handleEndChange}
                     slotProps={{ inputLabel: { shrink: true } }}
-                /> */}
+                />
             </Box>
 
             {loading ? (
@@ -91,6 +91,7 @@ function BaseTableView({url}){
                         }}
                         pageSizeOptions={[10, 20, 30]}
                         disableRowSelectionOnClick
+                        showToolbar
                     />
                 </Box>
             )}
