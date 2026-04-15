@@ -53,7 +53,7 @@ SELECT MachID,
        pdm.FWeight AS Weight,
        NAU_prs
 FROM mach_info as m  LEFT JOIN   product_down_mach as pdm ON pdm.mach=m.MachID
-ORDER BY mach ASC;
+ORDER BY MachID ASC;
 """
 
 NAU_RUN_TIME_QUERY = """
@@ -73,6 +73,7 @@ WHERE pm.DateRec > @Start
     AND pm.Pieces >= 0
     AND pm.Pieces < 500  ---clean mach mes data
 GROUP BY pm.MachCode, pm.Shift, pm.StyleCode
+ORDER BY shift_start_time, MachID;
 """
 
 NAU_STOP_QUERY = """
