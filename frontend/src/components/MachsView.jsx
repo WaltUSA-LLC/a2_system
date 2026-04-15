@@ -27,6 +27,14 @@ function WeightsView() {
             headerAlign: 'center',
         },
         {
+            field: 'Weight',
+            headerName: 'Weight (kg)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
             field: 'NAU_prs',
             headerName: 'NAU (prs)',
             flex: 1,

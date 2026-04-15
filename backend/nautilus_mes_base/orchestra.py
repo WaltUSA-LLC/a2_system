@@ -48,8 +48,8 @@ class MESOrchestra:
                 print(f"finished mes {current_dt} shift {shift}")
             current_dt += timedelta(days=1)
         all_df = pd.concat(dfs, ignore_index=True)
-        all_df.drop(columns=["Prs_Weight"], inplace=True)
-        #output_path = self.writer.to_excel(all_df, start_dt, end_dt)
+        #self.writer.to_excel(all_df, start_dt, end_dt)
+        all_df.drop(columns=["Prs_Weight"], inplace=True) 
         return all_df
 
 class NAUTimeOrchestra:
