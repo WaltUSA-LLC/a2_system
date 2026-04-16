@@ -1,15 +1,9 @@
 from nautilus_mes_base import AppConfig
 from nautilus_mes_base import MESOrchestra
 from nautilus_mes_base.utils import parse_start_date
+from app.services.utils import estimate_st_output_prs
 import pandas as pd
 import numpy as np
-import math
-
-
-def estimate_st_output_prs(rec: pd.Series) -> int:
-    if pd.isna(rec["Avg_Cycle"]):
-        return np.nan
-    return math.floor((rec["ON_Time"]+rec["OFF_Time"])/rec["Avg_Cycle"]/2)
 
 
 def handle_mach_view(start_time:str, end_time:str)->pd.DataFrame:

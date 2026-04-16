@@ -80,7 +80,7 @@ function WeightsView() {
         },
     ];
     return (
-        <BaseTableView url="http://localhost:8000/base/mes" col={columns}/>
+        <BaseTableView url="http://localhost:8000/base/mach" col={columns}/>
     );
 }
 

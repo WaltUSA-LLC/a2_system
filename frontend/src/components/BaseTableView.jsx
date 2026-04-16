@@ -77,7 +77,7 @@ function BaseTableView({url, col}){
                     variant="contained"
                     onClick={handleImportData}
                 >
-                    Import Data
+                    Show Data
                 </Button>
             </Box>
 
