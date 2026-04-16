@@ -36,16 +36,23 @@ class MESOrchestra:
         writer = ExcelWriter(config.output_dir, "MES_DATA", "mes_base")
         return cls(mes_data, cleaner, calculator, writer)
 
-    def generate_mes(self, start_dt: datetime, end_dt: datetime) -> pd.DataFrame:
+    def generate_mes(self, start_dt: datetime, end_dt: datetime, shift: int) -> pd.DataFrame:
         dfs = []
         current_dt = start_dt
         while current_dt <= end_dt:
-            for shift in range(1, 3):
+            if shift!=0:
                 df = self.repository.fetch_shift_data(current_dt, shift)
                 df = self.cleaner.clean(df)
                 df = self.calculator.append_weight_est(df)
                 dfs.append(df)
                 print(f"finished mes {current_dt} shift {shift}")
+            else:
+                for shift_iter in range(1, 3):
+                    df = self.repository.fetch_shift_data(current_dt, shift_iter)
+                    df = self.cleaner.clean(df)
+                    df = self.calculator.append_weight_est(df)
+                    dfs.append(df)
+                    print(f"finished mes {current_dt} shift {shift_iter}")
             current_dt += timedelta(days=1)
         all_df = pd.concat(dfs, ignore_index=True)
         #self.writer.to_excel(all_df, start_dt, end_dt)

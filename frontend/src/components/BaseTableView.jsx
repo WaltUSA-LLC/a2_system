@@ -3,6 +3,10 @@ import axios from "axios";
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import { DataGrid } from '@mui/x-data-grid';
 
 function formatDate(date) {
@@ -15,25 +19,24 @@ function BaseTableView({url, col}){
     const defaultDate = formatDate(yesterday);
     const [start, setStart] = useState(defaultDate);
     const [end, setEnd] = useState(defaultDate);
+    const [shift, setShift] = useState(0);
     const [rec, setRec] = useState([]);
-    //const [col, setCol] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    function handleImportData() {
+    function handleShowData() {
         setLoading(true);
         axios.get(url, {
             params: {
                 start,
                 end,
+                shift,
             },
         })
             .then((resp) => {
-                //setCol((resp.data.columns ?? []).filter((column) => column.field !== 'id'));
                 setRec(resp.data.content ?? []);
             })
             .catch((err) => {
                 console.error(err);
-                //setCol([]);
                 setRec([]);
             })
             .finally(() => {
@@ -47,6 +50,10 @@ function BaseTableView({url, col}){
 
     function handleEndChange(event) {
         setEnd(event.target.value);
+    }
+
+    function handleShiftChange(event) {
+        setShift(event.target.value);
     }
 
     return (
@@ -73,9 +80,22 @@ function BaseTableView({url, col}){
                     onChange={handleEndChange}
                     slotProps={{ inputLabel: { shrink: true } }}
                 />
+                <FormControl>
+                    <InputLabel id="shift-label">Shift</InputLabel>
+                    <Select
+                        labelId="shift-label"
+                        value={shift}
+                        label="Shift"
+                        onChange={handleShiftChange}
+                    >
+                        <MenuItem value={0}>ALL</MenuItem>
+                        <MenuItem value={1}>DAY</MenuItem>
+                        <MenuItem value={2}>NIGHT</MenuItem>
+                    </Select>
+                </FormControl>
                 <Button
                     variant="contained"
-                    onClick={handleImportData}
+                    onClick={handleShowData}
                 >
                     Show Data
                 </Button>

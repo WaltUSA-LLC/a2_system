@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 
 
-def handle_mach_view(start_time:str, end_time:str)->pd.DataFrame:
+def handle_mach_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     config = AppConfig.from_env()
     mes_nau = MESOrchestra.from_config(config)
 
@@ -16,7 +16,7 @@ def handle_mach_view(start_time:str, end_time:str)->pd.DataFrame:
     if end_dt < start_dt:
         raise SystemExit("End date must be on or after the start date.")
     
-    df = mes_nau.generate_mes(start_dt, end_dt)
+    df = mes_nau.generate_mes(start_dt, end_dt, shift)
     df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
     df["ON_Time_Occupation"] = (df["ON_Time"] / (df["ON_Time"] + df["OFF_Time"])).round(2)

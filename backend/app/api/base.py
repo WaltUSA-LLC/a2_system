@@ -5,8 +5,8 @@ from app.services.sku_view import handle_sku_view
 router = APIRouter()
 
 @router.get("/mach")
-def get_mes(start:str, end:str):
-    df = handle_mach_view(start, end)
+def get_mes(start:str, end:str, shift: int):
+    df = handle_mach_view(start, end, shift)
     return {"content": df.to_dict(orient="records")}
 
 @router.get("/sku")
