@@ -1,6 +1,40 @@
 import BaseTableView from "./BaseTableView"
+import { GridFilterInputValue } from "@mui/x-data-grid";
 
-function WeightsView() {
+function MachsView() {
+    const hourFilterOperators = [
+        {
+            label: "hours =",
+            value: "hoursEquals",
+            InputComponent: GridFilterInputValue,
+            getApplyFilterFn: (filterItem) => {
+            if (filterItem.value == null || filterItem.value === "") return null;
+            const target = Number(filterItem.value) * 3600;
+            return (value) => Number(value) === target;
+            },
+        },
+        {
+            label: "hours >",
+            value: "hoursGreaterThan",
+            InputComponent: GridFilterInputValue,
+            getApplyFilterFn: (filterItem) => {
+            if (filterItem.value == null || filterItem.value === "") return null;
+            const target = Number(filterItem.value) * 3600;
+            return (value) => Number(value) > target;
+            },
+        },
+        {
+            label: "hours <",
+            value: "hoursLessThan",
+            InputComponent: GridFilterInputValue,
+            getApplyFilterFn: (filterItem) => {
+            if (filterItem.value == null || filterItem.value === "") return null;
+            const target = Number(filterItem.value) * 3600;
+            return (value) => Number(value) < target;
+            },
+        },
+    ];
+
     const columns = [
         {
             field: 'MachID',
@@ -53,18 +87,22 @@ function WeightsView() {
         {
             field: "ON_Time",
             headerName: "ON Time",
+            type: 'number',
             flex: 1,
             align: 'center',
             headerAlign: 'center',
             valueFormatter: (value) => formatSeconds(value),
+            filterOperators: hourFilterOperators,
         },
         {
             field: "OFF_Time",
             headerName: "OFF Time",
+            type: 'number',
             flex: 1,
             align: 'center',
             headerAlign: 'center',
             valueFormatter: (value) => formatSeconds(value),
+            filterOperators: hourFilterOperators,
         },
         {
             field: 'ON_Time_Occupation',
@@ -108,5 +146,5 @@ function WeightsView() {
     );
 }
 
-export default WeightsView;
+export default MachsView;
 
