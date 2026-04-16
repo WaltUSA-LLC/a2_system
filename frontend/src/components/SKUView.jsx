@@ -3,6 +3,14 @@ import BaseTableView from "./BaseTableView"
 function SKUView() {
     const columns = [
         {
+            field: 'Style_Code',
+            headerName: 'Style Code',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
             field: 'Shift_Start_Time',
             headerName: 'Shift Start Time',
             flex: 1,
@@ -11,10 +19,18 @@ function SKUView() {
             headerAlign: 'center',
         },
         {
-            field: 'Style_Code',
-            headerName: 'Style Code',
+            field: 'MES_prs',
+            headerName: 'MES (prs)',
             flex: 1,
-            type: 'string',
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'NAU_prs',
+            headerName: 'NAU (prs)',
+            flex: 1,
+            type: 'number',
             align: 'center',
             headerAlign: 'center',
         },
