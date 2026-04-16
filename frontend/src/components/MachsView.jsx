@@ -35,6 +35,14 @@ function WeightsView() {
             headerAlign: 'center',
         },
         {
+            field: 'MES_prs',
+            headerName: 'MES (prs)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
             field: 'NAU_prs',
             headerName: 'NAU (prs)',
             flex: 1,
@@ -43,12 +51,20 @@ function WeightsView() {
             headerAlign: 'center',
         },
         {
-            field: 'MES_prs',
-            headerName: 'MES (prs)',
+            field: "ON_Time",
+            headerName: "ON Time",
             flex: 1,
-            type: 'number',
             align: 'center',
             headerAlign: 'center',
+            valueFormatter: (value) => formatSeconds(value),
+        },
+        {
+            field: "OFF_Time",
+            headerName: "OFF Time",
+            flex: 1,
+            align: 'center',
+            headerAlign: 'center',
+            valueFormatter: (value) => formatSeconds(value),
         },
         {
             field: 'ON_Time_Occupation',
@@ -79,6 +95,14 @@ function WeightsView() {
             headerAlign: 'center',
         },
     ];
+
+    function formatSeconds(sec) {
+        sec = Number(sec ?? 0);
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
     return (
         <BaseTableView url="http://localhost:8000/base/mach" col={columns}/>
     );

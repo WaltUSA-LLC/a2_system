@@ -111,7 +111,7 @@ function BaseTableView({url, col}){
                         initialState={{
                             pagination: {
                                 paginationModel: {
-                                    pageSize: 20,
+                                    pageSize: 10,
                                 },
                             },
                         }}

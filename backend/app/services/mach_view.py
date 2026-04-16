@@ -25,7 +25,7 @@ def handle_mach_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df["Comment"] = ""
     df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
     df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
-    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
+    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
     df = df.reset_index(names="id")
     df = df.astype(object).where(pd.notnull(df), None)
     return df
