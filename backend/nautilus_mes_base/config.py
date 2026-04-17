@@ -10,6 +10,7 @@ class AppConfig:
     database_url: str
     weights_path: Path
     output_dir: Path
+    data_log: bool
 
     @classmethod
     def from_env(cls) -> "AppConfig":
@@ -19,8 +20,11 @@ class AppConfig:
         if not database_url:
             raise ValueError("DATABASE_URL is missing. Set it in .env")
 
+        data_log = os.getenv("DATA_LOG", "false").strip().lower() == "true"
+
         return cls(
             database_url=database_url,
             weights_path=Path(os.getenv("WEIGHTS_PATH", "./nautilus_mes_base/data/weights.json")),
             output_dir=Path(os.getenv("BASE_OUTPUT", "./base_outputs")),
+            data_log=data_log,
         )

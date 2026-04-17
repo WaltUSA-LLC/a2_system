@@ -20,11 +20,13 @@ class MESOrchestra:
         cleaner: WeightCleaner,
         calculator: WeightCalculator,
         writer: ExcelWriter,
+        data_log: bool,
     ) -> None:
         self.repository = repository
         self.cleaner = cleaner
         self.calculator = calculator
         self.writer = writer
+        self.data_log = data_log
 
     @classmethod
     def from_config(cls, config: AppConfig) -> "MESOrchestra":
@@ -34,7 +36,7 @@ class MESOrchestra:
         weights = WeightRepository(config.weights_path).get_weights()
         calculator = WeightCalculator(weights)
         writer = ExcelWriter(config.output_dir, "MES_DATA", "mes_base")
-        return cls(mes_data, cleaner, calculator, writer)
+        return cls(mes_data, cleaner, calculator, writer, config.data_log)
 
     def generate_mes(self, start_dt: datetime, end_dt: datetime, shift: int) -> pd.DataFrame:
         dfs = []
@@ -55,7 +57,8 @@ class MESOrchestra:
                     print(f"finished mes {current_dt} shift {shift_iter}")
             current_dt += timedelta(days=1)
         all_df = pd.concat(dfs, ignore_index=True)
-        #self.writer.to_excel(all_df, start_dt, end_dt)
+        if self.data_log:
+            self.writer.to_excel(all_df, start_dt, end_dt)
         all_df.drop(columns=["Prs_Weight"], inplace=True) 
         return all_df
 

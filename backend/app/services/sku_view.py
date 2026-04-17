@@ -17,8 +17,6 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
         raise SystemExit("End date must be on or after the start date.")
     
     df = mes_nau.generate_mes(start_dt, end_dt, shift)
-    print(len(df))
-    print(type(df["Shift_Start_Time"].iloc[0]))
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
     #count mach
     df_mach_cnt = df.groupby(["Style_Code", "Shift_Start_Time"])["MachID"].nunique()
