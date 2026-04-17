@@ -64,29 +64,10 @@ FROM mach_info as m  LEFT JOIN   product_down_mach as pdm ON pdm.mach=m.MachID
 ORDER BY MachID ASC;
 """
 
-NAU_RUN_TIME_QUERY = """
-DECLARE @Start DATETIME2(0) = :start_dt;
-DECLARE @End   DATETIME2(0) = DATEADD(HOUR, 24, @Start);
-
-SELECT
-    pm.MachCode AS MachID,
-    MIN(pm.DateStartShift) as shift_start_time,
-    pm.StyleCode as style_code,
-    CAST(AVG(CASE WHEN pm.Cycle <> 0 THEN pm.Cycle END) AS INT) AS Avg_Cycle,
-    SUM(pm.TimeOn) AS ON_Time,
-    SUM(pm.TimeOff) AS OFF_Time
-FROM dbNautilus.dbo.PRODUCTIONS_MONITOR AS pm
-WHERE pm.DateRec > @Start
-    AND pm.DateRec <=  @End
-    AND pm.Pieces >= 0
-    AND pm.Pieces < 500  ---clean mach mes data
-GROUP BY pm.MachCode, pm.Shift, pm.StyleCode
-ORDER BY shift_start_time, MachID;
-"""
 
 NAU_STOP_QUERY = """
 DECLARE @Start DATETIME2(0) = :start_dt;
-DECLARE @End   DATETIME2(0) = DATEADD(HOUR, 24, @Start);
+DECLARE @End   DATETIME2(0) = :end_dt;
 
 SELECT
     sm.Shift AS Shift,

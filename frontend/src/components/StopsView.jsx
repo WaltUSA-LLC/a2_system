@@ -1,8 +1,67 @@
 import BaseTableView from "./BaseTableView"
 
 function StopsView() {
+    const columns = [
+        {
+            field: 'Shift',
+            headerName: 'Shift',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'MachID',
+            headerName: 'Mach ID',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'Stop_code',
+            headerName: 'Stop Code',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'Description',
+            headerName: 'Description',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'Recover_time',
+            headerName: 'Recover Time',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'Stop_time',
+            headerName: 'Stop Time',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'dur_minute',
+            headerName: 'Duration',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        
+    ];
     return (
-        <BaseTableView url="http://localhost:8000/base/nau/stop" />
+        <BaseTableView url="http://localhost:8000/base/stop" col={columns}/>
     );
 }
 
