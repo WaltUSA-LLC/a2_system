@@ -52,4 +52,4 @@ class WeightCalculator:
 class TimeCalculator:
     @staticmethod
     def estimate_time_duration(t1:pd.Series, t2:pd.Series)->pd.Series:
-        return (t2 - t1) / 60 # return duration minute
+        return t2 - t1

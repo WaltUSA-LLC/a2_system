@@ -83,7 +83,7 @@ class NAUStopOrchestra:
         df = self.repository.fetch_data_with_start_end_date(start_dt, end_dt + timedelta(days=1))
         print(f"finished sql query with {len(df)}")
         df["dur_minute"] = TimeCalculator.estimate_time_duration(df["Stop_time"], df["Recover_time"])
-        df = df.sort_values(by=["MachID", "dur_minute"], ascending=[True, False])
+        #df = df.sort_values(by=["MachID", "dur_minute"], ascending=[True, False])
         print(f"finished df process")
         #output_path = self.writer.to_excel(all_df, start_dt, end_dt)
         return df

@@ -1,12 +1,13 @@
 import BaseTableView from "./BaseTableView"
+import { formatSeconds } from "./utils";
 
 function StopsView() {
     const columns = [
         {
-            field: 'Shift',
-            headerName: 'Shift',
+            field: 'Stop_time',
+            headerName: 'Stop Time',
             flex: 1,
-            type: 'number',
+            type: 'string',
             align: 'center',
             headerAlign: 'center',
         },
@@ -43,20 +44,13 @@ function StopsView() {
             headerAlign: 'center',
         },
         {
-            field: 'Stop_time',
-            headerName: 'Stop Time',
-            flex: 1,
-            type: 'string',
-            align: 'center',
-            headerAlign: 'center',
-        },
-        {
             field: 'dur_minute',
             headerName: 'Duration',
             flex: 1,
             type: 'number',
             align: 'center',
             headerAlign: 'center',
+            valueFormatter: (value) => formatSeconds(value),
         },
         
     ];

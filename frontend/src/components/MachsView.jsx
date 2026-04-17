@@ -1,5 +1,6 @@
 import BaseTableView from "./BaseTableView"
 import { GridFilterInputValue } from "@mui/x-data-grid";
+import { formatSeconds } from "./utils";
 
 function MachsView() {
     const hourFilterOperators = [
@@ -134,13 +135,7 @@ function MachsView() {
         },
     ];
 
-    function formatSeconds(sec) {
-        sec = Number(sec ?? 0);
-        const h = Math.floor(sec / 3600);
-        const m = Math.floor((sec % 3600) / 60);
-        const s = sec % 60;
-        return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-    }
+    
     return (
         <BaseTableView url="http://localhost:8000/base/mach" col={columns}/>
     );
