@@ -10,7 +10,12 @@ import MenuItem from '@mui/material/MenuItem';
 import { DataGrid } from '@mui/x-data-grid';
 
 function formatDate(date) {
-    return date.toISOString().split('T')[0];
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Denver',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(date);
 }
 
 function BaseTableView({url, col}){
