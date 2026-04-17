@@ -2,6 +2,7 @@ from nautilus_mes_base import AppConfig
 from nautilus_mes_base import MESOrchestra
 from nautilus_mes_base.utils import parse_start_date
 from app.services.utils import estimate_st_output_prs
+from app.services.utils import validate_throughput
 import pandas as pd
 import numpy as np
 
@@ -26,10 +27,12 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df_on_time_occupation = df_on_time/(df_on_time + df_off_time)
     #calc sku eff
     df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
+    df["Real_prs"] = df[["NAU_prs", "ST_prs", "MES_prs", "ON_Time", "Discard_prs", "Avg_Cycle"]].apply(validate_throughput, axis=1)
     df_nau_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["NAU_prs"].sum()
     df_mes_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["MES_prs"].sum()
+    df_real_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["Real_prs"].sum()
     df_st_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["ST_prs"].sum()
-    df_sku_eff = df_mes_prs/df_st_prs
+    df_sku_eff = df_real_prs/df_st_prs
 
     df_sku=pd.DataFrame({"Mach_cnt": df_mach_cnt,
                 "NAU_prs": df_nau_prs,
