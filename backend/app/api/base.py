@@ -15,6 +15,6 @@ def get_sku(start:str, end:str, shift: int):
     return {"content": df.to_dict(orient="records")}
 
 @router.get("/stop")
-def get_stop(start:str, end:str):
-    df = handle_stop_view(start, end)
+def get_stop(start:str, end:str, shift: int):
+    df = handle_stop_view(start, end, shift)
     return {"content": df.to_dict(orient="records")}

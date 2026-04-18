@@ -4,6 +4,14 @@ import { formatSeconds } from "./utils";
 function StopsView() {
     const columns = [
         {
+            field: 'Start_Shift_Time',
+            headerName: 'Start Shift Time',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
             field: 'Stop_time',
             headerName: 'Stop Time',
             flex: 1,

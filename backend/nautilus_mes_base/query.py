@@ -77,9 +77,8 @@ SELECT
     sm.DateRec AS Recover_time,
     sm.LastDateRec AS Stop_time
 FROM dbNautilus.dbo.STOPS_MONITOR AS sm, dbNautilus.dbo.STOPS AS s 
-WHERE sm.DateRec > @Start
-    AND sm.DateRec <=  @End
+WHERE sm.LastDateRec > @Start
+    AND sm.LastDateRec <=  @End
     AND sm.StopCode = 0
     AND sm.LastStopCode = s.StopCode 
-ORDER BY MachID;
 """
