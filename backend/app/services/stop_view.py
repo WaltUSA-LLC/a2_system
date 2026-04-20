@@ -74,7 +74,7 @@ def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFr
                                     "freq":df_freq,
                                     "dur_minute_sum": df_dur_sum,
                                     "dur_minute_med": df_dur_med  })
-    df_stop_by_code = df_stop_by_code.sort_values(["Mach_cnt", "dur_minute_sum"], ascending=[False, False])
+    df_stop_by_code = df_stop_by_code.sort_values(["freq", "Mach_cnt", "dur_minute_sum"], ascending=[False, False, False])
     df_stop_by_code.reset_index(inplace=True)
     df_stop_by_code = df_stop_by_code.reset_index(names="id")
     return df_stop_by_code
