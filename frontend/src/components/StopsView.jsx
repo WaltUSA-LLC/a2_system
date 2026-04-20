@@ -1,7 +1,40 @@
+import { GridFilterInputValue } from "@mui/x-data-grid";
 import BaseTableView from "./BaseTableView"
 import { formatSeconds } from "./utils";
 
 function StopsView() {
+    const minuteFilterOperators = [
+            {
+                label: "minutes =",
+                value: "minutesEquals",
+                InputComponent: GridFilterInputValue,
+                getApplyFilterFn: (filterItem) => {
+                if (filterItem.value == null || filterItem.value === "") return null;
+                const target = Number(filterItem.value) * 60;
+                return (value) => Number(value) === target;
+                },
+            },
+            {
+                label: "minutes >=",
+                value: "minutesGreaterOrEqualThan",
+                InputComponent: GridFilterInputValue,
+                getApplyFilterFn: (filterItem) => {
+                if (filterItem.value == null || filterItem.value === "") return null;
+                const target = Number(filterItem.value) * 60;
+                return (value) => Number(value) >= target;
+                },
+            },
+            {
+                label: "minutes <=",
+                value: "minutesLessOrEqualThan",
+                InputComponent: GridFilterInputValue,
+                getApplyFilterFn: (filterItem) => {
+                if (filterItem.value == null || filterItem.value === "") return null;
+                const target = Number(filterItem.value) * 60;
+                return (value) => Number(value) <= target;
+                },
+            },
+        ];
     const columns = [
         {
             field: 'Start_Shift_Time',
@@ -59,6 +92,7 @@ function StopsView() {
             align: 'center',
             headerAlign: 'center',
             valueFormatter: (value) => formatSeconds(value),
+            filterOperators: minuteFilterOperators,
         },
         
     ];
