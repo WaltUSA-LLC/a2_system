@@ -68,16 +68,18 @@ class NAUStopOrchestra:
         self,
         repository: DataRepository,
         writer: ExcelWriter,
+        data_log: bool,
     ) -> None:
         self.repository = repository
         self.writer = writer
+        self.data_log = data_log
 
     @classmethod
     def from_config(cls, config: AppConfig) -> "MESOrchestra":
         engine = create_engine(config.database_url)
         nau_run_data = DataRepository(engine, NAU_STOP_QUERY)
         writer = ExcelWriter(config.output_dir, "NAU_STOP_DATA", "nau_stop")
-        return cls(nau_run_data, writer)
+        return cls(nau_run_data, writer, config.data_log)
 
     def generate_nau_stop(self, start_dt: datetime, end_dt: datetime) -> list[str]:
         df = self.repository.fetch_data_with_start_end_date(start_dt, end_dt + timedelta(days=1))
@@ -85,5 +87,6 @@ class NAUStopOrchestra:
         df["dur_minute"] = TimeCalculator.estimate_time_duration(df["Stop_time"], df["Recover_time"])
         #df = df.sort_values(by=["MachID", "dur_minute"], ascending=[True, False])
         print(f"finished df process")
-        #output_path = self.writer.to_excel(all_df, start_dt, end_dt)
+        if self.data_log:
+            self.writer.to_excel(df, start_dt, end_dt)
         return df
