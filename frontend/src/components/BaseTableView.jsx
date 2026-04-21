@@ -8,6 +8,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { DataGrid } from '@mui/x-data-grid';
+import BaseChartView from './BaseChartView';
 
 function formatDate(date) {
     return new Intl.DateTimeFormat('en-CA', {
@@ -27,6 +28,8 @@ function BaseTableView({url, col}){
     const [shift, setShift] = useState(0);
     const [rec, setRec] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [chartOpen, setChartOpen] = useState(false);
+    const hasData = !loading && rec.length > 0;
 
     function handleShowData() {
         setLoading(true);
@@ -38,11 +41,13 @@ function BaseTableView({url, col}){
             },
         })
             .then((resp) => {
-                setRec(resp.data.content ?? []);
+                const records = resp.data.content ?? [];
+                setRec(records);
             })
             .catch((err) => {
                 console.error(err);
                 setRec([]);
+                setChartOpen(false);
             })
             .finally(() => {
                 setLoading(false);
@@ -59,6 +64,14 @@ function BaseTableView({url, col}){
 
     function handleShiftChange(event) {
         setShift(event.target.value);
+    }
+
+    function handleOpenChart() {
+        setChartOpen(true);
+    }
+
+    function handleCloseChart() {
+        setChartOpen(false);
     }
 
     return (
@@ -98,12 +111,19 @@ function BaseTableView({url, col}){
                         <MenuItem value={2}>NIGHT</MenuItem>
                     </Select>
                 </FormControl>
-                <Button
-                    variant="contained"
-                    onClick={handleShowData}
-                >
-                    Show Data
-                </Button>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Button
+                        variant="contained"
+                        onClick={handleShowData}
+                    >
+                        Show Data
+                    </Button>
+                    {hasData ? (
+                        <Button variant="text" onClick={handleOpenChart}>
+                            Chart
+                        </Button>
+                    ) : null}
+                </Box>
             </Box>
 
             {loading ? (
@@ -131,6 +151,9 @@ function BaseTableView({url, col}){
                     />
                 </Box>
             )}
+            {chartOpen ? (
+                <BaseChartView open={chartOpen} onClose={handleCloseChart} rec={rec} />
+            ) : null}
         </Box>
     );
 }
