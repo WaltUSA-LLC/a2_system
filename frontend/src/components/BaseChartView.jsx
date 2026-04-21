@@ -32,7 +32,7 @@ function BaseChartView({ open, onClose, rec }) {
         .filter((machId) => machId !== null && machId !== undefined)
         .sort((a, b) => Number(a) - Number(b));
     const propertyOptions = Object.keys(rec[0] ?? {}).filter(
-        (property) => ['MES_prs', 'NAU_prs'].includes(property)
+        (property) => ['MES_prs', 'NAU_prs', 'ON_Time_Occupation', 'Mach_Efficiency'].includes(property)
     );
 
     useEffect(() => {
