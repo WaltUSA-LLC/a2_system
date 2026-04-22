@@ -1,5 +1,5 @@
 import { GridFilterInputValue } from "@mui/x-data-grid";
-import BaseTableView from "./BaseTableView"
+import TableView from "./TableView"
 import { formatSeconds } from "./utils";
 
 function StopsView() {
@@ -97,7 +97,7 @@ function StopsView() {
         
     ];
     return (
-        <BaseTableView url="http://localhost:8000/base/stop" col={columns}/>
+        <TableView url="http://localhost:8000/base/stop" col={columns}/>
     );
 }
 

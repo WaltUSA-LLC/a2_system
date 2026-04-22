@@ -8,7 +8,6 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { DataGrid } from '@mui/x-data-grid';
-import BaseChartView from './BaseChartView';
 
 function formatDate(date) {
     return new Intl.DateTimeFormat('en-CA', {
@@ -19,7 +18,7 @@ function formatDate(date) {
     }).format(date);
 }
 
-function BaseTableView({url, col}){
+function TableView({url, col, ChartView}){
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const defaultDate = formatDate(yesterday);
@@ -152,10 +151,10 @@ function BaseTableView({url, col}){
                 </Box>
             )}
             {chartOpen ? (
-                <BaseChartView open={chartOpen} onClose={handleCloseChart} rec={rec} />
+                <ChartView open={chartOpen} onClose={handleCloseChart} rec={rec} />
             ) : null}
         </Box>
     );
 }
 
-export default BaseTableView;
+export default TableView;

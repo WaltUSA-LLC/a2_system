@@ -1,4 +1,4 @@
-import BaseTableView from "./BaseTableView"
+import TableView from "./TableView"
 
 function SKUView() {
     const columns = [
@@ -65,7 +65,7 @@ function SKUView() {
         
     ];
     return (
-        <BaseTableView url="http://localhost:8000/base/sku" col={columns}/>
+        <TableView url="http://localhost:8000/base/sku" col={columns}/>
     );
 }
 
