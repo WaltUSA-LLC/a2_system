@@ -1,4 +1,5 @@
-import TableView from "./TableView"
+import TableView from "./TableView";
+import { SKUChartView } from './ChartView';
 
 function SKUView() {
     const columns = [
@@ -65,7 +66,7 @@ function SKUView() {
         
     ];
     return (
-        <TableView url="http://localhost:8000/base/sku" col={columns}/>
+        <TableView url="http://localhost:8000/base/sku" col={columns} ChartView={SKUChartView}/>
     );
 }
 

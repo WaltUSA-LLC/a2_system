@@ -183,3 +183,102 @@ export function MachChartView({ open, onClose, rec }) {
         </Dialog>
     );
 }
+
+export function SKUChartView({ open, onClose, rec }) {
+    const [selectedStyle, setSelectedStyle] = useState('');
+    const [selectedProperty, setSelectedProperty] = useState('');
+    const [filteredRec, setFilteredRec] = useState(rec);
+    const [chartDataset, setChartDataset] = useState([]);
+
+    const styles = [...new Set(rec.map((item) => item.Style_Code))]
+        .filter((sku) => sku !== null && sku !== undefined)
+        .sort((a, b) =>
+            String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+        );
+
+        
+    const propertyOptions = Object.keys(rec[0] ?? {}).filter(
+        (property) => ['MES_prs', 'NAU_prs', 'ON_Time_Occupation', 'Efficiency'].includes(property)
+    );
+
+    useEffect(() => {
+        setFilteredRec(
+            rec.filter((item) => String(item.Style_Code) === String(selectedStyle))
+        );
+    }, [rec, selectedStyle]);
+
+    function handleStyleChange(event) {
+        setSelectedStyle(event.target.value);
+    }
+
+    function handlePropertyChange(event) {
+        setSelectedProperty(event.target.value);
+    }
+
+    function handleGenChart(event) {
+        event.preventDefault();
+        let dataset = {};
+        filteredRec.forEach((record) => {
+            const [date, time] = record.Shift_Start_Time.trim().split(/\s+/);
+            if (!dataset[date]) {
+                dataset[date] = {};
+            }
+            const shift = time === "07:00:00" ? "Day" : "Night";
+            dataset[date].date = date;
+            dataset[date][shift] = Number(record[selectedProperty] ?? 0);
+        });
+        dataset = Object.values(dataset).sort((a, b) => a.date.localeCompare(b.date));
+        setChartDataset(dataset);
+    }
+
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            maxWidth="md"
+        >
+            <DialogTitle>Data Vis</DialogTitle>
+            <DialogContent>
+                <Box component="form" onSubmit={handleGenChart} sx={{ display: 'flex', gap: 2, pt: 1 }}>
+                    <FormControl fullWidth required>
+                        <InputLabel id="chart-sku-label">Style</InputLabel>
+                        <Select
+                            labelId="chart-sku-label"
+                            value={selectedStyle}
+                            label="Style"
+                            required
+                            onChange={handleStyleChange}
+                        >
+                            {styles.map((style) => (
+                                <MenuItem key={style} value={style}>
+                                    {style}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth required>
+                        <InputLabel id="chart-property-label">Property</InputLabel>
+                        <Select
+                            labelId="chart-property-label"
+                            value={selectedProperty}
+                            label="Property"
+                            onChange={handlePropertyChange}
+                        >
+                            {propertyOptions.map((property) => (
+                                <MenuItem key={property} value={property}>
+                                    {property}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <Button type='submit' variant="contained">Gen</Button>
+                </Box>
+                <BaseBarChart chartDataset={chartDataset} />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Close</Button>
+            </DialogActions>
+        </Dialog>
+    );
+}
