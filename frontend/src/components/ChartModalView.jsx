@@ -88,7 +88,7 @@ function BaseBarChart({ chartDataset }) {
     );
 }
 
-export function MachChartView({ open, onClose, rec }) {
+export function MachChartModalView({ open, onClose, rec }) {
     const [selectedMachId, setSelectedMachId] = useState('');
     const [selectedProperty, setSelectedProperty] = useState('');
     const [filteredRec, setFilteredRec] = useState(rec);
@@ -184,7 +184,7 @@ export function MachChartView({ open, onClose, rec }) {
     );
 }
 
-export function SKUChartView({ open, onClose, rec }) {
+export function SKUChartModalView({ open, onClose, rec }) {
     const [selectedStyle, setSelectedStyle] = useState('');
     const [selectedProperty, setSelectedProperty] = useState('');
     const [filteredRec, setFilteredRec] = useState(rec);

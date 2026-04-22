@@ -7,6 +7,7 @@ import SKUView from './components/SKUView';
 import MachsView from './components/MachsView';
 import StopsView from './components/StopsView';
 import StopsViewByCode from './components/StopsViewByCode';
+import StopsViewByMach from './components/StopsViewByMach';
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                     <Route path="/sku-view" element={<SKUView />} />
                     <Route path="/stops-view/time" element={<StopsView />} />
                     <Route path="/stops-view/code" element={<StopsViewByCode />} />
+                    <Route path="/stops-view/mach" element={<StopsViewByMach />} />
                 </Routes>
             </div>
         </>

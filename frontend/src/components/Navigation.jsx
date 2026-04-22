@@ -8,6 +8,7 @@ function Navigation() {
             <Link to="/sku-view">View SKU</Link>
             <Link to="/stops-view/time">View Stops (by time)</Link>
             <Link to="/stops-view/code">View Stops (by code)</Link>
+            <Link to="/stops-view/mach">View Stops (by mach)</Link>
         </div>
     );
 }

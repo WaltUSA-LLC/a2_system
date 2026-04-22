@@ -1,7 +1,7 @@
 import TableView from "./TableView"
 import { GridFilterInputValue } from "@mui/x-data-grid";
 import { formatSeconds } from "./utils";
-import { MachChartView } from './ChartView';
+import { MachChartModalView } from './ChartModalView';
 
 function MachsView() {
     const hourFilterOperators = [
@@ -138,7 +138,7 @@ function MachsView() {
 
     
     return (
-        <TableView url="http://localhost:8000/base/mach" col={columns} ChartView={MachChartView}/>
+        <TableView url="http://localhost:8000/base/mach" col={columns} ChartView={MachChartModalView}/>
     );
 }
 

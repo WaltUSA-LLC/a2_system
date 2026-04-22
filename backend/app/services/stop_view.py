@@ -80,4 +80,69 @@ def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFr
     return df_stop_by_code
 
 
+def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFrame:
+    config = AppConfig.from_env()
+    nau_stop = NAUStopOrchestra.from_config(config)
+
+    start_dt = parse_start_date(start_time)
+    end_dt = parse_start_date(end_time)
+
+    if end_dt < start_dt:
+        raise SystemExit("End date must be on or after the start date.")
+    
+    df = nau_stop.generate_nau_stop(start_dt, end_dt)
+    df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
+    if shift==1:
+        df = df[df["Start_Shift_Time"].str.contains("07:00:00", na=False)]
+    elif shift==2:
+        df = df[df["Start_Shift_Time"].str.contains("19:00:00", na=False)]
+    else:
+        pass
+    
+    df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
+    df["Description"] = df["Description"].str.strip()
+    df_freq = df.groupby(["MachID", "Style_Code"]).size()
+    df_stop_by_mach = pd.DataFrame({"freq":df_freq,})
+    df_stop_by_mach = df_stop_by_mach.sort_values(["MachID", "Style_Code", "freq"], ascending=[True, True, False])
+    df_stop_by_mach.reset_index(inplace=True)
+    df_stop_by_mach = df_stop_by_mach.reset_index(names="id")
+
+    return df_stop_by_mach
+
+
+def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, style:str)->pd.DataFrame:
+    config = AppConfig.from_env()
+    nau_stop = NAUStopOrchestra.from_config(config)
+
+    start_dt = parse_start_date(start_time)
+    end_dt = parse_start_date(end_time)
+
+    if end_dt < start_dt:
+        raise SystemExit("End date must be on or after the start date.")
+    
+    df = nau_stop.generate_nau_stop(start_dt, end_dt)
+    df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
+    df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
+    if shift==1:
+        df = df[(df["Start_Shift_Time"].str.contains("07:00:00", na=False))&
+                (df["MachID"]==mach)&
+                (df["Style_Code"]==style)]
+    elif shift==2:
+        df = df[(df["Start_Shift_Time"].str.contains("19:00:00", na=False))&
+                (df["MachID"]==mach)&
+                (df["Style_Code"]==style)]
+    else:
+        df = df[(df["MachID"]==mach)&
+                (df["Style_Code"]==style)]
+    print(len(df))
+    df["Recover_time"] = df["Recover_time"].dt.strftime("%Y-%m-%d %H:%M:%S")
+    df["Stop_time"] = df["Stop_time"].dt.strftime("%Y-%m-%d %H:%M:%S")
+    df["Description"] = df["Description"].str.strip()
+    df = df.sort_values(["Start_Shift_Time", "dur_minute"], ascending=[True, False])
+    df = df.reset_index(names="id")
+    df = df.astype(object).where(pd.notnull(df), None)
+    return df
+    
+
+
 

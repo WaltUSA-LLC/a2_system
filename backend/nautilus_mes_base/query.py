@@ -72,6 +72,7 @@ DECLARE @End   DATETIME2(0) = :end_dt;
 SELECT
     sm.Shift AS Shift,
     sm.MachCode AS MachID,
+    sm.StyleCode AS Style_Code,
     sm.LastStopCode AS Stop_code,
     s.Description AS Description,
     sm.DateRec AS Recover_time,

@@ -18,7 +18,7 @@ function formatDate(date) {
     }).format(date);
 }
 
-function TableView({url, col, ChartView}){
+function TableView({url, col, ChartView, handleRowClick, markDownSelectedTime}){
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const defaultDate = formatDate(yesterday);
@@ -32,6 +32,9 @@ function TableView({url, col, ChartView}){
 
     function handleShowData() {
         setLoading(true);
+        if(markDownSelectedTime) {
+            markDownSelectedTime({start, end, shift});
+        }
         axios.get(url, {
             params: {
                 start,
@@ -117,7 +120,7 @@ function TableView({url, col, ChartView}){
                     >
                         Show Data
                     </Button>
-                    {hasData ? (
+                    { (hasData && ChartView) ? (
                         <Button variant="text" onClick={handleOpenChart}>
                             Chart
                         </Button>
@@ -140,7 +143,7 @@ function TableView({url, col, ChartView}){
                             },
                         }}
                         pageSizeOptions={[10, 20, 30]}
-                        disableRowSelectionOnClick
+                        onRowClick={handleRowClick}
                         showToolbar
                         sx={{
                             '& .MuiDataGrid-columnHeaderTitle': {
@@ -150,7 +153,7 @@ function TableView({url, col, ChartView}){
                     />
                 </Box>
             )}
-            {chartOpen ? (
+            {(chartOpen && ChartView) ? (
                 <ChartView open={chartOpen} onClose={handleCloseChart} rec={rec} />
             ) : null}
         </Box>
