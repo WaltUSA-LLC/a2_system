@@ -9,7 +9,7 @@ import { DataGrid } from '@mui/x-data-grid';
 
 import { formatSeconds } from "./utils";
 
-export function MachStopTableModalView({open, onClose, rec}){
+export function MachStopTableModalView({open, onClose, rec, metaData}){
     const minuteFilterOperators = [
         {
             label: "minutes =",
@@ -105,7 +105,7 @@ export function MachStopTableModalView({open, onClose, rec}){
             fullWidth
             maxWidth="lg"
         >
-            <DialogTitle>Data Vis</DialogTitle>
+            <DialogTitle>The Details of Mach# {metaData.mach} with StyleCode# {metaData.style}</DialogTitle>
             <DialogContent>
                 <Box sx={{ height: 700, width: '100%' }}>
                     <DataGrid

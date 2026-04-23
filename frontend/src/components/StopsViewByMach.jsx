@@ -8,6 +8,7 @@ function StopsViewByMach() {
     const [tableOpen, setTableOpen] = useState(false);
     const [rec, setRec] = useState(null);
     const [time, setTime] = useState({})
+    const [metaData, setMetaData] = useState({});
 
     const columns = [
         {
@@ -48,14 +49,16 @@ function StopsViewByMach() {
             console.error(err);
             setRec([]);
             setTableOpen(false);
+            return;
         });
         setTableOpen(true);
+        setMetaData({mach:params.row.MachID, style:params.row.Style_Code})
     }
 
     return (
         <>
             <TableView url="http://localhost:8000/base/stop/mach" col={columns} handleRowClick={handleRowClick} markDownSelectedTime={setTime}/>
-            {(tableOpen && rec) ? <MachStopTableModalView open={tableOpen} onClose={()=>{setTableOpen(false); setRec(null)}} rec={rec}/> : null}
+            {(tableOpen && rec) ? <MachStopTableModalView open={tableOpen} onClose={()=>{setTableOpen(false); setRec(null)}} rec={rec} metaData={metaData}/> : null}
         </>
     );
 }
