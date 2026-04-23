@@ -19,7 +19,6 @@ function App() {
                 <Routes>
                     <Route path="/machs-view" element={<MachsView />} />
                     <Route path="/sku-view" element={<SKUView />} />
-                    <Route path="/stops-view/time" element={<StopsView />} />
                     <Route path="/stops-view/code" element={<StopsViewByCode />} />
                     <Route path="/stops-view/mach" element={<StopsViewByMach />} />
                 </Routes>
