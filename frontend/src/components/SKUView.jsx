@@ -1,5 +1,5 @@
 import TableView from "./TableView";
-import { SKUChartModalView } from './ChartModalView';
+import { SKUChartModal } from './modals/ChartModal';
 
 function SKUView() {
     const columns = [
@@ -66,7 +66,7 @@ function SKUView() {
         
     ];
     return (
-        <TableView url="http://localhost:8000/base/sku" col={columns} ChartView={SKUChartModalView}/>
+        <TableView url="http://localhost:8000/base/sku" col={columns} ChartView={SKUChartModal}/>
     );
 }
 

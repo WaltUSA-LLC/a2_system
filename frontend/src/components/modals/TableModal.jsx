@@ -6,9 +6,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import { DataGrid } from '@mui/x-data-grid';
 
-import { formatSeconds, minuteFilterOperators } from "./utils";
+import { formatSeconds, minuteFilterOperators } from "../utils";
 
-export function MachStopTableModalView({open, onClose, rec, metaData}){
+export function MachStopTableModal({open, onClose, rec, metaData}){
     const columns = [
         {
             field: 'Start_Shift_Time',
@@ -103,7 +103,7 @@ export function MachStopTableModalView({open, onClose, rec, metaData}){
 }
 
 
-export function CodeStopTableModalView({open, onClose, rec, metaData}){
+export function CodeStopTableModal({open, onClose, rec, metaData}){
     const columns = [
         {
             field: 'MachID',

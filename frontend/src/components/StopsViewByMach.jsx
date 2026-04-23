@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 
 import TableView from "./TableView"
-import { MachStopTableModalView } from "./TableModalView";
+import { MachStopTableModal } from "./modals/TableModal";
 
 function StopsViewByMach() {
     const [tableOpen, setTableOpen] = useState(false);
@@ -58,7 +58,7 @@ function StopsViewByMach() {
     return (
         <>
             <TableView url="http://localhost:8000/base/stop/mach" col={columns} handleRowClick={handleRowClick} markDownSelectedTime={setTime}/>
-            {(tableOpen && rec) ? <MachStopTableModalView open={tableOpen} onClose={()=>{setTableOpen(false); setRec(null)}} rec={rec} metaData={metaData}/> : null}
+            {(tableOpen && rec) ? <MachStopTableModal open={tableOpen} onClose={()=>{setTableOpen(false); setRec(null)}} rec={rec} metaData={metaData}/> : null}
         </>
     );
 }

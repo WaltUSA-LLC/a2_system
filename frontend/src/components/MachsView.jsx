@@ -1,6 +1,6 @@
 import TableView from "./TableView"
-import { formatSeconds } from "./utils";
-import { MachChartModalView, hourFilterOperators } from './ChartModalView';
+import { formatSeconds, hourFilterOperators } from "./utils";
+import { MachChartModal } from './modals/ChartModal';
 
 function MachsView() {
 
@@ -105,7 +105,7 @@ function MachsView() {
 
     
     return (
-        <TableView url="http://localhost:8000/base/mach" col={columns} ChartView={MachChartModalView}/>
+        <TableView url="http://localhost:8000/base/mach" col={columns} ChartView={MachChartModal}/>
     );
 }
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 
 import TableView from "./TableView";
-import { CodeStopTableModalView } from "./TableModalView";
+import { CodeStopTableModal } from "./modals/TableModal";
 import { formatSeconds, minuteFilterOperators } from "./utils";
 
 function StopsViewByCode() {
@@ -88,7 +88,7 @@ function StopsViewByCode() {
     return (
         <>
             <TableView url="http://localhost:8000/base/stop/code" col={columns} handleRowClick={handleRowClick} markDownSelectedTime={setTime}/>
-            {(tableOpen && rec) ? <CodeStopTableModalView open={tableOpen} 
+            {(tableOpen && rec) ? <CodeStopTableModal open={tableOpen} 
                                                           onClose={()=>{setTableOpen(false); setRec(null)}} 
                                                           rec={rec}
                                                           metaData={metaData}/> : null}
