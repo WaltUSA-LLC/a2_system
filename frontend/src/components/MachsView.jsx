@@ -1,41 +1,8 @@
 import TableView from "./TableView"
-import { GridFilterInputValue } from "@mui/x-data-grid";
 import { formatSeconds } from "./utils";
-import { MachChartModalView } from './ChartModalView';
+import { MachChartModalView, hourFilterOperators } from './ChartModalView';
 
 function MachsView() {
-    const hourFilterOperators = [
-        {
-            label: "hours =",
-            value: "hoursEquals",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 3600;
-            return (value) => Number(value) === target;
-            },
-        },
-        {
-            label: "hours >",
-            value: "hoursGreaterThan",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 3600;
-            return (value) => Number(value) > target;
-            },
-        },
-        {
-            label: "hours <",
-            value: "hoursLessThan",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 3600;
-            return (value) => Number(value) < target;
-            },
-        },
-    ];
 
     const columns = [
         {

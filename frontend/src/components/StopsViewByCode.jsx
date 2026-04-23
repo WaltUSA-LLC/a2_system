@@ -1,49 +1,15 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-import { GridFilterInputValue } from "@mui/x-data-grid";
 import TableView from "./TableView";
 import { CodeStopTableModalView } from "./TableModalView";
-import { formatSeconds } from "./utils";
+import { formatSeconds, minuteFilterOperators } from "./utils";
 
 function StopsViewByCode() {
     const [tableOpen, setTableOpen] = useState(false);
     const [rec, setRec] = useState(null);
     const [time, setTime] = useState({})
     const [metaData, setMetaData] = useState({});
-
-    const minuteFilterOperators = [
-        {
-            label: "minutes =",
-            value: "minutesEquals",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 60;
-            return (value) => Number(value) === target;
-            },
-        },
-        {
-            label: "minutes >=",
-            value: "minutesGreaterOrEqualThan",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 60;
-            return (value) => Number(value) >= target;
-            },
-        },
-        {
-            label: "minutes <=",
-            value: "minutesLessOrEqualThan",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 60;
-            return (value) => Number(value) <= target;
-            },
-        },
-    ];
 
     const columns = [
         {

@@ -4,45 +4,11 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import { GridFilterInputValue } from "@mui/x-data-grid";
 import { DataGrid } from '@mui/x-data-grid';
 
-import { formatSeconds } from "./utils";
+import { formatSeconds, minuteFilterOperators } from "./utils";
 
 export function MachStopTableModalView({open, onClose, rec, metaData}){
-    const minuteFilterOperators = [
-        {
-            label: "minutes =",
-            value: "minutesEquals",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 60;
-            return (value) => Number(value) === target;
-            },
-        },
-        {
-            label: "minutes >=",
-            value: "minutesGreaterOrEqualThan",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 60;
-            return (value) => Number(value) >= target;
-            },
-        },
-        {
-            label: "minutes <=",
-            value: "minutesLessOrEqualThan",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 60;
-            return (value) => Number(value) <= target;
-            },
-        },
-    ];
-
     const columns = [
         {
             field: 'Start_Shift_Time',
@@ -138,39 +104,6 @@ export function MachStopTableModalView({open, onClose, rec, metaData}){
 
 
 export function CodeStopTableModalView({open, onClose, rec, metaData}){
-    const minuteFilterOperators = [
-        {
-            label: "minutes =",
-            value: "minutesEquals",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 60;
-            return (value) => Number(value) === target;
-            },
-        },
-        {
-            label: "minutes >=",
-            value: "minutesGreaterOrEqualThan",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 60;
-            return (value) => Number(value) >= target;
-            },
-        },
-        {
-            label: "minutes <=",
-            value: "minutesLessOrEqualThan",
-            InputComponent: GridFilterInputValue,
-            getApplyFilterFn: (filterItem) => {
-            if (filterItem.value == null || filterItem.value === "") return null;
-            const target = Number(filterItem.value) * 60;
-            return (value) => Number(value) <= target;
-            },
-        },
-    ];
-
     const columns = [
         {
             field: 'MachID',
