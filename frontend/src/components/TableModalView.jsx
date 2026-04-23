@@ -135,3 +135,124 @@ export function MachStopTableModalView({open, onClose, rec, metaData}){
         </Dialog>
     );
 }
+
+
+export function CodeStopTableModalView({open, onClose, rec, metaData}){
+    const minuteFilterOperators = [
+        {
+            label: "minutes =",
+            value: "minutesEquals",
+            InputComponent: GridFilterInputValue,
+            getApplyFilterFn: (filterItem) => {
+            if (filterItem.value == null || filterItem.value === "") return null;
+            const target = Number(filterItem.value) * 60;
+            return (value) => Number(value) === target;
+            },
+        },
+        {
+            label: "minutes >=",
+            value: "minutesGreaterOrEqualThan",
+            InputComponent: GridFilterInputValue,
+            getApplyFilterFn: (filterItem) => {
+            if (filterItem.value == null || filterItem.value === "") return null;
+            const target = Number(filterItem.value) * 60;
+            return (value) => Number(value) >= target;
+            },
+        },
+        {
+            label: "minutes <=",
+            value: "minutesLessOrEqualThan",
+            InputComponent: GridFilterInputValue,
+            getApplyFilterFn: (filterItem) => {
+            if (filterItem.value == null || filterItem.value === "") return null;
+            const target = Number(filterItem.value) * 60;
+            return (value) => Number(value) <= target;
+            },
+        },
+    ];
+
+    const columns = [
+        {
+            field: 'MachID',
+            headerName: 'Mach ID',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'Style_Code',
+            headerName: 'Style Code',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'freq',
+            headerName: 'Frequency',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'dur_sum',
+            headerName: 'Duration (SUM)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            valueFormatter: (value) => formatSeconds(value),
+            filterOperators: minuteFilterOperators,
+        },
+        {
+            field: 'dur_med',
+            headerName: 'Duration (MED)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            valueFormatter: (value) => formatSeconds(value),
+            filterOperators: minuteFilterOperators,
+        },
+    ];
+
+
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            maxWidth="lg"
+        >
+            <DialogTitle>The Details of Stop Code# {metaData.stop_code}</DialogTitle>
+            <DialogContent>
+                <Box sx={{ height: 700, width: '100%' }}>
+                    <DataGrid
+                        rows={rec}
+                        columns={columns}
+                        initialState={{
+                            pagination: {
+                                paginationModel: {
+                                    pageSize: 10,
+                                },
+                            },
+                        }}
+                        pageSizeOptions={[10, 20, 30]}
+                        disableRowSelectionOnClick
+                        showToolbar
+                        sx={{
+                            '& .MuiDataGrid-columnHeaderTitle': {
+                            fontWeight: 'bold',
+                            },
+                        }}
+                    />
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Close</Button>
+            </DialogActions>
+        </Dialog>
+    );
+}

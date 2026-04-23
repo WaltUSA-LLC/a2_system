@@ -106,13 +106,48 @@ def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, s
     else:
         df = df[(df["MachID"]==mach)&
                 (df["Style_Code"]==style)]
-    print(len(df))
+    #print(len(df))
     df["Recover_time"] = df["Recover_time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["Stop_time"] = df["Stop_time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["Description"] = df["Description"].str.strip()
     df = df.sort_values(["Start_Shift_Time", "dur_minute"], ascending=[True, False])
     df = df.reset_index(names="id")
     df = df.astype(object).where(pd.notnull(df), None)
+    return df
+
+
+def handle_stop_code_detail(start_time:str, end_time:str, shift:int, stop_code:int)->pd.DataFrame:
+    config = AppConfig.from_env()
+    nau_stop = NAUStopOrchestra.from_config(config)
+
+    start_dt = parse_start_date(start_time)
+    end_dt = parse_start_date(end_time)
+
+    if end_dt < start_dt:
+        raise SystemExit("End date must be on or after the start date.")
+    
+    df = nau_stop.generate_nau_stop(start_dt, end_dt)
+    df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
+    df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
+    if shift==1:
+        df = df[(df["Start_Shift_Time"].str.contains("07:00:00", na=False))&
+                (df["Stop_code"]==stop_code)]
+    elif shift==2:
+        df = df[(df["Start_Shift_Time"].str.contains("19:00:00", na=False))&
+                (df["Stop_code"]==stop_code)]
+    else:
+        df = df[(df["Stop_code"]==stop_code)]
+
+    df_dur_sum = df.groupby(["MachID", "Style_Code"])["dur_minute"].sum()
+    df_dur_med = df.groupby(["MachID", "Style_Code"])["dur_minute"].median()
+    df_freq = df.groupby(["MachID", "Style_Code"]).size()
+
+    df = pd.DataFrame({"freq":df_freq,
+                        "dur_sum": df_dur_sum,
+                        "dur_med": df_dur_med  })
+    df = df.sort_values(["MachID", "freq"], ascending=[True, False])
+    df.reset_index(inplace=True)
+    df = df.reset_index(names="id")
     return df
     
 

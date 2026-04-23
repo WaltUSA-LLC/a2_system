@@ -1,8 +1,17 @@
+import { useState } from 'react';
+import axios from 'axios';
+
 import { GridFilterInputValue } from "@mui/x-data-grid";
-import TableView from "./TableView"
+import TableView from "./TableView";
+import { CodeStopTableModalView } from "./TableModalView";
 import { formatSeconds } from "./utils";
 
 function StopsViewByCode() {
+    const [tableOpen, setTableOpen] = useState(false);
+    const [rec, setRec] = useState(null);
+    const [time, setTime] = useState({})
+    const [metaData, setMetaData] = useState({});
+
     const minuteFilterOperators = [
         {
             label: "minutes =",
@@ -91,8 +100,33 @@ function StopsViewByCode() {
         },
         
     ];
+
+    function handleRowClick(params){
+        //console.log("clicked row:", params.row);
+        axios.get(`http://localhost:8000/base/stop/code/detail?start=${time.start}&end=${time.end}&shift=${time.shift}&stop_code=${params.row.Stop_code}`).then(
+            resp => {
+                const records = resp.data.content ?? [];
+                setRec(records);
+            }
+        ).catch((err) => {
+            console.error(err);
+            setRec([]);
+            setTableOpen(false);
+            return;
+        });
+        setTableOpen(true);
+        setMetaData({stop_code: params.row.Stop_code})
+    }
+
+
     return (
-        <TableView url="http://localhost:8000/base/stop/code" col={columns}/>
+        <>
+            <TableView url="http://localhost:8000/base/stop/code" col={columns} handleRowClick={handleRowClick} markDownSelectedTime={setTime}/>
+            {(tableOpen && rec) ? <CodeStopTableModalView open={tableOpen} 
+                                                          onClose={()=>{setTableOpen(false); setRec(null)}} 
+                                                          rec={rec}
+                                                          metaData={metaData}/> : null}
+        </>
     );
 }
 

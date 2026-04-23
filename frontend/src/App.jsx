@@ -5,7 +5,6 @@ import TopBar from './components/TopBar';
 import Navigation from './components/Navigation';
 import SKUView from './components/SKUView';
 import MachsView from './components/MachsView';
-import StopsView from './components/StopsView';
 import StopsViewByCode from './components/StopsViewByCode';
 import StopsViewByMach from './components/StopsViewByMach';
 
