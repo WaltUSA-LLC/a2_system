@@ -6,7 +6,8 @@ import { MachStopTableModal } from "../modals/TableModal";
 
 function StopsViewByMach() {
     const [tableOpen, setTableOpen] = useState(false);
-    const [rec, setRec] = useState(null);
+    const [modalRec, setModalRec] = useState(null);
+    const [contentRec, setContentRec] = useState([]);
     const [time, setTime] = useState({})
     const [metaData, setMetaData] = useState({});
 
@@ -38,16 +39,16 @@ function StopsViewByMach() {
         
     ];
 
-    function handleRowClick(params, event){
+    function handleRowClick(params){
         //console.log("clicked row:", params.row);
         axios.get(`http://localhost:8000/base/stop/mach/detail?start=${time.start}&end=${time.end}&shift=${time.shift}&mach=${params.row.MachID}&style=${params.row.Style_Code}`).then(
             resp => {
                 const records = resp.data.content ?? [];
-                setRec(records);
+                setModalRec(records);
             }
         ).catch((err) => {
             console.error(err);
-            setRec([]);
+            setModalRec([]);
             setTableOpen(false);
             return;
         });
@@ -55,10 +56,28 @@ function StopsViewByMach() {
         setMetaData({mach:params.row.MachID, style:params.row.Style_Code})
     }
 
+    function loadData(start, end, shift) {
+        const promise = axios.get("http://localhost:8000/base/stop/mach", {
+                            params: {
+                                start,
+                                end,
+                                shift,
+                            },
+                        }).then((resp) => {
+                            const records = resp.data.content ?? [];
+                            setContentRec(records);
+                        }).catch((err) => {
+                            setContentRec([]);
+                            console.error(err);
+                            throw new Error("Failed to load mach data");
+                        });
+        return promise;
+    }
+
     return (
         <>
-            <TableView url="http://localhost:8000/base/stop/mach" col={columns} handleRowClick={handleRowClick} markDownSelectedTime={setTime}/>
-            {(tableOpen && rec) ? <MachStopTableModal open={tableOpen} onClose={()=>{setTableOpen(false); setRec(null)}} rec={rec} metaData={metaData}/> : null}
+            <TableView col={columns} rec={contentRec} loadData={loadData} handleRowClick={handleRowClick} markDownSelectedTime={setTime}/>
+            {(tableOpen && modalRec) ? <MachStopTableModal open={tableOpen} onClose={()=>{setTableOpen(false); setModalRec(null)}} rec={modalRec} metaData={metaData}/> : null}
         </>
     );
 }

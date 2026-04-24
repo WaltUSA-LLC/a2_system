@@ -1,8 +1,13 @@
+import { useState } from 'react';
+import axios from "axios";
+
 import TableView from "./TableView"
 import { formatSeconds, hourFilterOperators } from "../utils";
 import { MachChartModal } from '../modals/ChartModal';
 
 function MachsView() {
+    const [contentRec, setContentRec] = useState([]);
+    const [chartOpen, setChartOpen] = useState(false); 
 
     const columns = [
         {
@@ -103,9 +108,40 @@ function MachsView() {
         },
     ];
 
-    
+    function handleOpenChart() {
+        setChartOpen(true);
+    }
+
+    function handleCloseChart() {
+        setChartOpen(false);
+    }
+
+    function loadData(start, end, shift) {
+        const promise = axios.get("http://localhost:8000/base/mach", {
+                            params: {
+                                start,
+                                end,
+                                shift,
+                            },
+                        }).then((resp) => {
+                            const records = resp.data.content ?? [];
+                            setContentRec(records);
+                        }).catch((err) => {
+                            setChartOpen(false);
+                            setContentRec([]);
+                            console.error(err);
+                            throw new Error("Failed to load mach data");
+                        });
+        return promise;
+    }
+
     return (
-        <TableView url="http://localhost:8000/base/mach" col={columns} ChartView={MachChartModal}/>
+        <>
+            <TableView col={columns} rec={contentRec} loadData={loadData} handleOpenChart={handleOpenChart}/>
+            { chartOpen ? (
+                <MachChartModal open={chartOpen} onClose={handleCloseChart} rec={contentRec} />) : 
+                null}
+        </>
     );
 }
 

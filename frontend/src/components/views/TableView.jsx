@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import axios from "axios";
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -18,42 +17,30 @@ function formatDate(date) {
     }).format(date);
 }
 
-function TableView({url, col, ChartView, handleRowClick, markDownSelectedTime}){
+function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDownSelectedTime}){
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const defaultDate = formatDate(yesterday);
     const [start, setStart] = useState(defaultDate);
     const [end, setEnd] = useState(defaultDate);
     const [shift, setShift] = useState(0);
-    const [rec, setRec] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [chartOpen, setChartOpen] = useState(false);
     const hasData = !loading && rec.length > 0;
 
-    function handleShowData() {
+    async function handleShowData() {
         setLoading(true);
         if(markDownSelectedTime) {
             markDownSelectedTime({start, end, shift});
         }
-        axios.get(url, {
-            params: {
-                start,
-                end,
-                shift,
-            },
-        })
-            .then((resp) => {
-                const records = resp.data.content ?? [];
-                setRec(records);
-            })
-            .catch((err) => {
-                console.error(err);
-                setRec([]);
-                setChartOpen(false);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+
+        try{
+            await loadData(start, end, shift);
+        }catch(err){
+            console.error(err);
+        }finally{
+            setLoading(false);
+        }
+        
     }
 
     function handleStartChange(event) {
@@ -66,14 +53,6 @@ function TableView({url, col, ChartView, handleRowClick, markDownSelectedTime}){
 
     function handleShiftChange(event) {
         setShift(event.target.value);
-    }
-
-    function handleOpenChart() {
-        setChartOpen(true);
-    }
-
-    function handleCloseChart() {
-        setChartOpen(false);
     }
 
     return (
@@ -120,11 +99,11 @@ function TableView({url, col, ChartView, handleRowClick, markDownSelectedTime}){
                     >
                         Show Data
                     </Button>
-                    { (hasData && ChartView) ? (
+                    { hasData ? (
                         <Button variant="text" onClick={handleOpenChart}>
                             Chart
                         </Button>
-                    ) : null}
+                    ) : null }
                 </Box>
             </Box>
 
@@ -153,9 +132,6 @@ function TableView({url, col, ChartView, handleRowClick, markDownSelectedTime}){
                     />
                 </Box>
             )}
-            {(chartOpen && ChartView) ? (
-                <ChartView open={chartOpen} onClose={handleCloseChart} rec={rec} />
-            ) : null}
         </Box>
     );
 }
