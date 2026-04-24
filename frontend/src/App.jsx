@@ -3,10 +3,10 @@ import './App.css'
 
 import TopBar from './components/TopBar';
 import Navigation from './components/Navigation';
-import SKUView from './components/SKUView';
-import MachsView from './components/MachsView';
-import StopsViewByCode from './components/StopsViewByCode';
-import StopsViewByMach from './components/StopsViewByMach';
+import SKUView from './components/views/SKUView';
+import MachsView from './components/views/MachsView';
+import StopsViewByCode from './components/views/StopsViewByCode';
+import StopsViewByMach from './components/views/StopsViewByMach';
 
 
 function App() {

@@ -1,5 +1,5 @@
 import TableView from "./TableView";
-import { SKUChartModal } from './modals/ChartModal';
+import { SKUChartModal } from '../modals/ChartModal';
 
 function SKUView() {
     const columns = [

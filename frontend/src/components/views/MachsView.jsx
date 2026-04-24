@@ -1,6 +1,6 @@
 import TableView from "./TableView"
-import { formatSeconds, hourFilterOperators } from "./utils";
-import { MachChartModal } from './modals/ChartModal';
+import { formatSeconds, hourFilterOperators } from "../utils";
+import { MachChartModal } from '../modals/ChartModal';
 
 function MachsView() {
 

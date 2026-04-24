@@ -2,8 +2,8 @@ import { useState } from 'react';
 import axios from 'axios';
 
 import TableView from "./TableView";
-import { CodeStopTableModal } from "./modals/TableModal";
-import { formatSeconds, minuteFilterOperators } from "./utils";
+import { CodeStopTableModal } from "../modals/TableModal";
+import { formatSeconds, minuteFilterOperators } from "../utils";
 
 function StopsViewByCode() {
     const [tableOpen, setTableOpen] = useState(false);

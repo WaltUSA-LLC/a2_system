@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 
 import TableView from "./TableView"
-import { MachStopTableModal } from "./modals/TableModal";
+import { MachStopTableModal } from "../modals/TableModal";
 
 function StopsViewByMach() {
     const [tableOpen, setTableOpen] = useState(false);
