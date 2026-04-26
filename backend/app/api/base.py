@@ -20,13 +20,19 @@ def get_sku(start:str, end:str, shift: int):
 
 @router.get("/stop/code")
 def get_stop_by_code(start:str, end:str, shift: int):
-    df = handle_stop_view_by_code(start, end, shift)
-    return {"content": df.to_dict(orient="records")}
+    df, df_freq, df_mach, df_dur_sum, df_dur_med = handle_stop_view_by_code(start, end, shift)
+    return {"content": df.to_dict(orient="records"),
+            "chart_freq": df_freq.to_dict(orient="records"),
+            "chart_mach": df_mach.to_dict(orient="records"),
+            "chart_dur_sum": df_dur_sum.to_dict(orient="records"),
+            "chart_dur_med": df_dur_med.to_dict(orient="records")}
 
 @router.get("/stop/mach")
 def get_stop_by_mach(start:str, end:str, shift: int):
-    df = handle_stop_view_by_mach(start, end, shift)
-    return {"content": df.to_dict(orient="records")}
+    df_table, df_chart = handle_stop_view_by_mach(start, end, shift)
+    print(df_chart)
+    return {"content": df_table.to_dict(orient="records"),
+            "chart": df_chart.to_dict(orient="records")}
 
 @router.get("/stop/mach/detail")
 def get_stop_by_mach_detail(start:str, end:str, shift: int, mach: int, style: str):

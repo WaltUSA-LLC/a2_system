@@ -44,12 +44,22 @@ def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFr
 
     df_stop_by_code = pd.DataFrame({"Mach_cnt": df_mach_cnt,
                                     "freq":df_freq,
-                                    "dur_minute_sum": df_dur_sum,
-                                    "dur_minute_med": df_dur_med  })
-    df_stop_by_code = df_stop_by_code.sort_values(["freq", "Mach_cnt", "dur_minute_sum"], ascending=[False, False, False])
+                                    "dur_sum": df_dur_sum,
+                                    "dur_med": df_dur_med  })
+    df_stop_by_code = df_stop_by_code.sort_values(["freq", "Mach_cnt", "dur_sum"], ascending=[False, False, False])
     df_stop_by_code.reset_index(inplace=True)
     df_stop_by_code = df_stop_by_code.reset_index(names="id")
-    return df_stop_by_code
+
+    #chart
+    df_freq_sort = df_stop_by_code[["Stop_code", "freq"]].sort_values("freq", ascending=False)
+    df_mach_sort = df_stop_by_code[["Stop_code", "Mach_cnt"]].sort_values("Mach_cnt", ascending=False)
+    df_dur_sum_sort = df_stop_by_code[["Stop_code", "dur_sum"]].sort_values("dur_sum", ascending=False)
+    df_dur_med_sort = df_stop_by_code[["Stop_code", "dur_med"]].sort_values("dur_med", ascending=False)
+    return df_stop_by_code, \
+           df_freq_sort.iloc[:min(10,len(df))], \
+           df_mach_sort.iloc[:min(10,len(df))], \
+           df_dur_sum_sort.iloc[:min(10,len(df))],\
+           df_dur_med_sort.iloc[:min(10,len(df))]
 
 
 def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFrame:
@@ -71,6 +81,7 @@ def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFr
     else:
         pass
     
+    #table
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
     df["Description"] = df["Description"].str.strip()
     df_freq = df.groupby(["MachID", "Style_Code"]).size()
@@ -79,7 +90,13 @@ def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFr
     df_stop_by_mach.reset_index(inplace=True)
     df_stop_by_mach = df_stop_by_mach.reset_index(names="id")
 
-    return df_stop_by_mach
+    #chart
+    df_freq = df.groupby(["MachID"]).size()
+    df_stop_chart_mach = pd.DataFrame({"freq":df_freq,})
+    df_stop_chart_mach = df_stop_chart_mach.sort_values(["freq"], ascending=[False])
+    df_stop_chart_mach.reset_index(inplace=True)
+
+    return df_stop_by_mach, df_stop_chart_mach.iloc[:min(10, len(df_stop_chart_mach))]
 
 
 def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, style:str)->pd.DataFrame:

@@ -3,12 +3,18 @@ import axios from 'axios';
 
 import TableView from "./TableView";
 import { CodeStopTableModal } from "../modals/TableModal";
+import { CodeStopChartModal } from '../modals/ChartModal';
 import { formatSeconds, minuteFilterOperators } from "../utils";
 
 function StopsViewByCode() {
     const [tableOpen, setTableOpen] = useState(false);
+    const [chartOpen, setChartOpen] = useState(false); 
     const [modalRec, setModalRec] = useState(null);
     const [contentRec, setContentRec] = useState([]);
+    const [chartFreqRec, setChartFreqRec] = useState(null);
+    const [chartMachRec, setChartMachRec] = useState(null);
+    const [chartDurSumRec, setChartDurSumRec] = useState(null);
+    const [chartDurMedRec, setChartDurMedRec] = useState(null);
     const [time, setTime] = useState({})
     const [metaData, setMetaData] = useState({});
 
@@ -64,9 +70,16 @@ function StopsViewByCode() {
             headerAlign: 'center',
             valueFormatter: (value) => formatSeconds(value),
             filterOperators: minuteFilterOperators,
-        },
-        
+        },   
     ];
+
+    function handleOpenChart() {
+        setChartOpen(true);
+    }
+
+    function handleCloseChart() {
+        setChartOpen(false);
+    }
 
     function handleRowClick(params){
         //console.log("clicked row:", params.row);
@@ -93,8 +106,16 @@ function StopsViewByCode() {
                                 shift,
                             },
                         }).then((resp) => {
-                            const records = resp.data.content ?? [];
-                            setContentRec(records);
+                            const content = resp.data.content ?? [];
+                            const chart_freq = resp.data.chart_freq ?? [];
+                            const chart_mach = resp.data.chart_mach ?? [];
+                            const chart_dur_sum = resp.data.chart_dur_sum ?? [];
+                            const chart_dur_med = resp.data.chart_dur_med ?? [];
+                            setContentRec(content);
+                            setChartFreqRec(chart_freq);
+                            setChartMachRec(chart_mach);
+                            setChartDurSumRec(chart_dur_sum);
+                            setChartDurMedRec(chart_dur_med);
                         }).catch((err) => {
                             setContentRec([]);
                             console.error(err);
@@ -106,11 +127,17 @@ function StopsViewByCode() {
 
     return (
         <>
-            <TableView col={columns} rec={contentRec} loadData={loadData} handleRowClick={handleRowClick} markDownSelectedTime={setTime}/>
+            <TableView col={columns} rec={contentRec} loadData={loadData} handleOpenChart={handleOpenChart} handleRowClick={handleRowClick} markDownSelectedTime={setTime}/>
             {(tableOpen && modalRec) ? <CodeStopTableModal open={tableOpen} 
                                                           onClose={()=>{setTableOpen(false); setModalRec(null)}} 
                                                           rec={modalRec}
                                                           metaData={metaData}/> : null}
+            {chartOpen ? (<CodeStopChartModal open={chartOpen} 
+                                            onClose={handleCloseChart}  
+                                            rec_freq={chartFreqRec}
+                                            rec_mach={chartMachRec}
+                                            rec_dur_sum={chartDurSumRec}
+                                            rec_dur_med={chartDurMedRec}/>) : null}
         </>
     );
 }

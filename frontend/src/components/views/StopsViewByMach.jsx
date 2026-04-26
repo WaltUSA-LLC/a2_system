@@ -3,9 +3,12 @@ import axios from 'axios';
 
 import TableView from "./TableView"
 import { MachStopTableModal } from "../modals/TableModal";
+import { MachStopChartModal } from '../modals/ChartModal';
 
 function StopsViewByMach() {
     const [tableOpen, setTableOpen] = useState(false);
+    const [chartOpen, setChartOpen] = useState(false); 
+    const [chartRec, setChartRec] = useState(null);
     const [modalRec, setModalRec] = useState(null);
     const [contentRec, setContentRec] = useState([]);
     const [time, setTime] = useState({})
@@ -39,6 +42,14 @@ function StopsViewByMach() {
         
     ];
 
+    function handleOpenChart() {
+        setChartOpen(true);
+    }
+
+    function handleCloseChart() {
+        setChartOpen(false);
+    }
+
     function handleRowClick(params){
         //console.log("clicked row:", params.row);
         axios.get(`http://localhost:8000/base/stop/mach/detail?start=${time.start}&end=${time.end}&shift=${time.shift}&mach=${params.row.MachID}&style=${params.row.Style_Code}`).then(
@@ -65,7 +76,9 @@ function StopsViewByMach() {
                             },
                         }).then((resp) => {
                             const records = resp.data.content ?? [];
+                            const charRecords = resp.data.chart ?? [];
                             setContentRec(records);
+                            setChartRec(charRecords);
                         }).catch((err) => {
                             setContentRec([]);
                             console.error(err);
@@ -73,11 +86,12 @@ function StopsViewByMach() {
                         });
         return promise;
     }
-
+    
     return (
         <>
-            <TableView col={columns} rec={contentRec} loadData={loadData} handleRowClick={handleRowClick} markDownSelectedTime={setTime}/>
+            <TableView col={columns} rec={contentRec} loadData={loadData} handleOpenChart={handleOpenChart} handleRowClick={handleRowClick} markDownSelectedTime={setTime}/>
             {(tableOpen && modalRec) ? <MachStopTableModal open={tableOpen} onClose={()=>{setTableOpen(false); setModalRec(null)}} rec={modalRec} metaData={metaData}/> : null}
+            {chartOpen ? (<MachStopChartModal open={chartOpen} onClose={handleCloseChart} rec={chartRec} />) : null}
         </>
     );
 }

@@ -138,9 +138,7 @@ function MachsView() {
     return (
         <>
             <TableView col={columns} rec={contentRec} loadData={loadData} handleOpenChart={handleOpenChart}/>
-            { chartOpen ? (
-                <MachChartModal open={chartOpen} onClose={handleCloseChart} rec={contentRec} />) : 
-                null}
+            {chartOpen ? (<MachChartModal open={chartOpen} onClose={handleCloseChart} rec={contentRec} />) : null}
         </>
     );
 }

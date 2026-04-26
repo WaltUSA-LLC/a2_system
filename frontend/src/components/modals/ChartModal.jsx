@@ -10,6 +10,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
+import { BarChart as MuiBarChart } from '@mui/x-charts/BarChart';
 import {
     ChartsContainer,
     BarPlot,
@@ -22,7 +23,7 @@ import {
     ChartsGrid,
 } from '@mui/x-charts';
 
-function BaseBarChart({ chartDataset }) {
+function LineBarChart({ chartDataset }) {
     return (
         <>
             {chartDataset.length > 0 ? (
@@ -85,6 +86,45 @@ function BaseBarChart({ chartDataset }) {
                 </Box>
             ) : null}
         </>
+    );
+}
+
+export function BarChart({ chartDataset }) {
+    return (
+        <MuiBarChart
+            dataset={chartDataset}
+            xAxis={[{ label: 'Frequency' }]}
+            yAxis={[{
+                scaleType: 'band',
+                dataKey: 'MachID',
+                label: 'Machine ID', 
+            }]}
+            series={[{ dataKey: 'freq', 
+                       label: 'Frequency',}]}
+            layout="horizontal"
+            grid={{ vertical: true }}
+            height={400}
+        />
+    );
+}
+
+export function BarChart1({ chartDataset, property }) {
+    return (
+        chartDataset.length>0 &&<MuiBarChart
+            dataset={chartDataset}
+            xAxis={[{ label: property }]}
+            yAxis={[{
+                scaleType: 'band',
+                dataKey: 'Stop_code',
+                label: 'Stop Code',
+                width: 90, 
+            }]}
+            series={[{ dataKey: property, 
+                    label: property,}]}
+            layout="horizontal"
+            grid={{ vertical: true }}
+            height={400}
+        />
     );
 }
 
@@ -175,7 +215,7 @@ export function MachChartModal({ open, onClose, rec }) {
                     </FormControl>
                     <Button type='submit' variant="contained">Gen</Button>
                 </Box>
-                <BaseBarChart chartDataset={chartDataset} />
+                <LineBarChart chartDataset={chartDataset} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Close</Button>
@@ -274,7 +314,88 @@ export function SKUChartModal({ open, onClose, rec }) {
                     </FormControl>
                     <Button type='submit' variant="contained">Gen</Button>
                 </Box>
-                <BaseBarChart chartDataset={chartDataset} />
+                <LineBarChart chartDataset={chartDataset} />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Close</Button>
+            </DialogActions>
+        </Dialog>
+    );
+}
+
+export function MachStopChartModal({ open, onClose, rec }) {
+
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            maxWidth="md"
+        >
+            <DialogTitle>Data Vis</DialogTitle>
+            <DialogContent>
+                <BarChart chartDataset={rec} />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Close</Button>
+            </DialogActions>
+        </Dialog>
+    );
+}
+
+
+export function CodeStopChartModal({ open, onClose, rec_freq,  rec_mach, rec_dur_sum, rec_dur_med}) {
+    const [selectedProperty, setSelectedProperty] = useState('');
+    const [chartDataset, setChartDataset] = useState(null);
+
+    const propertyOptions = [['Frequency', 'freq'], ['Mach Count', 'Mach_cnt'], ['Duration Sum', 'dur_sum'], ['Duration Median', 'dur_med']];
+
+    function handlePropertyChange(event) {
+        setSelectedProperty(event.target.value);
+        setChartDataset(null);
+    }
+
+    function handleGenChart(event) {
+        event.preventDefault();
+        if(selectedProperty==='freq'){
+            setChartDataset(rec_freq);
+        }else if(selectedProperty==='Mach_cnt'){
+            setChartDataset(rec_mach);
+        }else if(selectedProperty==='dur_sum'){
+            setChartDataset(rec_dur_sum);
+        }else{
+            setChartDataset(rec_dur_med);
+        }    
+    }
+
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            maxWidth="lg"
+        >
+            <DialogTitle>Data Vis</DialogTitle>
+            <DialogContent>
+                <Box component="form" onSubmit={handleGenChart} sx={{ display: 'flex', gap: 2, pt: 1 }}>
+                    <FormControl fullWidth required>
+                        <InputLabel id="chart-property-label">Property</InputLabel>
+                        <Select
+                            labelId="chart-property-label"
+                            value={selectedProperty}
+                            label="Property"
+                            onChange={handlePropertyChange}
+                        >
+                            {propertyOptions.map((property) => (
+                                <MenuItem key={property[0]} value={property[1]}>
+                                    {property[0]}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <Button type='submit' variant="contained">Gen</Button>
+                </Box>
+                {chartDataset && <BarChart1 chartDataset={chartDataset} property={selectedProperty}/>}
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Close</Button>
