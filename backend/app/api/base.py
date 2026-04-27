@@ -30,7 +30,6 @@ def get_stop_by_code(start:str, end:str, shift: int):
 @router.get("/stop/mach")
 def get_stop_by_mach(start:str, end:str, shift: int):
     df_table, df_chart = handle_stop_view_by_mach(start, end, shift)
-    print(df_chart)
     return {"content": df_table.to_dict(orient="records"),
             "chart": df_chart.to_dict(orient="records")}
 
