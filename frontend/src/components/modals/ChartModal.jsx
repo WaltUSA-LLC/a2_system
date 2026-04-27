@@ -89,7 +89,7 @@ function LineBarChart({ chartDataset }) {
     );
 }
 
-export function BarChart({ chartDataset }) {
+export function BarChartForMachStop({ chartDataset }) {
     return (
         <MuiBarChart
             dataset={chartDataset}
@@ -108,11 +108,13 @@ export function BarChart({ chartDataset }) {
     );
 }
 
-export function BarChart1({ chartDataset, property }) {
+export function BarChartForCodeStop({ chartDataset, property }) {
+    const vocab = {'freq':'Frequency', 'Mach_cnt':'Mach Count', 'dur_sum':'Duration Sum', 'dur_med':'Duration Medium'};
+
     return (
         chartDataset.length>0 &&<MuiBarChart
             dataset={chartDataset}
-            xAxis={[{ label: property }]}
+            xAxis={[{ label: vocab[property] }]}
             yAxis={[{
                 scaleType: 'band',
                 dataKey: 'Stop_code',
@@ -120,7 +122,7 @@ export function BarChart1({ chartDataset, property }) {
                 width: 90, 
             }]}
             series={[{ dataKey: property, 
-                    label: property,}]}
+                    label: vocab[property],}]}
             layout="horizontal"
             grid={{ vertical: true }}
             height={400}
@@ -334,7 +336,7 @@ export function MachStopChartModal({ open, onClose, rec }) {
         >
             <DialogTitle>Data Vis</DialogTitle>
             <DialogContent>
-                <BarChart chartDataset={rec} />
+                <BarChartForMachStop chartDataset={rec} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Close</Button>
@@ -373,7 +375,7 @@ export function CodeStopChartModal({ open, onClose, rec_freq,  rec_mach, rec_dur
             open={open}
             onClose={onClose}
             fullWidth
-            maxWidth="lg"
+            maxWidth="xl"
         >
             <DialogTitle>Data Vis</DialogTitle>
             <DialogContent>
@@ -395,7 +397,7 @@ export function CodeStopChartModal({ open, onClose, rec_freq,  rec_mach, rec_dur
                     </FormControl>
                     <Button type='submit' variant="contained">Gen</Button>
                 </Box>
-                {chartDataset && <BarChart1 chartDataset={chartDataset} property={selectedProperty}/>}
+                {chartDataset && <BarChartForCodeStop chartDataset={chartDataset} property={selectedProperty}/>}
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Close</Button>
