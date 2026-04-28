@@ -1,6 +1,6 @@
-from nautilus_mes_base import AppConfig
-from nautilus_mes_base import NAUStopOrchestra
-from nautilus_mes_base.utils import parse_start_date
+from extractors import AppConfig
+from extractors import StopExtractor
+from extractors.utils import parse_start_date
 import pandas as pd
 from datetime import time, timedelta
 
@@ -17,7 +17,7 @@ def determin_start_shift_time(stop_time:pd.Timestamp)->str:
 
 def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     config = AppConfig.from_env()
-    nau_stop = NAUStopOrchestra.from_config(config)
+    nau_stop = StopExtractor.from_config(config)
 
     start_dt = parse_start_date(start_time)
     end_dt = parse_start_date(end_time)
@@ -25,7 +25,7 @@ def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFr
     if end_dt < start_dt:
         raise SystemExit("End date must be on or after the start date.")
     
-    df = nau_stop.generate_nau_stop(start_dt, end_dt)
+    df = nau_stop.extract(start_dt, end_dt)
     df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     if shift==1:
         df = df[df["Start_Shift_Time"].str.contains("07:00:00", na=False)]
@@ -64,7 +64,7 @@ def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFr
 
 def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     config = AppConfig.from_env()
-    nau_stop = NAUStopOrchestra.from_config(config)
+    nau_stop = StopExtractor.from_config(config)
 
     start_dt = parse_start_date(start_time)
     end_dt = parse_start_date(end_time)
@@ -72,7 +72,7 @@ def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFr
     if end_dt < start_dt:
         raise SystemExit("End date must be on or after the start date.")
     
-    df = nau_stop.generate_nau_stop(start_dt, end_dt)
+    df = nau_stop.extract(start_dt, end_dt)
     df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     if shift==1:
         df = df[df["Start_Shift_Time"].str.contains("07:00:00", na=False)]
@@ -101,7 +101,7 @@ def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFr
 
 def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, style:str)->pd.DataFrame:
     config = AppConfig.from_env()
-    nau_stop = NAUStopOrchestra.from_config(config)
+    nau_stop = StopExtractor.from_config(config)
 
     start_dt = parse_start_date(start_time)
     end_dt = parse_start_date(end_time)
@@ -109,7 +109,7 @@ def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, s
     if end_dt < start_dt:
         raise SystemExit("End date must be on or after the start date.")
     
-    df = nau_stop.generate_nau_stop(start_dt, end_dt)
+    df = nau_stop.extract(start_dt, end_dt)
     df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
     if shift==1:
@@ -135,7 +135,7 @@ def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, s
 
 def handle_stop_code_detail(start_time:str, end_time:str, shift:int, stop_code:int)->pd.DataFrame:
     config = AppConfig.from_env()
-    nau_stop = NAUStopOrchestra.from_config(config)
+    nau_stop = StopExtractor.from_config(config)
 
     start_dt = parse_start_date(start_time)
     end_dt = parse_start_date(end_time)
@@ -143,7 +143,7 @@ def handle_stop_code_detail(start_time:str, end_time:str, shift:int, stop_code:i
     if end_dt < start_dt:
         raise SystemExit("End date must be on or after the start date.")
     
-    df = nau_stop.generate_nau_stop(start_dt, end_dt)
+    df = nau_stop.extract(start_dt, end_dt)
     df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
     if shift==1:
