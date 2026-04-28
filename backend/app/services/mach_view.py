@@ -1,5 +1,5 @@
 from extractors import MESExtractor
-from app.services.utils import estimate_st_output_prs, validate_throughput, extract_base_data
+from app.services.utils import estimate_st_output_prs, validate_throughput, extract_base_data, clean_weight
 import pandas as pd
 import numpy as np
 import math
@@ -7,6 +7,7 @@ import math
 
 def handle_mach_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(MESExtractor, start_time, end_time, shift)
+    df = clean_weight(df)
     df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
     df["ON_Time_Occupation"] = (df["ON_Time"] / (df["ON_Time"] + df["OFF_Time"])).round(2)

@@ -1,11 +1,12 @@
 from extractors import MESExtractor
-from app.services.utils import estimate_st_output_prs, validate_throughput, extract_base_data
+from app.services.utils import estimate_st_output_prs, validate_throughput, extract_base_data, clean_weight
 import pandas as pd
 import numpy as np
 
 
 def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(MESExtractor, start_time, end_time, shift)
+    df = clean_weight(df)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
     #count mach
     df_mach_cnt = df.groupby(["Style_Code", "Shift_Start_Time"])["MachID"].nunique()
