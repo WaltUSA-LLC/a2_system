@@ -1,23 +1,12 @@
-from extractors import AppConfig
 from extractors import MESExtractor
-from extractors.utils import parse_start_date
-from app.services.utils import estimate_st_output_prs, validate_throughput
+from app.services.utils import estimate_st_output_prs, validate_throughput, extract_base_data
 import pandas as pd
 import numpy as np
 import math
 
 
 def handle_mach_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
-    config = AppConfig.from_env()
-    mes_nau = MESExtractor.from_config(config)
-
-    start_dt = parse_start_date(start_time)
-    end_dt = parse_start_date(end_time)
-
-    if end_dt < start_dt:
-        raise SystemExit("End date must be on or after the start date.")
-    
-    df = mes_nau.extract(start_dt, end_dt, shift)
+    df = extract_base_data(MESExtractor, start_time, end_time, shift)
     df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
     df["ON_Time_Occupation"] = (df["ON_Time"] / (df["ON_Time"] + df["OFF_Time"])).round(2)

@@ -2,6 +2,10 @@ import math
 import pandas as pd
 import numpy as np
 
+from extractors import AppConfig
+from extractors import BaseExtractor
+from extractors.utils import parse_start_date
+
 def validate_throughput(rec:pd.Series) -> pd.Series:
     nau = rec["NAU_prs"]
     weight = rec["MES_prs"]
@@ -26,3 +30,16 @@ def estimate_st_output_prs(rec: pd.Series) -> int:
     if pd.isna(rec["Avg_Cycle"]):
         return np.nan
     return math.floor((rec["ON_Time"]+rec["OFF_Time"])/rec["Avg_Cycle"]/2)
+
+
+def extract_base_data(extractor_cls: type[BaseExtractor], start_time:str, end_time:str, shift:int=0)->pd.DataFrame:
+    config = AppConfig.from_env()
+    ext = extractor_cls.from_config(config)
+
+    start_dt = parse_start_date(start_time)
+    end_dt = parse_start_date(end_time)
+
+    if end_dt < start_dt:
+        raise SystemExit("End date must be on or after the start date.")
+    
+    return ext.extract(start_dt, end_dt, shift)

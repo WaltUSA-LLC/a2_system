@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 import pandas as pd
-
 from sqlalchemy import create_engine
 from extractors.query import MES_QUERY, STOP_QUERY
 
@@ -12,8 +12,28 @@ from extractors.config import AppConfig
 from extractors.repositories import DataRepository, WeightRepository
 from extractors.writers import ExcelWriter
 
+class BaseExtractor(ABC):
+    def __init__(
+        self,
+        repository: DataRepository,
+        writer: ExcelWriter,
+        log_data_output: bool,
+    ) -> None:
+        self.repository = repository
+        self.writer = writer
+        self.log_data_output = log_data_output
 
-class MESExtractor:
+    @classmethod
+    @abstractmethod
+    def from_config(cls, config: AppConfig) -> "BaseExtractor":
+        pass
+
+    @abstractmethod
+    def extract(self, start_dt: datetime, end_dt: datetime, *args, **kwargs) -> pd.DataFrame:
+        pass
+
+
+class MESExtractor(BaseExtractor):
     def __init__(
         self,
         repository: DataRepository,
@@ -63,7 +83,7 @@ class MESExtractor:
         return all_df
     
     
-class StopExtractor:
+class StopExtractor(BaseExtractor):
     def __init__(
         self,
         repository: DataRepository,
@@ -81,7 +101,7 @@ class StopExtractor:
         writer = ExcelWriter(config.output_dir, "STOP_DATA", "stop")
         return cls(nau_run_data, writer, config.log_data_output)
 
-    def extract(self, start_dt: datetime, end_dt: datetime) -> list[str]:
+    def extract(self, start_dt: datetime, end_dt: datetime, shift:int) -> list[str]:
         df = self.repository.fetch_data_with_start_end_date(start_dt, end_dt + timedelta(days=1))
         print(f"finished sql query with {len(df)}")
         df["dur_minute"] = TimeCalculator.estimate_time_duration(df["Stop_time"], df["Recover_time"])
