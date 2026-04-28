@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from nautilus_mes_base.utils import (
+from extractors.utils import (
     format_header_bold,
     format_header_fill,
     auto_fit_columns,
@@ -20,8 +20,8 @@ class ExcelWriter:
         self.sheet_name = sheet_name
         self.file_name = file_name
 
-    def to_excel(self, df: pd.DataFrame, start_dt: datetime, end_dt: datetime) -> str:
-        output_name = f"{self.file_name}_{start_dt.date().isoformat()}_{end_dt.date().isoformat()}.xlsx"
+    def to_excel(self, df: pd.DataFrame, start_dt: datetime, end_dt: datetime, shift: int = 0) -> str:
+        output_name = f"{self.file_name}_{start_dt.date().isoformat()}_{end_dt.date().isoformat()}_{shift}.xlsx"
         output_path = self.output_dir / output_name
 
         with pd.ExcelWriter(output_path, engine="openpyxl") as writer:

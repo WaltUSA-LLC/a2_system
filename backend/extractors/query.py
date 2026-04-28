@@ -65,7 +65,7 @@ ORDER BY MachID ASC;
 """
 
 
-NAU_STOP_QUERY = """
+STOP_QUERY = """
 DECLARE @Start DATETIME2(0) = :start_dt;
 DECLARE @End   DATETIME2(0) = :end_dt;
 
