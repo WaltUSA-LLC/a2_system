@@ -32,6 +32,13 @@ def estimate_st_output_prs(rec: pd.Series) -> int:
     return math.floor((rec["ON_Time"]+rec["OFF_Time"])/rec["Avg_Cycle"]/2)
 
 
+def clean_weight(df: pd.DataFrame) -> pd.DataFrame:
+        cleaned_df = df.copy()
+        if "Weight" in cleaned_df.columns:
+            mask = (cleaned_df["Weight"] > 0) & (cleaned_df["Weight"] < 1)
+            cleaned_df.loc[mask, "Weight"] = 0
+        return cleaned_df
+
 def extract_base_data(extractor_cls: type[BaseExtractor], start_time:str, end_time:str, shift:int=0)->pd.DataFrame:
     config = AppConfig.from_env()
     ext = extractor_cls.from_config(config)

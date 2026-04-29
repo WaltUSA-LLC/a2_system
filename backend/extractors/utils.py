@@ -2,6 +2,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, PatternFill
 from datetime import datetime
 from openpyxl.styles import Border, Side
+import pandas as pd
 
 def parse_start_date(raw: str) -> datetime:
     # Accept YYYY-MM-DD
@@ -12,6 +13,22 @@ def parse_start_date(raw: str) -> datetime:
         raise SystemExit(
             "Invalid date format. Use YYYY-MM-DD"
         ) from exc
+
+
+def normalize_style(style_code: Any) -> str:
+        if pd.isna(style_code):
+            return ""
+        style_code = style_code.strip()
+        if len(style_code)==0:
+            return ""
+        style_code = style_code.upper()
+        [style, size] = style_code.split()
+        if '-' in style:
+            style = style.split('-')[0]
+        if 'CN' in style:
+            style = style[:-2]
+        #print(style+'-'+size)
+        return style+'-'+size
 
 
 def format_percentage_columns(ws, df, col_names) -> None:
