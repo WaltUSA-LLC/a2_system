@@ -51,7 +51,7 @@ export function MachStopTableModal({open, onClose, rec, metaData}){
             headerAlign: 'center',
         },
         {
-            field: 'dur_minute',
+            field: 'duration',
             headerName: 'Duration',
             flex: 1,
             type: 'number',

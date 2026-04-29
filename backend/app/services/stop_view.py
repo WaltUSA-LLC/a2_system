@@ -16,6 +16,7 @@ def determin_start_shift_time(stop_time:pd.Timestamp)->str:
 
 def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(StopExtractor, start_time, end_time)
+    df["duration"] = df["Recover_time"] - df["Stop_time"]
     df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     if shift==1:
         df = df[df["Start_Shift_Time"].str.contains("07:00:00", na=False)]
@@ -29,8 +30,8 @@ def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFr
     df_mach_cnt = df.groupby(["Stop_code", "Description"])["MachID"].nunique()
     df_freq = df.groupby(["Stop_code", "Description"]).size()
     #stop hours
-    df_dur_sum = df.groupby(["Stop_code", "Description"])["dur_minute"].sum()
-    df_dur_med = df.groupby(["Stop_code", "Description"])["dur_minute"].median()
+    df_dur_sum = df.groupby(["Stop_code", "Description"])["duration"].sum()
+    df_dur_med = df.groupby(["Stop_code", "Description"])["duration"].median()
 
     df_stop_by_code = pd.DataFrame({"Mach_cnt": df_mach_cnt,
                                     "freq":df_freq,
@@ -82,6 +83,7 @@ def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFr
 
 def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, style:str)->pd.DataFrame:
     df = extract_base_data(StopExtractor, start_time, end_time)
+    df["duration"] = df["Recover_time"] - df["Stop_time"]
     df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
     if shift==1:
@@ -99,7 +101,7 @@ def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, s
     df["Recover_time"] = df["Recover_time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["Stop_time"] = df["Stop_time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["Description"] = df["Description"].str.strip()
-    df = df.sort_values(["Start_Shift_Time", "dur_minute"], ascending=[True, False])
+    df = df.sort_values(["Start_Shift_Time", "duration"], ascending=[True, False])
     df = df.reset_index(names="id")
     df = df.astype(object).where(pd.notnull(df), None)
     return df
@@ -107,6 +109,7 @@ def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, s
 
 def handle_stop_code_detail(start_time:str, end_time:str, shift:int, stop_code:int)->pd.DataFrame:
     df = extract_base_data(StopExtractor, start_time, end_time)
+    df["duration"] = df["Recover_time"] - df["Stop_time"]
     df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
     if shift==1:
@@ -118,8 +121,8 @@ def handle_stop_code_detail(start_time:str, end_time:str, shift:int, stop_code:i
     else:
         df = df[(df["Stop_code"]==stop_code)]
 
-    df_dur_sum = df.groupby(["MachID", "Style_Code"])["dur_minute"].sum()
-    df_dur_med = df.groupby(["MachID", "Style_Code"])["dur_minute"].median()
+    df_dur_sum = df.groupby(["MachID", "Style_Code"])["duration"].sum()
+    df_dur_med = df.groupby(["MachID", "Style_Code"])["duration"].median()
     df_freq = df.groupby(["MachID", "Style_Code"]).size()
 
     df = pd.DataFrame({"freq":df_freq,

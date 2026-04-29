@@ -7,6 +7,7 @@ import numpy as np
 def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(MESExtractor, start_time, end_time, shift)
     df = clean_weight(df)
+    df["MES_prs"] = np.floor(df["Weight"]/(df["Prs_Weight"]/1000))
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
     #count mach
     df_mach_cnt = df.groupby(["Style_Code", "Shift_Start_Time"])["MachID"].nunique()

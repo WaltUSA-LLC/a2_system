@@ -52,7 +52,7 @@ function StopsViewByCode() {
             headerAlign: 'center',
         },
         {
-            field: 'dur_minute_sum',
+            field: 'dur_sum',
             headerName: 'Duration (SUM)',
             flex: 1,
             type: 'number',
@@ -62,7 +62,7 @@ function StopsViewByCode() {
             filterOperators: minuteFilterOperators,
         },
         {
-            field: 'dur_minute_med',
+            field: 'dur_med',
             headerName: 'Duration (Medium)',
             flex: 1,
             type: 'number',
