@@ -2,10 +2,11 @@ import { useState } from 'react';
 import axios from "axios";
 
 import TableView from "./TableView"
+import { ShiftChartModal } from '../modals/ChartModal';
 
 function ShiftView() {
     const [contentRec, setContentRec] = useState([]);
-    //const [chartOpen, setChartOpen] = useState(false); 
+    const [chartOpen, setChartOpen] = useState(false); 
 
     const columns = [
         {
@@ -72,6 +73,13 @@ function ShiftView() {
         
     ];
 
+    function handleOpenChart() {
+        setChartOpen(true);
+    }
+
+    function handleCloseChart() {
+        setChartOpen(false);
+    }
 
     function loadData(start, end, shift) {
         const promise = axios.get("http://localhost:8000/base/shift", {
@@ -94,7 +102,8 @@ function ShiftView() {
 
     return (
         <>
-            <TableView col={columns} rec={contentRec} loadData={loadData} />
+            <TableView col={columns} rec={contentRec} loadData={loadData} handleOpenChart={handleOpenChart}/>
+            {chartOpen ? (<ShiftChartModal open={chartOpen} onClose={handleCloseChart} rec={contentRec} />) : null}
         </>
     );
 }

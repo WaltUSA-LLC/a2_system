@@ -89,7 +89,7 @@ function LineBarChart({ chartDataset }) {
     );
 }
 
-export function BarChartForMachStop({ chartDataset }) {
+function BarChartForMachStop({ chartDataset }) {
     return (
         <MuiBarChart
             dataset={chartDataset}
@@ -108,7 +108,7 @@ export function BarChartForMachStop({ chartDataset }) {
     );
 }
 
-export function BarChartForCodeStop({ chartDataset, property }) {
+function BarChartForCodeStop({ chartDataset, property }) {
     const vocab = {'freq':'Frequency', 'Mach_cnt':'Mach Count', 'dur_sum':'Duration Sum', 'dur_med':'Duration Medium'};
 
     return (
@@ -127,6 +127,77 @@ export function BarChartForCodeStop({ chartDataset, property }) {
             grid={{ vertical: true }}
             height={400}
         />
+    );
+}
+
+
+export function ShiftChartModal({ open, onClose, rec }) {
+    const [selectedProperty, setSelectedProperty] = useState('');
+    const [chartDataset, setChartDataset] = useState([]);
+    const vocab = {'Mach_cnt':'Mach Count', 
+                   'MES_prs':'MES Throughput (prs)', 
+                   'NAU_prs':'NAU Throughput (prs)', 
+                   'Time_Occupation':'ON Time Occupation',
+                   'eff':'Mach Efficiency'};
+        
+    const propertyOptions = Object.keys(rec[0] ?? {}).filter(
+        (property) => ['Mach_cnt', 'MES_prs', 'NAU_prs', 'Time_Occupation', 'eff'].includes(property)
+    );
+
+    function handlePropertyChange(event) {
+        setSelectedProperty(event.target.value);
+        setChartDataset([]);
+    }
+
+    function handleGenChart(event) {
+        event.preventDefault();
+        let dataset = {};
+        rec.forEach((record) => {
+            const [date, time] = record.Shift_Start_Time.trim().split(/\s+/);
+            if (!dataset[date]) {
+                dataset[date] = {};
+            }
+            const shift = time === "07:00:00" ? "Day" : "Night";
+            dataset[date].date = date;
+            dataset[date][shift] = Number(record[selectedProperty] ?? 0);
+        });
+        dataset = Object.values(dataset).sort((a, b) => a.date.localeCompare(b.date));
+        setChartDataset(dataset);
+    }
+
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            maxWidth="md"
+        >
+            <DialogTitle>Data Vis</DialogTitle>
+            <DialogContent>
+                <Box component="form" onSubmit={handleGenChart} sx={{ display: 'flex', gap: 2, pt: 1 }}>
+                    <FormControl fullWidth required>
+                        <InputLabel id="chart-property-label">Property</InputLabel>
+                        <Select
+                            labelId="chart-property-label"
+                            value={selectedProperty}
+                            label="Property"
+                            onChange={handlePropertyChange}
+                        >
+                            {propertyOptions.map((property) => (
+                                <MenuItem key={property} value={property}>
+                                    {vocab[property]}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <Button type='submit' variant="contained">Gen</Button>
+                </Box>
+                <LineBarChart chartDataset={chartDataset} />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Close</Button>
+            </DialogActions>
+        </Dialog>
     );
 }
 
