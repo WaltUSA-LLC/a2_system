@@ -34,3 +34,28 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df_sku = df_sku.replace([np.nan, np.inf, -np.inf], None)
     df_sku["Shift_Start_Time"] = df_sku["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     return df_sku
+
+
+def handle_sku_mach_detail(start_time:str, end_time:str, shift:int, style:str)->pd.DataFrame:
+    df = extract_base_data(MESExtractor, start_time, end_time, shift)
+    df = clean_weight(df)
+    df["MES_prs"] = np.floor(df["Weight"]/(df["Prs_Weight"]/1000))
+    df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
+
+    #filter style
+    df = df[df["Style_Code"]==style]
+    #all mach info
+    df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
+    df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
+    df["ON_Time_Occupation"] = (df["ON_Time"] / (df["ON_Time"] + df["OFF_Time"])).round(2)
+    df["Real_prs"] = df[["NAU_prs", "ST_prs", "MES_prs", "ON_Time", "Discard_prs", "Avg_Cycle"]].apply(validate_throughput, axis=1)
+    df["Mach_Efficiency"] = (df["Real_prs"]/df["ST_prs"]).round(2)
+    df.loc[df["ON_Time"]==0, "Mach_Efficiency"] = np.nan
+    df["Comment"] = ""
+    df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
+    df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
+    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "MES_prs", "NAU_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
+    df = df.reset_index(names="id")
+    df = df.astype(object).where(pd.notnull(df), None)
+    df = df.sort_values(by="MachID", ascending=True)
+    return df

@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import { DataGrid } from '@mui/x-data-grid';
 
-import { formatSeconds, minuteFilterOperators } from "../utils";
+import { formatSeconds, minuteFilterOperators, hourFilterOperators } from "../utils";
 
 export function MachStopTableModal({open, onClose, rec, metaData}){
     const columns = [
@@ -160,6 +160,122 @@ export function CodeStopTableModal({open, onClose, rec, metaData}){
             maxWidth="lg"
         >
             <DialogTitle>The Details of Stop Code# {metaData.stop_code}</DialogTitle>
+            <DialogContent>
+                <Box sx={{ height: 700, width: '100%' }}>
+                    <DataGrid
+                        rows={rec}
+                        columns={columns}
+                        initialState={{
+                            pagination: {
+                                paginationModel: {
+                                    pageSize: 10,
+                                },
+                            },
+                        }}
+                        pageSizeOptions={[10, 20, 30]}
+                        disableRowSelectionOnClick
+                        showToolbar
+                        sx={{
+                            '& .MuiDataGrid-columnHeaderTitle': {
+                            fontWeight: 'bold',
+                            },
+                        }}
+                    />
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Close</Button>
+            </DialogActions>
+        </Dialog>
+    );
+}
+
+
+export function SKUTableModal({open, onClose, rec, metaData}){
+    const columns = [
+        {
+            field: 'MachID',
+            headerName: 'Mach ID',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'MES_prs',
+            headerName: 'MES (prs)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'NAU_prs',
+            headerName: 'NAU (prs)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: "ON_Time",
+            headerName: "ON Time",
+            type: 'number',
+            flex: 1,
+            align: 'center',
+            headerAlign: 'center',
+            valueFormatter: (value) => formatSeconds(value),
+            filterOperators: hourFilterOperators,
+        },
+        {
+            field: "OFF_Time",
+            headerName: "OFF Time",
+            type: 'number',
+            flex: 1,
+            align: 'center',
+            headerAlign: 'center',
+            valueFormatter: (value) => formatSeconds(value),
+            filterOperators: hourFilterOperators,
+        },
+        {
+            field: 'ON_Time_Occupation',
+            headerName: 'ON Time (%)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            valueGetter: (value) => value * 100,
+            valueFormatter: (value) => `${value.toFixed(1)}%`,
+        },
+        {
+            field: 'Mach_Efficiency',
+            headerName: 'Mach Eff (%)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            valueGetter: (value) => value * 100,
+            valueFormatter: (value) => `${value.toFixed(1)}%`,
+        },
+        {
+            field: 'Comment',
+            headerName: 'Comment',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+    ];
+
+
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            maxWidth="lg"
+        >
+            <DialogTitle>Style: {metaData.style}, Shift: {metaData.date_time}</DialogTitle>
             <DialogContent>
                 <Box sx={{ height: 700, width: '100%' }}>
                     <DataGrid

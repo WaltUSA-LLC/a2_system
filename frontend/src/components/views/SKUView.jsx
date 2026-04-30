@@ -3,10 +3,14 @@ import axios from "axios";
 
 import TableView from "./TableView";
 import { SKUChartModal } from '../modals/ChartModal';
+import { SKUTableModal } from '../modals/TableModal';
 
 function SKUView() {
     const [contentRec, setContentRec] = useState([]);
+    const [modalRec, setModalRec] = useState(null);
     const [chartOpen, setChartOpen] = useState(false); 
+    const [tableOpen, setTableOpen] = useState(false);
+    const [metaData, setMetaData] = useState({});
 
     const columns = [
         {
@@ -80,6 +84,28 @@ function SKUView() {
         setChartOpen(false);
     }
 
+    function handleRowClick(params){
+        //console.log("clicked row:", params.row);
+        const [date, shift_time] = params.row.Shift_Start_Time.split(/\s+/);
+        const shift = shift_time==="07:00:00"? 1 : 2;
+        //console.log(date);
+        //console.log(shift);
+        
+        axios.get(`http://localhost:8000/base/sku/detail?start=${date}&end=${date}&shift=${shift}&style=${params.row.Style_Code}`).then(
+            resp => {
+                const records = resp.data.content ?? [];
+                setModalRec(records);
+            }
+        ).catch((err) => {
+            console.error(err);
+            setModalRec([]);
+            setTableOpen(false);
+            return;
+        });
+        setTableOpen(true);
+        setMetaData({date_time: params.row.Shift_Start_Time, style:params.row.Style_Code})
+    }
+
     function loadData(start, end, shift) {
         const promise = axios.get("http://localhost:8000/base/sku", {
                             params: {
@@ -101,10 +127,14 @@ function SKUView() {
 
     return (
         <>
-            <TableView col={columns} rec={contentRec} loadData={loadData} handleOpenChart={handleOpenChart}/>
+            <TableView col={columns} rec={contentRec} loadData={loadData} handleOpenChart={handleOpenChart} handleRowClick={handleRowClick}/>
             { chartOpen ? (
                 <SKUChartModal open={chartOpen} onClose={handleCloseChart} rec={contentRec} />) : 
                 null}
+            {(tableOpen && modalRec) ? <SKUTableModal open={tableOpen} 
+                                        onClose={()=>{setTableOpen(false); setModalRec(null)}} 
+                                        rec={modalRec} 
+                                        metaData={metaData}/> : null}
         </>
     );
 }
