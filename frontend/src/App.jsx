@@ -17,7 +17,7 @@ function App() {
             <div className='nav-and-content'>
                 <Navigation />
                 <Routes>
-                    <Route path="/machs-view" element={<MachsView />} />
+                    {/* <Route path="/machs-view" element={<MachsView />} /> */}
                     <Route path="/sku-view" element={<SKUView />} />
                     <Route path="/shift-view" element={<ShiftView />} />
                     <Route path="/stops-view/code" element={<StopsViewByCode />} />
