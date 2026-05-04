@@ -202,6 +202,14 @@ export function SKUTableModal({open, onClose, rec, metaData}){
             headerAlign: 'center',
         },
         {
+            field: 'Style_Code',
+            headerName: 'Style Code',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
             field: 'MES_prs',
             headerName: 'MES (prs)',
             flex: 1,
