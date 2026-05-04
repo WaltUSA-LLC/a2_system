@@ -9,6 +9,7 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = clean_weight(df)
     df["MES_prs"] = np.floor(df["Weight"]/(df["Prs_Weight"]/1000))
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
+    df = df[(df["MES_prs"]>0)|(df["NAU_prs"]>0)|(df["ON_Time"]>0)]
     #count mach
     df_mach_cnt = df.groupby(["Style_Code", "Shift_Start_Time"])["MachID"].nunique()
     #calc on time occupation
@@ -34,7 +35,6 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df_sku = df_sku.replace([np.nan, np.inf, -np.inf], None)
     df_sku["Shift_Start_Time"] = df_sku["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     # filter out residual sku
-    df_sku = df_sku[(df_sku["MES_prs"]!=0)|(df_sku["NAU_prs"]!=0)|(df_sku["ON_Time_Occupation"]!=0)]
     return df_sku
 
 
@@ -46,6 +46,8 @@ def handle_sku_mach_detail(start_time:str, end_time:str, shift:int, style:str)->
 
     #filter style
     df = df[df["Style_Code_wo_size"]==style]
+    df = df[(df["MES_prs"]>0)|(df["NAU_prs"]>0)|(df["ON_Time"]>0)]
+
     #all mach info
     df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
