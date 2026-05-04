@@ -158,22 +158,6 @@ def mock_empty_box_data(extractor_cls, start_time, end_time, shift):
     ])
 
 
-def mock_empty_box_data(extractor_cls, start_time, end_time, shift):
-    return pd.DataFrame([
-        {
-            "Shift_Start_Time": pd.Timestamp("2026-04-30 07:00:00"),
-            "MachID": 1,
-            "Style_Code": "A",
-            "Weight": 0.9,
-            "Prs_Weight": 1,
-            "NAU_prs": 25,
-            "ON_Time": 600,
-            "OFF_Time": 300,
-            "Avg_Cycle": 30,
-        },
-    ])
-
-
 def mock_prs_weight_zero_data(extractor_cls, start_time, end_time, shift):
     return pd.DataFrame([
         {
