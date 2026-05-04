@@ -24,10 +24,16 @@ def validate_throughput(rec:pd.Series) -> pd.Series:
         return nau
     else:
         return weight
-    
-    
+
+
+def estimate_mes_output_prs(rec: pd.Series) -> int:
+    if pd.isna(rec["Prs_Weight"]) or rec["Prs_Weight"] == 0:
+        return np.nan
+    return math.floor(rec["Weight"]/(rec["Prs_Weight"]/1000))   
+
+   
 def estimate_st_output_prs(rec: pd.Series) -> int:
-    if pd.isna(rec["Avg_Cycle"]):
+    if pd.isna(rec["Avg_Cycle"]) or rec["Avg_Cycle"] == 0:
         return np.nan
     return math.floor((rec["ON_Time"]+rec["OFF_Time"])/rec["Avg_Cycle"]/2)
 

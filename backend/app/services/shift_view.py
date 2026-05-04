@@ -1,12 +1,12 @@
 from extractors import MESExtractor
-from app.services.utils import extract_base_data, clean_weight, estimate_st_output_prs
+from app.services.utils import extract_base_data, clean_weight, estimate_st_output_prs, estimate_mes_output_prs
 import pandas as pd
 import numpy as np
 
 def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(MESExtractor, start_time, end_time, shift)
     df = clean_weight(df)
-    df["MES_prs"] = np.floor(df["Weight"]/(df["Prs_Weight"]/1000))
+    df["MES_prs"] = df[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
     df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
 
     df_on_mach = df[df["ON_Time"]>300]
@@ -33,6 +33,6 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
 
     df_shift.reset_index(inplace=True)
     df_shift = df_shift.reset_index(names="id")
-    #df_shift = df_shift.replace([np.nan, np.inf, -np.inf], None)
+    df_shift = df_shift.replace([np.nan, np.inf, -np.inf], None)
 
     return df_shift
