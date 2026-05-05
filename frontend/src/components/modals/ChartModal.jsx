@@ -111,6 +111,13 @@ function BarChartForMachStop({ chartDataset }) {
 function BarChartForCodeStop({ chartDataset, property }) {
     const vocab = {'freq':'Frequency', 'Mach_cnt':'Mach Count', 'dur_sum':'Duration Sum', 'dur_med':'Duration Medium'};
 
+    // remove code 99,999 if it is the first
+    if(chartDataset[0].Stop_code===99999){
+        chartDataset = chartDataset.slice(1);
+    }else{
+        chartDataset = chartDataset.slice(0, 10);
+    }
+
     return (
         chartDataset.length>0 &&<MuiBarChart
             dataset={chartDataset}
