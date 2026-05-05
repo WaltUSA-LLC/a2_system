@@ -126,8 +126,16 @@ function BarChartForCodeStop({ chartDataset, property }) {
                 scaleType: 'band',
                 dataKey: 'Stop_code',
                 label: 'Stop Code',
-                width: 90, 
-            }]}
+                width: 90,
+                valueFormatter: (code, context) => {
+                    const row = chartDataset.find((d) => d.Stop_code === code);
+                    const codeText = String(code ?? "");
+
+                    return context.location === "tick"
+                        ? codeText
+                        : `Description: ${row?.Description ?? "N/A"} (${codeText})`;
+                },
+                    }]}
             series={[{ dataKey: property, 
                     label: vocab[property],}]}
             layout="horizontal"

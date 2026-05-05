@@ -42,10 +42,10 @@ def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFr
     df_stop_by_code = df_stop_by_code.reset_index(names="id")
 
     #chart
-    df_freq_sort = df_stop_by_code[["Stop_code", "freq"]].sort_values("freq", ascending=False)
-    df_mach_sort = df_stop_by_code[["Stop_code", "Mach_cnt"]].sort_values("Mach_cnt", ascending=False)
-    df_dur_sum_sort = df_stop_by_code[["Stop_code", "dur_sum"]].sort_values("dur_sum", ascending=False)
-    df_dur_med_sort = df_stop_by_code[["Stop_code", "dur_med"]].sort_values("dur_med", ascending=False)
+    df_freq_sort = df_stop_by_code[["Stop_code", "Description", "freq"]].sort_values("freq", ascending=False)
+    df_mach_sort = df_stop_by_code[["Stop_code", "Description", "Mach_cnt"]].sort_values("Mach_cnt", ascending=False)
+    df_dur_sum_sort = df_stop_by_code[["Stop_code", "Description", "dur_sum"]].sort_values("dur_sum", ascending=False)
+    df_dur_med_sort = df_stop_by_code[["Stop_code", "Description", "dur_med"]].sort_values("dur_med", ascending=False)
     return df_stop_by_code, \
            df_freq_sort.iloc[:min(11,len(df))], \
            df_mach_sort.iloc[:min(11,len(df))], \
