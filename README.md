@@ -3,6 +3,9 @@
     conda activate a2_system
     pip install -r requirements.txt
 
+### Install ODBC 17 for SQL Server
+    [ODBC 17](https://go.microsoft.com/fwlink/?linkid=2361646)
+
 ### Export Backend Environment
     conda activate a2_system
     conda env export --from-history > environment.yml
@@ -10,3 +13,5 @@
 
 ### Backend Unit test
     pytest --cov=app --cov=extractors --cov-report=html -v -s
+
+
