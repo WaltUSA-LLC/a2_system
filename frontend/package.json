@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start:f": "vite",
+    "start:f": "vite --host 0.0.0.0",
     "start:b": "cd ../backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
     "start": "concurrently \"npm run start:f\" \"npm run start:b\"",
     "build": "vite build",

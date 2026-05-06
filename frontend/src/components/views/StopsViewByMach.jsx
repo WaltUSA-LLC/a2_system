@@ -5,6 +5,8 @@ import TableView from "./TableView"
 import { MachStopTableModal } from "../modals/TableModal";
 import { MachStopChartModal } from '../modals/ChartModal';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function StopsViewByMach() {
     const [tableOpen, setTableOpen] = useState(false);
     const [chartOpen, setChartOpen] = useState(false); 
@@ -52,7 +54,7 @@ function StopsViewByMach() {
 
     function handleRowClick(params){
         //console.log("clicked row:", params.row);
-        axios.get(`http://localhost:8000/base/stop/mach/detail?start=${time.start}&end=${time.end}&shift=${time.shift}&mach=${params.row.MachID}&style=${params.row.Style_Code}`).then(
+        axios.get(`${API_BASE_URL}/base/stop/mach/detail?start=${time.start}&end=${time.end}&shift=${time.shift}&mach=${params.row.MachID}&style=${params.row.Style_Code}`).then(
             resp => {
                 const records = resp.data.content ?? [];
                 setModalRec(records);
@@ -68,7 +70,7 @@ function StopsViewByMach() {
     }
 
     function loadData(start, end, shift) {
-        const promise = axios.get("http://localhost:8000/base/stop/mach", {
+        const promise = axios.get(`${API_BASE_URL}/base/stop/mach`, {
                             params: {
                                 start,
                                 end,

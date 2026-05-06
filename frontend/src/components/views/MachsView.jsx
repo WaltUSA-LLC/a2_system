@@ -117,7 +117,8 @@ function MachsView() {
     }
 
     function loadData(start, end, shift) {
-        const promise = axios.get("http://localhost:8000/base/mach", {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+        const promise = axios.get(`${API_BASE_URL}/base/mach`, {
                             params: {
                                 start,
                                 end,

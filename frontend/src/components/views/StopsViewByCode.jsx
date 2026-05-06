@@ -6,6 +6,8 @@ import { CodeStopTableModal } from "../modals/TableModal";
 import { CodeStopChartModal } from '../modals/ChartModal';
 import { formatSeconds, minuteFilterOperators } from "../utils";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function StopsViewByCode() {
     const [tableOpen, setTableOpen] = useState(false);
     const [chartOpen, setChartOpen] = useState(false); 
@@ -83,7 +85,7 @@ function StopsViewByCode() {
 
     function handleRowClick(params){
         //console.log("clicked row:", params.row);
-        axios.get(`http://localhost:8000/base/stop/code/detail?start=${time.start}&end=${time.end}&shift=${time.shift}&stop_code=${params.row.Stop_code}`).then(
+        axios.get(`${API_BASE_URL}/base/stop/code/detail?start=${time.start}&end=${time.end}&shift=${time.shift}&stop_code=${params.row.Stop_code}`).then(
             resp => {
                 const records = resp.data.content ?? [];
                 setModalRec(records);
@@ -99,7 +101,7 @@ function StopsViewByCode() {
     }
 
     function loadData(start, end, shift) {
-        const promise = axios.get("http://localhost:8000/base/stop/code", {
+        const promise = axios.get(`${API_BASE_URL}/base/stop/code`, {
                             params: {
                                 start,
                                 end,

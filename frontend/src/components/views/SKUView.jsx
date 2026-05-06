@@ -5,6 +5,8 @@ import TableView from "./TableView";
 import { SKUChartModal } from '../modals/ChartModal';
 import { SKUTableModal } from '../modals/TableModal';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function SKUView() {
     const [contentRec, setContentRec] = useState([]);
     const [modalRec, setModalRec] = useState(null);
@@ -90,8 +92,7 @@ function SKUView() {
         const shift = shift_time==="07:00:00"? 1 : 2;
         //console.log(date);
         //console.log(shift);
-        
-        axios.get(`http://localhost:8000/base/sku/detail?start=${date}&end=${date}&shift=${shift}&style=${params.row.Style_Code}`).then(
+        axios.get(`${API_BASE_URL}/base/sku/detail?start=${date}&end=${date}&shift=${shift}&style=${params.row.Style_Code}`).then(
             resp => {
                 const records = resp.data.content ?? [];
                 setModalRec(records);
@@ -107,7 +108,7 @@ function SKUView() {
     }
 
     function loadData(start, end, shift) {
-        const promise = axios.get("http://localhost:8000/base/sku", {
+        const promise = axios.get(`${API_BASE_URL}/base/sku`, {
                             params: {
                                 start,
                                 end,
