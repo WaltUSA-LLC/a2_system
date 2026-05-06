@@ -39,11 +39,32 @@ def estimate_st_output_prs(rec: pd.Series) -> int:
 
 
 def clean_weight(df: pd.DataFrame) -> pd.DataFrame:
-        cleaned_df = df.copy()
-        if "Weight" in cleaned_df.columns:
-            mask = (cleaned_df["Weight"] > 0) & (cleaned_df["Weight"] < 1)
-            cleaned_df.loc[mask, "Weight"] = 0
-        return cleaned_df
+    cleaned_df = df.copy()
+    if "Weight" in cleaned_df.columns:
+        mask = (cleaned_df["Weight"] > 0) & (cleaned_df["Weight"] < 1)
+        cleaned_df.loc[mask, "Weight"] = 0
+    return cleaned_df
+
+
+def filterShutdownMach(df: pd.DataFrame) -> pd.DataFrame:
+    cleaned_df = df.copy()
+    cleaned_df = cleaned_df[(cleaned_df["Weight"]>0)|(cleaned_df["NAU_prs"]>0)|(cleaned_df["ON_Time"]>0)]
+    return cleaned_df
+
+
+def distributeWeightForSameMach(df: pd.DataFrame) -> pd.DataFrame:
+    cleaned_df = df.copy()
+    s_on_time_sum = cleaned_df.groupby("MachID")["ON_Time"].transform("sum")
+    s_group_size = cleaned_df.groupby("MachID")["ON_Time"].transform("size")
+
+    cleaned_df["Weight"] = np.where(
+        s_on_time_sum > 0,
+        cleaned_df["Weight"] * (cleaned_df["ON_Time"] / s_on_time_sum),
+        cleaned_df["Weight"] / s_group_size
+    )
+    #print(cleaned_df[cleaned_df["MachID"]==100])
+    return cleaned_df
+
 
 def extract_base_data(extractor_cls: type[BaseExtractor], start_time:str, end_time:str, shift:int=0)->pd.DataFrame:
     config = AppConfig.from_env()
