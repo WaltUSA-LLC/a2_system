@@ -54,8 +54,8 @@ function SKUView() {
             type: 'number',
             align: 'center',
             headerAlign: 'center',
-            valueGetter: (value) => value * 100,
-            valueFormatter: (value) => `${value.toFixed(1)}%`,
+            valueGetter: (value) => value == null ? null : value * 100,
+            valueFormatter: (value) => value == null ? '' : `${value.toFixed(1)}%`,
         },
         {
             field: 'Efficiency',
@@ -64,8 +64,8 @@ function SKUView() {
             type: 'number',
             align: 'center',
             headerAlign: 'center',
-            valueGetter: (value) => value * 100,
-            valueFormatter: (value) => `${value.toFixed(1)}%`,
+            valueGetter: (value) => value == null ? null : value * 100,
+            valueFormatter: (value) => value == null ? '' : `${value.toFixed(1)}%`,
         },
         {
             field: 'Mach_cnt',

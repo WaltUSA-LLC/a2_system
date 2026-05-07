@@ -30,7 +30,7 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df_nau_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["NAU_prs"].sum()
     df_mes_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["MES_prs"].sum()
     #df_real_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["Real_prs"].sum()
-    df_st_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["ST_prs"].sum()
+    df_st_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["ST_prs"].agg(lambda s: np.nan if s.isna().any() else s.sum())
     df_sku_eff = df_mes_prs/df_st_prs
 
     df_sku=pd.DataFrame({"Mach_cnt": df_mach_cnt,
@@ -60,9 +60,9 @@ def handle_sku_mach_detail(start_time:str, end_time:str, shift:int, style:str)->
     #all mach info
     df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
-    df["ON_Time_Occupation"] = (df["ON_Time"] / (df["ON_Time"] + df["OFF_Time"])).round(2)
+    df["ON_Time_Occupation"] = (df["ON_Time"] / (df["ON_Time"] + df["OFF_Time"])).round(3)
     #df["Real_prs"] = df[["NAU_prs", "ST_prs", "MES_prs", "ON_Time", "Discard_prs", "Avg_Cycle"]].apply(validate_throughput, axis=1)
-    df["Mach_Efficiency"] = (df["MES_prs"]/df["ST_prs"]).round(2)
+    df["Mach_Efficiency"] = (df["MES_prs"]/df["ST_prs"]).round(3)
     df.loc[df["ON_Time"]==0, "Mach_Efficiency"] = np.nan
     df["Comment"] = ""
     df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
