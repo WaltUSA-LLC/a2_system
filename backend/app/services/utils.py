@@ -54,8 +54,8 @@ def filterShutdownMach(df: pd.DataFrame) -> pd.DataFrame:
 
 def distributeWeightForSameMach(df: pd.DataFrame) -> pd.DataFrame:
     cleaned_df = df.copy()
-    s_on_time_sum = cleaned_df.groupby("MachID")["ON_Time"].transform("sum")
-    s_group_size = cleaned_df.groupby("MachID")["ON_Time"].transform("size")
+    s_on_time_sum = cleaned_df.groupby(["MachID", "Shift_Start_Time"])["ON_Time"].transform("sum")
+    s_group_size = cleaned_df.groupby(["MachID", "Shift_Start_Time"])["ON_Time"].transform("size")
 
     cleaned_df["Weight"] = np.where(
         s_on_time_sum > 0,
