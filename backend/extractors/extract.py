@@ -60,15 +60,26 @@ class MESExtractor(BaseExtractor):
             if shift!=0:
                 df = self.data_repo.fetch_data_with_start_date(current_dt, shift)
                 df["Prs_Weight"] = df["Style_Code"].apply(lambda x: self.sock_weight.get(normalize_style(x),np.nan))
-                dfs.append(df)
-                print(f"finished mes {current_dt} shift {shift}")
+                if len(df) != 0:
+                    dfs.append(df)
+                    print(f"finished mes {current_dt} shift {shift}")
+                else:
+                    print(f"Empty data in mes {current_dt} shift {shift}")
             else:
                 for shift_iter in range(1, 3):
                     df = self.data_repo.fetch_data_with_start_date(current_dt, shift_iter)
                     df["Prs_Weight"] = df["Style_Code"].apply(lambda x: self.sock_weight.get(normalize_style(x),np.nan))
-                    dfs.append(df)
-                    print(f"finished mes {current_dt} shift {shift_iter}")
+                    if len(df) != 0:
+                        dfs.append(df)
+                        print(f"finished mes {current_dt} shift {shift_iter}")
+                    else:
+                        print(f"Empty data in mes {current_dt} shift {shift}")
             current_dt += timedelta(days=1)
+
+        if not dfs:
+            print("No data extracted.")
+            return pd.DataFrame()
+        
         all_df = pd.concat(dfs, ignore_index=True)
         if self.log_data_output:
             self.writer.to_excel(all_df, start_dt, end_dt, shift)
@@ -96,8 +107,6 @@ class StopExtractor(BaseExtractor):
     def extract(self, start_dt: datetime, end_dt: datetime, shift:int) -> list[str]:
         df = self.repository.fetch_data_with_start_end_date(start_dt, end_dt + timedelta(days=1))
         print(f"finished sql query with {len(df)}")
-        #df = df.sort_values(by=["MachID", "dur_minute"], ascending=[True, False])
-        print(f"finished df process")
         if self.log_data_output:
             self.writer.to_excel(df, start_dt, end_dt)
         return df

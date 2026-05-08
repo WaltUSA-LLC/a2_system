@@ -16,6 +16,12 @@ def determin_start_shift_time(stop_time:pd.Timestamp)->str:
 
 def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(StopExtractor, start_time, end_time)
+    if len(df)==0:
+        return pd.DataFrame(), \
+            pd.DataFrame(), \
+            pd.DataFrame(), \
+            pd.DataFrame(), \
+            pd.DataFrame()
     df["duration"] = df["Recover_time"] - df["Stop_time"]
     df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     if shift==1:
@@ -55,6 +61,9 @@ def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFr
 
 def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(StopExtractor, start_time, end_time)
+    if len(df)==0:
+        return pd.DataFrame(), \
+            pd.DataFrame()
     df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     if shift==1:
         df = df[df["Start_Shift_Time"].str.contains("07:00:00", na=False)]
@@ -83,6 +92,8 @@ def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFr
 
 def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, style:str)->pd.DataFrame:
     df = extract_base_data(StopExtractor, start_time, end_time)
+    if len(df)==0:
+        return pd.DataFrame()
     df["duration"] = df["Recover_time"] - df["Stop_time"]
     df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
@@ -109,6 +120,8 @@ def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, s
 
 def handle_stop_code_detail(start_time:str, end_time:str, shift:int, stop_code:int)->pd.DataFrame:
     df = extract_base_data(StopExtractor, start_time, end_time)
+    if len(df)==0:
+        return pd.DataFrame()
     df["duration"] = df["Recover_time"] - df["Stop_time"]
     df["Start_Shift_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)

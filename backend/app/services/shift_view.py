@@ -10,6 +10,8 @@ import numpy as np
 
 def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(MESExtractor, start_time, end_time, shift)
+    if len(df)==0:
+        return pd.DataFrame()
     df = distributeWeightForSameMach(df)
     df = clean_weight(df)
     df_on_mach = filterShutdownMach(df)
@@ -47,6 +49,8 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
 
 def handle_shift_mach_detail(start_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(MESExtractor, start_time, start_time, shift)
+    if len(df)==0:
+        return pd.DataFrame()
     df = distributeWeightForSameMach(df)
     df = clean_weight(df)
     df = filterShutdownMach(df)
