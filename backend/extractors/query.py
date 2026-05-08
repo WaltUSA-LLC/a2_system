@@ -24,7 +24,7 @@ WITH mach_info AS(
         pm.StyleCode as Style_Code,
         SUM(pm.Pieces) / 2 as NAU_prs,
         SUM(pm.Discards) / 2 as Discard_prs,
-        CAST(AVG(CASE WHEN pm.Cycle <> 0 THEN pm.Cycle END) AS INT) AS Avg_Cycle,
+        CAST(MIN(CASE WHEN pm.Cycle <> 0 THEN pm.Cycle END) AS INT) AS Avg_Cycle,
         SUM(pm.TimeOn) AS ON_Time,
         SUM(pm.TimeOff) AS OFF_Time
     FROM dbNautilus.dbo.PRODUCTIONS_MONITOR AS pm
