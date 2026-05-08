@@ -48,7 +48,7 @@ def clean_weight(df: pd.DataFrame) -> pd.DataFrame:
 
 def filterShutdownMach(df: pd.DataFrame) -> pd.DataFrame:
     cleaned_df = df.copy()
-    cleaned_df = cleaned_df[(cleaned_df["Weight"]>0)|(cleaned_df["NAU_prs"]>0)|(cleaned_df["ON_Time"]>0)]
+    cleaned_df = cleaned_df[(cleaned_df["Weight"]>0)|(cleaned_df["NAU_prs"]>0)|(cleaned_df["ON_Time"]>600)]
     return cleaned_df
 
 

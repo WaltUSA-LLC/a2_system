@@ -12,11 +12,11 @@ import numpy as np
 
 def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(MESExtractor, start_time, end_time, shift)
+    df = distributeWeightForSameMach(df)
     df = clean_weight(df)
     df = filterShutdownMach(df)
-    df = distributeWeightForSameMach(df)
     df["MES_prs"] = df[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
-    df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
+    df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0].upper() if isinstance(x, str) and x.strip() else None)
     
     #count mach
     df_mach_cnt = df.groupby(["Style_Code", "Shift_Start_Time"])["MachID"].nunique()
@@ -48,11 +48,12 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
 
 def handle_sku_mach_detail(start_time:str, end_time:str, shift:int, style:str)->pd.DataFrame:
     df = extract_base_data(MESExtractor, start_time, end_time, shift)
+    df = distributeWeightForSameMach(df)
     df = clean_weight(df)
     df = filterShutdownMach(df)
-    df = distributeWeightForSameMach(df)
     df["MES_prs"] = df[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
-    df["Style_Code_wo_size"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
+    df["Style_Code_wo_size"] = df["Style_Code"].apply(lambda x: x.strip().split()[0].upper() if isinstance(x, str) and x.strip() else None)
+    df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().upper() if isinstance(x, str) and x.strip() else None)
 
     #filter style
     df = df[df["Style_Code_wo_size"]==style]
@@ -63,7 +64,7 @@ def handle_sku_mach_detail(start_time:str, end_time:str, shift:int, style:str)->
     df["ON_Time_Occupation"] = (df["ON_Time"] / (df["ON_Time"] + df["OFF_Time"])).round(3)
     #df["Real_prs"] = df[["NAU_prs", "ST_prs", "MES_prs", "ON_Time", "Discard_prs", "Avg_Cycle"]].apply(validate_throughput, axis=1)
     df["Mach_Efficiency"] = (df["MES_prs"]/df["ST_prs"]).round(3)
-    df.loc[df["ON_Time"]==0, "Mach_Efficiency"] = np.nan
+    #df.loc[df["ON_Time"]==0, "Mach_Efficiency"] = np.nan
     df["Comment"] = ""
     df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
     df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
