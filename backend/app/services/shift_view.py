@@ -1,21 +1,28 @@
 from extractors import MESExtractor
-from app.services.utils import extract_base_data, clean_weight, estimate_st_output_prs, estimate_mes_output_prs
+from app.services.utils import extract_base_data, \
+    clean_weight, \
+    estimate_st_output_prs, \
+    estimate_mes_output_prs, \
+    distributeWeightForSameMach, \
+    filterShutdownMach
 import pandas as pd
 import numpy as np
 
 def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(MESExtractor, start_time, end_time, shift)
+    df = distributeWeightForSameMach(df)
     df = clean_weight(df)
-    df["MES_prs"] = df[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
-    df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
+    df_on_mach = filterShutdownMach(df)
+    df_on_mach["MES_prs"] = df_on_mach[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
+    df_on_mach["Shift_Start_Time"] = df_on_mach["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
 
-    df_on_mach = df[df["ON_Time"]>300]
+    #df_on_mach = df[df["ON_Time"]>300]
     df_on_mach["ST_prs"] = df_on_mach[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
     # total throughput 
     s_nau_prs = df_on_mach.groupby("Shift_Start_Time")["NAU_prs"].sum()
     s_mes_prs = df_on_mach.groupby("Shift_Start_Time")["MES_prs"].sum()
-    s_st_prs = df_on_mach.groupby("Shift_Start_Time")["ST_prs"].sum()
-    s_eff = (s_mes_prs / s_st_prs).round(3)
+    s_st_prs = df_on_mach.groupby("Shift_Start_Time")["ST_prs"].sum()  # need to be fixed
+    s_eff = (s_mes_prs / s_st_prs).round(3) # need to be fixed
 
     # total running machine
     s_run_mach = df_on_mach.groupby("Shift_Start_Time")["MachID"].nunique()
