@@ -43,3 +43,23 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df_shift = df_shift.replace([np.nan, np.inf, -np.inf], None)
 
     return df_shift
+
+
+def handle_shift_mach_detail(start_time:str, shift:int)->pd.DataFrame:
+    df = extract_base_data(MESExtractor, start_time, start_time, shift)
+    df = distributeWeightForSameMach(df)
+    df = clean_weight(df)
+    df = filterShutdownMach(df)
+    df["MES_prs"] = df[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
+    df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
+    df["ON_Time_Occupation"] = (df["ON_Time"] / (df["ON_Time"] + df["OFF_Time"])).round(3)
+    df["Mach_Efficiency"] = (df["MES_prs"]/df["ST_prs"]).round(3)
+    df["Comment"] = ""
+    df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
+    df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
+    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
+    df = df.reset_index(names="id")
+    df = df.astype(object).where(pd.notnull(df), None)
+    return df

@@ -3,10 +3,16 @@ import axios from "axios";
 
 import TableView from "./TableView"
 import { ShiftChartModal } from '../modals/ChartModal';
+import { MachDetailTableModal } from '../modals/TableModal';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function ShiftView() {
     const [contentRec, setContentRec] = useState([]);
+    const [modalRec, setModalRec] = useState(null);
     const [chartOpen, setChartOpen] = useState(false); 
+    const [tableOpen, setTableOpen] = useState(false);
+    const [metaData, setMetaData] = useState({});
 
     const columns = [
         {
@@ -81,8 +87,28 @@ function ShiftView() {
         setChartOpen(false);
     }
 
+    function handleRowClick(params){
+        //console.log("clicked row:", params.row);
+        const [date, shift_time] = params.row.Shift_Start_Time.split(/\s+/);
+        const shift = shift_time==="07:00:00"? 1 : 2;
+        //console.log(date);
+        //console.log(shift);
+        axios.get(`${API_BASE_URL}/base/shift/detail?start=${date}&shift=${shift}`).then(
+            resp => {
+                const records = resp.data.content ?? [];
+                setModalRec(records);
+            }
+        ).catch((err) => {
+            console.error(err);
+            setModalRec([]);
+            setTableOpen(false);
+            return;
+        });
+        setTableOpen(true);
+        setMetaData({date_time: params.row.Shift_Start_Time})
+    }
+
     function loadData(start, end, shift) {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
         const promise = axios.get(`${API_BASE_URL}/base/shift`, {
                             params: {
                                 start,
@@ -103,8 +129,12 @@ function ShiftView() {
 
     return (
         <>
-            <TableView col={columns} rec={contentRec} loadData={loadData} handleOpenChart={handleOpenChart}/>
+            <TableView col={columns} rec={contentRec} loadData={loadData} handleOpenChart={handleOpenChart} handleRowClick={handleRowClick}/>
             {chartOpen ? (<ShiftChartModal open={chartOpen} onClose={handleCloseChart} rec={contentRec} />) : null}
+            {(tableOpen && modalRec) ? <MachDetailTableModal open={tableOpen} 
+                                        onClose={()=>{setTableOpen(false); setModalRec(null)}} 
+                                        rec={modalRec} 
+                                        metaData={metaData}/> : null}
         </>
     );
 }

@@ -1,12 +1,11 @@
 from fastapi import APIRouter
 from app.services.mach_view import handle_mach_view
-from app.services.sku_view import handle_sku_view,handle_sku_mach_detail
-from app.services.shift_view import handle_shift_view
+from app.services.sku_view import handle_sku_view, handle_sku_mach_detail
+from app.services.shift_view import handle_shift_view, handle_shift_mach_detail
 from app.services.stop_view import handle_stop_view_by_code
 from app.services.stop_view import handle_stop_view_by_mach
 from app.services.stop_view import handle_stop_mach_detail
 from app.services.stop_view import handle_stop_code_detail
-import pandas as pd
 
 router = APIRouter()
 
@@ -19,6 +18,13 @@ def get_mes(start:str, end:str, shift: int):
 def get_shift(start:str, end:str, shift: int):
     df = handle_shift_view(start, end, shift)
     return {"content": df.to_dict(orient="records")}
+
+
+@router.get("/shift/detail")
+def get_shift_detail(start:str, shift: int):
+    df = handle_shift_mach_detail(start, shift)
+    return {"content": df.to_dict(orient="records")}
+
 
 @router.get("/sku")
 def get_sku(start:str, end:str, shift: int):

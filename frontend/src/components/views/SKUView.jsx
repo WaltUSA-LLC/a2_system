@@ -3,7 +3,7 @@ import axios from "axios";
 
 import TableView from "./TableView";
 import { SKUChartModal } from '../modals/ChartModal';
-import { SKUTableModal } from '../modals/TableModal';
+import { MachDetailTableModal } from '../modals/TableModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -132,7 +132,7 @@ function SKUView() {
             { chartOpen ? (
                 <SKUChartModal open={chartOpen} onClose={handleCloseChart} rec={contentRec} />) : 
                 null}
-            {(tableOpen && modalRec) ? <SKUTableModal open={tableOpen} 
+            {(tableOpen && modalRec) ? <MachDetailTableModal open={tableOpen} 
                                         onClose={()=>{setTableOpen(false); setModalRec(null)}} 
                                         rec={modalRec} 
                                         metaData={metaData}/> : null}

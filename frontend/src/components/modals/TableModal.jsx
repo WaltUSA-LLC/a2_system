@@ -191,7 +191,7 @@ export function CodeStopTableModal({open, onClose, rec, metaData}){
 }
 
 
-export function SKUTableModal({open, onClose, rec, metaData}){
+export function MachDetailTableModal({open, onClose, rec, metaData}){
     const columns = [
         {
             field: 'MachID',
