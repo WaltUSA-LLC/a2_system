@@ -29,6 +29,8 @@ def validate_throughput(rec:pd.Series) -> pd.Series:
 def estimate_mes_output_prs(rec: pd.Series) -> int:
     if pd.isna(rec["Prs_Weight"]) or rec["Prs_Weight"] == 0:
         return np.nan
+    if pd.isna(rec["Weight"]):
+        return np.nan
     return math.floor(rec["Weight"]/(rec["Prs_Weight"]/1000))   
 
    
