@@ -246,6 +246,13 @@ def test_handle_sku_view_empty_df(monkeypatch):
         make_empty_sku_df(),
     )
 
+    mocks = make_call_counting_mocks()
+    patch_common_dependencies(
+        monkeypatch,
+        sku_view,
+        mocks,
+    )
+
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
         end_time="2026-05-02 00:00:00",
@@ -253,6 +260,11 @@ def test_handle_sku_view_empty_df(monkeypatch):
     )
 
     assert result.empty
+    mocks["distributeWeightForSameMach"].assert_not_called()
+    mocks["clean_weight"].assert_not_called()
+    mocks["filterShutdownMach"].assert_not_called()
+    mocks["estimate_mes_output_prs"].assert_not_called()
+    mocks["estimate_st_output_prs"].assert_not_called()
 
 
 def test_handle_sku_view_nan_st_prs_efficiency_becomes_none(monkeypatch):
