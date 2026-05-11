@@ -6,6 +6,8 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 import { DataGrid } from '@mui/x-data-grid';
 
 function formatDate(date) {
@@ -17,6 +19,11 @@ function formatDate(date) {
     }).format(date);
 }
 
+function getDateDiffInDays(startDate, endDate) {
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    return (new Date(endDate) - new Date(startDate)) / millisecondsPerDay;
+}
+
 function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDownSelectedTime}){
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -25,9 +32,24 @@ function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDow
     const [end, setEnd] = useState(defaultDate);
     const [shift, setShift] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [dateRangeErrorOpen, setDateRangeErrorOpen] = useState(false);
+    const [dateRangeErrorMessage, setDateRangeErrorMessage] = useState('');
     const hasData = !loading && rec.length > 0;
+    const isEndBeforeStart = end < start;
 
     async function handleShowData() {
+        if (isEndBeforeStart) {
+            setDateRangeErrorMessage('End time must be greater than or equal to start time.');
+            setDateRangeErrorOpen(true);
+            return;
+        }
+
+        if (getDateDiffInDays(start, end) > 14) {
+            setDateRangeErrorMessage('The difference between start and end time must be within 14 days.');
+            setDateRangeErrorOpen(true);
+            return;
+        }
+
         setLoading(true);
         if(markDownSelectedTime) {
             markDownSelectedTime({start, end, shift});
@@ -55,8 +77,31 @@ function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDow
         setShift(event.target.value);
     }
 
+    function handleDateRangeErrorClose(event, reason) {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setDateRangeErrorOpen(false);
+    }
+
     return (
         <Box sx={{ width: '100%' }}>
+            <Snackbar
+                open={dateRangeErrorOpen}
+                autoHideDuration={5000}
+                onClose={handleDateRangeErrorClose}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert
+                    severity="warning"
+                    variant="filled"
+                    onClose={handleDateRangeErrorClose}
+                    sx={{ width: '100%' }}
+                >
+                    {dateRangeErrorMessage}
+                </Alert>
+            </Snackbar>
             <Box
                 sx={{
                     display: 'flex',
