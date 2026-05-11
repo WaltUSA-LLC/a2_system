@@ -28,7 +28,7 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df_on_time_occupation = df_on_time/(df_on_time + df_off_time)
     #calc sku eff
     df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
-    df["Real_prs"] = df[["NAU_prs", "ST_prs", "MES_prs", "ON_Time", "Discard_prs", "Avg_Cycle"]].apply(validate_throughput, axis=1)
+    #df["Real_prs"] = df[["NAU_prs", "ST_prs", "MES_prs", "ON_Time", "Discard_prs", "Avg_Cycle"]].apply(validate_throughput, axis=1)
     df_nau_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["NAU_prs"].sum()
     df_mes_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["MES_prs"].sum()
     #df_real_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["Real_prs"].sum()
