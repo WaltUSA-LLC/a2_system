@@ -70,4 +70,5 @@ def handle_shift_mach_detail(start_time:str, shift:int)->pd.DataFrame:
     df = df[["MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
     df = df.reset_index(names="id")
     df = df.astype(object).where(pd.notnull(df), None)
+    df = df.sort_values(by="MachID", ascending=True)
     return df
