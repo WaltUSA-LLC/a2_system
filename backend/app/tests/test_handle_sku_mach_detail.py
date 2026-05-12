@@ -34,8 +34,13 @@ Test cases for handle_sku_mach_detail:
 
 11. Style argument case sensitivity
     - Verify lowercase style argument does not match uppercase normalized rows.
+
+12. Filtered-empty result
+    - Verify filtering all rows should return an empty result with schema.
 """
 
+
+from unittest.mock import Mock
 
 import pytest
 
@@ -69,6 +74,10 @@ EXPECTED_COLUMNS = [
         "Mach_Efficiency",
         "Comment",
     ]
+
+
+def _filter_all_shutdown_mach(df):
+    return df.iloc[0:0].copy()
 
 
 def test_handle_sku_mach_detail_output_columns(monkeypatch):
@@ -416,3 +425,36 @@ def test_handle_sku_mach_detail_style_argument_is_case_sensitive(monkeypatch):
 
     assert result.empty
     assert list(result.columns) == EXPECTED_COLUMNS
+
+
+def test_handle_sku_mach_detail_filtered_empty_returns_empty_with_schema(
+    monkeypatch,
+):
+    """
+    If filterShutdownMach removes all rows, handle_sku_mach_detail should
+    return an empty DataFrame with the final schema.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        sku_view,
+        make_base_sku_mach_detail_df(),
+    )
+
+    mocks = make_call_counting_mocks()
+    mocks["filterShutdownMach"] = Mock(
+        side_effect=_filter_all_shutdown_mach
+    )
+    patch_common_dependencies(
+        monkeypatch,
+        sku_view,
+        mocks,
+    )
+
+    result = sku_view.handle_sku_mach_detail(
+        start_time="2026-05-01 00:00:00",
+        end_time="2026-05-02 00:00:00",
+        shift=1,
+        style="ABC",
+    )
+
+    assert result.empty

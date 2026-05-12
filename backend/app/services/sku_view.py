@@ -17,6 +17,8 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = distributeWeightForSameMach(df)
     df = clean_weight(df)
     df = filterShutdownMach(df)
+    if len(df)==0:
+        return pd.DataFrame()
     df["MES_prs"] = df[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0].upper() if isinstance(x, str) and x.strip() else None)
     
@@ -55,6 +57,8 @@ def handle_sku_mach_detail(start_time:str, end_time:str, shift:int, style:str)->
     df = distributeWeightForSameMach(df)
     df = clean_weight(df)
     df = filterShutdownMach(df)
+    if len(df)==0:
+        return pd.DataFrame()
     df["MES_prs"] = df[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
     df["Style_Code_wo_size"] = df["Style_Code"].apply(lambda x: x.strip().split()[0].upper() if isinstance(x, str) and x.strip() else None)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().upper() if isinstance(x, str) and x.strip() else None)

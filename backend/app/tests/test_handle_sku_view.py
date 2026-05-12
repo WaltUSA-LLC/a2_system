@@ -27,8 +27,13 @@ Test cases for handle_sku_view:
 
 9. Invalid Style_Code handling
    - Verify empty or None Style_Code values are dropped by groupby.
+
+10. Filtered-empty result
+    - Verify filtering all rows should return an empty result with schema.
 """
 
+
+from unittest.mock import Mock
 
 import pytest
 
@@ -48,6 +53,23 @@ from app.tests.mocks.handle_sku_view_mocks import (
     make_sku_df_with_nan_st_prs,
     make_sku_df_with_zero_st_prs,
 )
+
+
+EXPECTED_COLUMNS = [
+    "id",
+    "Style_Code",
+    "Shift_Start_Time",
+    "Mach_cnt",
+    "NAU_prs",
+    "MES_prs",
+    "ON_Time_Occupation",
+    "Efficiency",
+]
+
+
+def _filter_all_shutdown_mach(df):
+    return df.iloc[0:0].copy()
+
 
 def test_handle_sku_view_output_columns(monkeypatch):
     """
@@ -72,18 +94,7 @@ def test_handle_sku_view_output_columns(monkeypatch):
         shift=1,
     )
 
-    expected_columns = [
-        "id",
-        "Style_Code",
-        "Shift_Start_Time",
-        "Mach_cnt",
-        "NAU_prs",
-        "MES_prs",
-        "ON_Time_Occupation",
-        "Efficiency",
-    ]
-
-    assert list(result.columns) == expected_columns
+    assert list(result.columns) == EXPECTED_COLUMNS
 
 
 def test_handle_sku_view_calls_invoked_functions(monkeypatch):
@@ -346,6 +357,36 @@ def test_handle_sku_view_invalid_style_code_is_dropped(monkeypatch):
     )
 
     mocks = make_call_counting_mocks()
+    patch_common_dependencies(
+        monkeypatch,
+        sku_view,
+        mocks,
+    )
+
+    result = sku_view.handle_sku_view(
+        start_time="2026-05-01 00:00:00",
+        end_time="2026-05-02 00:00:00",
+        shift=1,
+    )
+
+    assert result.empty
+
+
+def test_handle_sku_view_filtered_empty_returns_empty_with_schema(monkeypatch):
+    """
+    If filterShutdownMach removes all rows, handle_sku_view should return an
+    empty DataFrame with the final schema.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        sku_view,
+        make_base_sku_df(),
+    )
+
+    mocks = make_call_counting_mocks()
+    mocks["filterShutdownMach"] = Mock(
+        side_effect=_filter_all_shutdown_mach
+    )
     patch_common_dependencies(
         monkeypatch,
         sku_view,
