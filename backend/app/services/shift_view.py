@@ -15,6 +15,8 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = distributeWeightForSameMach(df)
     df = clean_weight(df)
     df_on_mach = filterShutdownMach(df)
+    if len(df_on_mach)==0:
+        return pd.DataFrame()
     df_on_mach["MES_prs"] = df_on_mach[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
     df_on_mach["Shift_Start_Time"] = df_on_mach["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -54,6 +56,8 @@ def handle_shift_mach_detail(start_time:str, shift:int)->pd.DataFrame:
     df = distributeWeightForSameMach(df)
     df = clean_weight(df)
     df = filterShutdownMach(df)
+    if len(df)==0:
+        return pd.DataFrame()
     df["MES_prs"] = df[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
     df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
 
