@@ -82,6 +82,7 @@ def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFr
     df_stop_by_mach = df_stop_by_mach.reset_index(names="id")
 
     #chart
+    df = df[df["Style_Code"].notna()]
     df_freq = df.groupby(["MachID"]).size()
     df_stop_chart_mach = pd.DataFrame({"freq":df_freq,})
     df_stop_chart_mach = df_stop_chart_mach.sort_values(["freq"], ascending=[False])
