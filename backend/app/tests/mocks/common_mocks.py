@@ -53,7 +53,7 @@ def patch_extract_base_data(monkeypatch, module, df: pd.DataFrame):
         patch_extract_base_data(monkeypatch, sku_view, make_base_sku_df())
     """
 
-    def fake_extract_base_data(extractor_cls, start_time, end_time, shift):
+    def fake_extract_base_data(extractor_cls, start_time, end_time, shift=0):
         return df.copy()
 
     monkeypatch.setattr(
