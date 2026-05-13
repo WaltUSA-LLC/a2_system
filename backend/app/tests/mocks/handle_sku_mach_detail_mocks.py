@@ -98,22 +98,3 @@ def make_sku_mach_detail_df_with_invalid_style_code() -> pd.DataFrame:
             "Discard_prs": [0, 0, 0],
         }
     )
-
-
-def make_sku_mach_detail_df_with_zero_st_prs() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
-
-    return pd.DataFrame(
-        {
-            "Style_Code": ["abc red"],
-            "Shift_Start_Time": [shift_time],
-            "MachID": ["M1"],
-            "ON_Time": [1],
-            "OFF_Time": [1],
-            "Avg_Cycle": [0],
-            "Weight": [10],
-            "Prs_Weight": [1000],
-            "NAU_prs": [1],
-            "Discard_prs": [0],
-        }
-    )
