@@ -46,13 +46,13 @@ import pytest
 
 import app.services.sku_view as sku_view
 
-from app.tests.mocks.common_mocks import (
+from app.tests.unit.mocks.common_mocks import (
     make_call_counting_mocks,
     patch_common_dependencies,
     patch_extract_base_data,
 )
 
-from app.tests.mocks.handle_sku_mach_detail_mocks import (
+from app.tests.unit.mocks.handle_sku_mach_detail_mocks import (
     make_base_sku_mach_detail_df,
     make_empty_sku_mach_detail_df,
     make_sku_mach_detail_df_for_metrics_and_comments,

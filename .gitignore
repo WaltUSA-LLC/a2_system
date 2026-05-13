@@ -4,8 +4,8 @@ backend/.coverage
 backend/app/__pycache__
 backend/app/api/__pycache__
 backend/app/services/__pycache__
-backend/app/tests/__pycache__
-backend/app/tests/mocks/__pycache__
+backend/app/tests/unit/__pycache__
+backend/app/tests/unit/mocks/__pycache__
 backend/extractors/__pycache__
 backend/extractors/data_outputs/*
 .vscode

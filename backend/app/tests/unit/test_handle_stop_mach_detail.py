@@ -58,8 +58,8 @@ import pandas as pd
 
 import app.services.stop_view as stop_view
 
-from app.tests.mocks.common_mocks import patch_extract_base_data
-from app.tests.mocks.handle_stop_mach_detail_mocks import (
+from app.tests.unit.mocks.common_mocks import patch_extract_base_data
+from app.tests.unit.mocks.handle_stop_mach_detail_mocks import (
     make_base_stop_mach_detail_df,
     make_empty_stop_mach_detail_df,
     make_stop_mach_detail_filtered_empty_after_shift_df,

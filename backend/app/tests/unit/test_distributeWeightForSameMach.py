@@ -35,7 +35,7 @@ import pandas as pd
 import pytest
 
 from app.services.utils import distributeWeightForSameMach
-from app.tests.mocks.handle_distributeWeightForSameMach_mocks import (
+from app.tests.unit.mocks.handle_distributeWeightForSameMach_mocks import (
     make_different_mach_same_shift_df,
     make_mixed_zero_and_nonzero_on_time_df,
     make_same_mach_different_shift_df,
