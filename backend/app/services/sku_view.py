@@ -1,7 +1,6 @@
 from extractors import MESExtractor
 from app.services.utils import estimate_st_output_prs, \
     estimate_mes_output_prs, \
-    validate_throughput, \
     extract_base_data, \
     clean_weight, \
     filterShutdownMach, \
