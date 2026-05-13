@@ -47,13 +47,13 @@ import pytest
 
 import app.services.shift_view as shift_view
 
-from app.tests.unit.mocks.common_mocks import (
+from app.tests.mocks.common_mocks import (
     make_call_counting_mocks,
     patch_common_dependencies,
     patch_extract_base_data,
 )
 
-from app.tests.unit.mocks.handle_shift_mach_detail_mocks import (
+from app.tests.mocks.handle_shift_mach_detail_mocks import (
     make_base_shift_mach_detail_df,
     make_empty_shift_mach_detail_df,
     make_shift_mach_detail_df_for_filter_shutdown,
