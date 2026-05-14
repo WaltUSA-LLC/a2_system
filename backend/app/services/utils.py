@@ -37,6 +37,8 @@ def estimate_mes_output_prs(rec: pd.Series) -> int:
 def estimate_st_output_prs(rec: pd.Series) -> int:
     if pd.isna(rec["Avg_Cycle"]) or rec["Avg_Cycle"] == 0:
         return np.nan
+    if pd.isna(rec["ON_Time"]+rec["OFF_Time"]):
+        return np.nan
     return math.floor((rec["ON_Time"]+rec["OFF_Time"])/rec["Avg_Cycle"]/2)
 
 
