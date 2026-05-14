@@ -69,6 +69,6 @@ def handle_shift_mach_detail(start_time:str, shift:int)->pd.DataFrame:
     df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
     df = df[["MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
     df = df.reset_index(names="id")
-    df = df.astype(object).where(pd.notnull(df), None)
+    df = df.replace([np.nan, np.inf, -np.inf], None)
     df = df.sort_values(by="MachID", ascending=True)
     return df
