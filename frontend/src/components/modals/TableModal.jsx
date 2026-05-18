@@ -283,7 +283,8 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
             fullWidth
             maxWidth="lg"
         >
-            <DialogTitle>Style: {metaData.style}, Shift: {metaData.date_time}</DialogTitle>
+            {metaData.style ? <DialogTitle>Style: {metaData.style}, Shift: {metaData.date_time}</DialogTitle> :
+                <DialogTitle>Shift: {metaData.date_time}</DialogTitle>}
             <DialogContent>
                 <Box sx={{ height: 700, width: '100%' }}>
                     <DataGrid
