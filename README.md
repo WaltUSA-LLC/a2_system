@@ -1,10 +1,14 @@
+![Unit tests](https://github.com/WaltUSA-LLC/a2_system/actions/workflows/unit-tests.yml/badge.svg)
+![Integration tests](https://github.com/WaltUSA-LLC/a2_system/actions/workflows/integration-tests.yml/badge.svg)
+![Coverage](https://codecov.io/gh/WaltUSA-LLC/a2_system/branch/main/graph/badge.svg)
+
 ### Create Backend Environment
     conda env create -f environment.yml
     conda activate a2_system
     pip install -r requirements.txt
 
 ### Install ODBC 17 for SQL Server
-    [ODBC 17](https://go.microsoft.com/fwlink/?linkid=2361646)
+    ![ODBC 17](https://go.microsoft.com/fwlink/?linkid=2361646)
 
 ### Export Backend Environment
     conda activate a2_system
