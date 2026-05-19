@@ -11,7 +11,11 @@
     conda env export --from-history > environment.yml
     pip freeze > requirements.txt
 
-### Backend Unit test
-    pytest --cov=app --cov=extractors --cov-report=html -v -s
+### Backend Unit Test
+    pytest app/tests/unit --cov=app --cov-report=term-missing --cov-report=html -v -s
+
+### Backend Integration Test
+    pytest app/tests/integration -v -s
+
 
 

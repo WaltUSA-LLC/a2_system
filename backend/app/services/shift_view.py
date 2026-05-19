@@ -49,6 +49,7 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
 
     df_staff = get_staff_schedule_table(start_time, end_time)
     df_shift = df_shift.merge(df_staff, left_on="Shift_Start_Time", right_on="ShiftStartTime", how="left")
+    df_shift = df_shift.drop(columns=["ShiftStartTime"], errors="ignore")
     df_shift["Shift_Start_Time"] = df_shift["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df_shift = df_shift.replace([np.nan, np.inf, -np.inf], None)
 

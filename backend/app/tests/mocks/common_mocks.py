@@ -55,12 +55,38 @@ def patch_extract_base_data(monkeypatch, module, df: pd.DataFrame):
 
     def fake_extract_base_data(extractor_cls, start_time, end_time, shift=0):
         return df.copy()
+    
+    mock_extract_base_data = Mock(side_effect=fake_extract_base_data)
 
     monkeypatch.setattr(
         module,
         "extract_base_data",
-        fake_extract_base_data,
+        mock_extract_base_data,
     )
+
+    return mock_extract_base_data
+
+
+def patch_get_staff_schedule_table(monkeypatch, module, df: pd.DataFrame):
+    """
+    Patch get_staff_schedule_table inside the module under test.
+
+    Example:
+        patch_get_staff_schedule_table(monkeypatch, shift_view, make_base_shift_df())
+    """
+
+    def fake_get_staff_schedule_table(start_time, end_time):
+        return df.copy()
+    
+    mock_get_staff_schedule_table = Mock(side_effect=fake_get_staff_schedule_table)
+
+    monkeypatch.setattr(
+        module,
+        "get_staff_schedule_table",
+        mock_get_staff_schedule_table,
+    )
+
+    return mock_get_staff_schedule_table
 
 
 def patch_common_dependencies(monkeypatch, module, mocks: dict):
