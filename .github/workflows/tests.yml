@@ -1,0 +1,43 @@
+name: Backend tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Conda environment
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: backend/environment.yml
+          activate-environment: a2_system
+          auto-activate-base: false
+
+      - name: Install pip dependencies
+        shell: bash -el {0}
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        shell: bash -el {0}
+        run: |
+          pytest app/tests/unit -v --cov=app --cov-report=term-missing
+
+      - name: Run integration tests
+        shell: bash -el {0}
+        run: |
+          pytest app/tests/integration -v
