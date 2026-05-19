@@ -75,8 +75,38 @@ function ShiftView() {
             valueGetter: (value) => value * 100,
             valueFormatter: (value) => `${value.toFixed(1)}%`,
         },
-        
-        
+        {
+            field: 'KO',
+            headerName: 'KO',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'Tech',
+            headerName: 'Tech',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'Creeler',
+            headerName: 'Creeler',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'Yarner',
+            headerName: 'Yarner',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },    
     ];
 
     function handleOpenChart() {

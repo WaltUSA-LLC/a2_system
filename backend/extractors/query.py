@@ -83,3 +83,18 @@ WHERE sm.LastDateRec > @Start
     AND sm.StopCode = 0
     AND sm.LastStopCode = s.StopCode 
 """
+
+
+STAFF_QUERY = """
+DECLARE @Start DATETIME2(0) = :start_dt;
+DECLARE @End   DATETIME2(0) = :end_dt;
+
+WITH specific_schedule AS(
+    SELECT *
+    FROM dbA2.dbo.ShiftOperator
+    WHERE ShiftStartTime >= @Start
+        AND ShiftStartTime < @End  -- note here is the shiftStartTime, not LastDateRec
+)
+SELECT ShiftStartTime, ID, FirstName, LastName, RoleName
+FROM specific_schedule AS ss JOIN dbA2.dbo.Operator AS op ON ss.OperatorID = op.ID
+"""

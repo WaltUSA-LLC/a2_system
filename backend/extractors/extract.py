@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
-from extractors.query import MES_QUERY, STOP_QUERY
+from extractors.query import MES_QUERY, STOP_QUERY, STAFF_QUERY
 from extractors.utils import normalize_style
 from extractors.config import AppConfig
 from extractors.repositories import DataRepository, WeightRepository
@@ -107,6 +107,31 @@ class StopExtractor(BaseExtractor):
     def extract(self, start_dt: datetime, end_dt: datetime, shift:int) -> list[str]:
         df = self.repository.fetch_data_with_start_end_date(start_dt, end_dt + timedelta(days=1))
         print(f"finished sql query with {len(df)}")
+        if self.log_data_output:
+            self.writer.to_excel(df, start_dt, end_dt)
+        return df
+    
+
+class StaffScheduleExtractor(BaseExtractor):
+    def __init__(
+        self,
+        repository: DataRepository,
+        writer: ExcelWriter,
+        log_data_output: bool,
+    ) -> None:
+        self.repository = repository
+        self.writer = writer
+        self.log_data_output = log_data_output
+
+    @classmethod
+    def from_config(cls, config: AppConfig) -> "StaffScheduleExtractor":
+        engine = create_engine(config.database_url)
+        staff_schedule_data = DataRepository(engine, STAFF_QUERY)
+        writer = ExcelWriter(config.output_dir, "STAFF_SCHEDULE", "staff_schedule")
+        return cls(staff_schedule_data, writer, config.log_data_output)
+
+    def extract(self, start_dt: datetime, end_dt: datetime, shift:int) -> list[str]:
+        df = self.repository.fetch_data_with_start_end_date(start_dt, end_dt + timedelta(days=1))
         if self.log_data_output:
             self.writer.to_excel(df, start_dt, end_dt)
         return df
