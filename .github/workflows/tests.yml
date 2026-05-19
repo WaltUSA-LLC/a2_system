@@ -25,7 +25,7 @@ jobs:
         with:
           environment-file: backend/environment.yml
           activate-environment: a2_system
-          auto-activate-base: false
+          auto-activate: false
 
       - name: Install pip dependencies
         shell: bash -el {0}
