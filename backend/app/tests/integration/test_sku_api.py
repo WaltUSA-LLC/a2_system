@@ -27,11 +27,6 @@ from app.tests.mocks.handle_sku_view_mocks import (
     make_base_sku_df,
     make_empty_sku_df,
     make_multi_sku_multi_shift_df,
-    make_sku_df_with_invalid_style_code,
-    make_sku_df_with_nan_st_prs,
-    make_sku_df_with_zero_st_prs,
-    make_sku_df_with_zero_on_off_time,
-    make_sku_df_with_nan_on_time,
 )
 from extractors import MESExtractor
 

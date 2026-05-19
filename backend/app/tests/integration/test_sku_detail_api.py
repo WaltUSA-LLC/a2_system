@@ -31,9 +31,7 @@ from app.tests.mocks.handle_sku_mach_detail_mocks import (
     make_base_sku_mach_detail_df,
     make_empty_sku_mach_detail_df,
     make_sku_mach_detail_df_for_metrics_and_comments,
-    make_sku_mach_detail_df_with_invalid_style_code,
     make_sku_mach_detail_df_without_matching_style,
-    make_unsorted_sku_mach_detail_df,
 )
 from extractors import MESExtractor
 

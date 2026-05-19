@@ -1,9 +1,20 @@
 """
-Integration tests for /base/stop/mach.
+Test cases for /base/stop/mach API:
 
-These tests keep detailed business-rule coverage in the corresponding unit
-tests and focus on route wiring, extractor boundary, response shape, JSON
-serialization, and request validation. Only extract_base_data is mocked.
+1. Output schema
+   - Verify the API returns the expected top-level response and row fields.
+
+2. Extractor arguments
+   - Verify extract_base_data receives StopExtractor, start, and end.
+
+3. Empty extractor result
+   - Verify an empty extracted DataFrame returns empty table and chart content.
+
+4. Representative transformation and serialization
+   - Verify machine/style and machine-only frequency counts serialize as ints.
+
+5. Required query validation
+   - Verify missing required route parameters are rejected by FastAPI.
 """
 from fastapi.testclient import TestClient
 

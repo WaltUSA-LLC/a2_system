@@ -29,8 +29,6 @@ from app.tests.mocks.handle_shift_mach_detail_mocks import (
     make_empty_shift_mach_detail_df,
     make_shift_mach_detail_df_for_metrics_and_comments,
     make_shift_mach_detail_df_with_duplicate_mach,
-    make_shift_mach_detail_df_with_nan_st_prs,
-    make_shift_mach_detail_df_with_zero_st_prs,
 )
 from extractors import MESExtractor
 
