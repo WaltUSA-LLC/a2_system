@@ -1,6 +1,5 @@
 ![Unit tests](https://github.com/WaltUSA-LLC/a2_system/actions/workflows/unit-tests.yml/badge.svg)
 ![Integration tests](https://github.com/WaltUSA-LLC/a2_system/actions/workflows/integration-tests.yml/badge.svg)
-![Coverage](https://codecov.io/gh/WaltUSA-LLC/a2_system/branch/main/graph/badge.svg)
 
 ### Create Backend Environment
     conda env create -f environment.yml
