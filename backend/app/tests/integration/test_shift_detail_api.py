@@ -18,14 +18,12 @@ Test cases for /base/shift/detail API:
    - Verify duplicate MachID rows are preserved as detail records.
 """
 
-
-from unittest.mock import Mock
-
 import pytest
 from fastapi.testclient import TestClient
 
 import app.services.shift_view as shift_view
 from app.main import app
+from app.tests.mocks.common_mocks import patch_extract_base_data
 from app.tests.mocks.handle_shift_mach_detail_mocks import (
     make_base_shift_mach_detail_df,
     make_empty_shift_mach_detail_df,
@@ -56,25 +54,14 @@ EXPECTED_COLUMNS = [
 ]
 
 
-def _patch_extract_base_data(monkeypatch, df):
-    extract_mock = Mock(
-        side_effect=lambda extractor_cls, start_time, end_time, shift=0: df.copy()
-    )
-    monkeypatch.setattr(
-        shift_view,
-        "extract_base_data",
-        extract_mock,
-    )
-    return extract_mock
-
-
 def test_shift_detail_api_output_columns(monkeypatch):
     """
     Case 1: Output schema.
     Verify the API returns machine-detail records with expected fields.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        shift_view,
         make_base_shift_mach_detail_df(),
     )
 
@@ -99,8 +86,9 @@ def test_shift_detail_api_extract_base_data_arguments(monkeypatch):
     Verify that the API path passes start as both start_time and end_time,
     plus shift, to extract_base_data through handle_shift_mach_detail.
     """
-    extract_mock = _patch_extract_base_data(
+    extract_mock = patch_extract_base_data(
         monkeypatch,
+        shift_view,
         make_base_shift_mach_detail_df(),
     )
 
@@ -127,8 +115,9 @@ def test_shift_detail_api_empty_df(monkeypatch):
     If extract_base_data returns an empty DataFrame, the API should return
     empty content.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        shift_view,
         make_empty_shift_mach_detail_df(),
     )
 
@@ -158,8 +147,9 @@ def test_shift_detail_api_metrics_and_comments(monkeypatch):
         1,
     ]
 
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        shift_view,
         df,
     )
 
@@ -198,8 +188,9 @@ def test_shift_detail_api_duplicate_mach_rows_preserved(monkeypatch):
     Case 5: Duplicate machine rows.
     Duplicate MachID rows should remain separate detail records.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        shift_view,
         make_shift_mach_detail_df_with_duplicate_mach(),
     )
 

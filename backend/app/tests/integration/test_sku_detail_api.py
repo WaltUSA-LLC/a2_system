@@ -20,15 +20,13 @@ Test cases for /base/sku/detail API:
    - Verify calculated metrics and comments are returned as JSON-safe values.
 """
 
-
-from unittest.mock import Mock
-
 import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
 import app.services.sku_view as sku_view
 from app.main import app
+from app.tests.mocks.common_mocks import patch_extract_base_data
 from app.tests.mocks.handle_sku_mach_detail_mocks import (
     make_base_sku_mach_detail_df,
     make_empty_sku_mach_detail_df,
@@ -58,25 +56,14 @@ EXPECTED_COLUMNS = [
 ]
 
 
-def _patch_extract_base_data(monkeypatch, df):
-    extract_mock = Mock(
-        side_effect=lambda extractor_cls, start_time, end_time, shift=0: df.copy()
-    )
-    monkeypatch.setattr(
-        sku_view,
-        "extract_base_data",
-        extract_mock,
-    )
-    return extract_mock
-
-
 def test_sku_detail_api_output_columns(monkeypatch):
     """
     Case 1: Output schema.
     Verify the API returns SKU machine-detail records with expected fields.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        sku_view,
         make_base_sku_mach_detail_df(),
     )
 
@@ -103,8 +90,9 @@ def test_sku_detail_api_extract_base_data_arguments(monkeypatch):
     Verify that the API path passes request query parameters to
     extract_base_data through handle_sku_mach_detail.
     """
-    extract_mock = _patch_extract_base_data(
+    extract_mock = patch_extract_base_data(
         monkeypatch,
+        sku_view,
         make_base_sku_mach_detail_df(),
     )
 
@@ -133,8 +121,9 @@ def test_sku_detail_api_empty_df(monkeypatch):
     If extract_base_data returns an empty DataFrame, the API should return
     empty content.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        sku_view,
         make_empty_sku_mach_detail_df(),
     )
 
@@ -158,8 +147,9 @@ def test_sku_detail_api_filters_by_style_without_size(monkeypatch):
     Style filtering should use the first token of Style_Code after stripping
     and uppercasing, while final Style_Code keeps the full cleaned value.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        sku_view,
         make_base_sku_mach_detail_df(),
     )
 
@@ -186,8 +176,9 @@ def test_sku_detail_api_no_matching_style_returns_empty(monkeypatch):
     Case 5: No matching style.
     If no row matches style, the API should return empty content.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        sku_view,
         make_sku_mach_detail_df_without_matching_style(),
     )
 
@@ -219,8 +210,9 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
         1,
     ]
 
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        sku_view,
         df,
     )
 

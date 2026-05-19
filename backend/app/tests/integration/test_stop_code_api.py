@@ -13,13 +13,11 @@ Test cases for /base/stop/code API:
 4. Metric serialization
    - Verify count metrics and Timedelta values are serialized correctly.
 """
-
-from unittest.mock import Mock
-
 from fastapi.testclient import TestClient
 
 import app.services.stop_view as stop_view
 from app.main import app
+from app.tests.mocks.common_mocks import patch_extract_base_data
 from app.tests.mocks.handle_stop_view_by_code_mocks import (
     make_base_stop_view_by_code_df,
     make_empty_stop_view_by_code_df,
@@ -45,18 +43,6 @@ EXPECTED_DUR_SUM_CHART_COLUMNS = ["Stop_code", "Description", "dur_sum"]
 EXPECTED_DUR_MED_CHART_COLUMNS = ["Stop_code", "Description", "dur_med"]
 
 
-def _patch_extract_base_data(monkeypatch, df):
-    extract_mock = Mock(
-        side_effect=lambda extractor_cls, start_time, end_time, shift=0: df.copy()
-    )
-    monkeypatch.setattr(
-        stop_view,
-        "extract_base_data",
-        extract_mock,
-    )
-    return extract_mock
-
-
 def _get_stop_code(shift=0):
     return client.get(
         "/base/stop/code",
@@ -73,8 +59,9 @@ def test_stop_code_api_output_columns(monkeypatch):
     Case 1: Output schema.
     Verify the API returns table and chart payloads with expected fields.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        stop_view,
         make_base_stop_view_by_code_df(),
     )
 
@@ -103,8 +90,9 @@ def test_stop_code_api_extract_base_data_arguments(monkeypatch):
     Verify that the API path passes start and end to extract_base_data
     through handle_stop_view_by_code. Current behavior does not pass shift.
     """
-    extract_mock = _patch_extract_base_data(
+    extract_mock = patch_extract_base_data(
         monkeypatch,
+        stop_view,
         make_base_stop_view_by_code_df(),
     )
 
@@ -124,8 +112,9 @@ def test_stop_code_api_empty_df(monkeypatch):
     If extract_base_data returns an empty DataFrame, the API should return
     empty arrays for the table and all charts.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        stop_view,
         make_empty_stop_view_by_code_df(),
     )
 
@@ -147,8 +136,9 @@ def test_stop_code_api_metric_serialization(monkeypatch):
     Count metrics and Timedelta values should serialize correctly in table
     and chart payloads.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        stop_view,
         make_base_stop_view_by_code_df(),
     )
 

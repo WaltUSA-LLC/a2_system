@@ -17,14 +17,12 @@ Test cases for /base/sku API:
    - Verify multiple Style_Code and Shift_Start_Time groups produce records.
 """
 
-
-from unittest.mock import Mock
-
 import pytest
 from fastapi.testclient import TestClient
 
 import app.services.sku_view as sku_view
 from app.main import app
+from app.tests.mocks.common_mocks import patch_extract_base_data
 from app.tests.mocks.handle_sku_view_mocks import (
     make_base_sku_df,
     make_empty_sku_df,
@@ -53,25 +51,14 @@ EXPECTED_COLUMNS = [
 ]
 
 
-def _patch_extract_base_data(monkeypatch, df):
-    extract_mock = Mock(
-        side_effect=lambda extractor_cls, start_time, end_time, shift=0: df.copy()
-    )
-    monkeypatch.setattr(
-        sku_view,
-        "extract_base_data",
-        extract_mock,
-    )
-    return extract_mock
-
-
 def test_sku_api_output_columns(monkeypatch):
     """
     Case 1: Output schema.
     Verify the API returns SKU records with expected fields.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        sku_view,
         make_base_sku_df(),
     )
 
@@ -97,8 +84,9 @@ def test_sku_api_extract_base_data_arguments(monkeypatch):
     Verify that the API path passes request query parameters to
     extract_base_data through handle_sku_view.
     """
-    extract_mock = _patch_extract_base_data(
+    extract_mock = patch_extract_base_data(
         monkeypatch,
+        sku_view,
         make_base_sku_df(),
     )
 
@@ -126,8 +114,9 @@ def test_sku_api_empty_df(monkeypatch):
     If extract_base_data returns an empty DataFrame, the API should return
     empty content.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        sku_view,
         make_empty_sku_df(),
     )
 
@@ -150,8 +139,9 @@ def test_sku_api_single_sku_aggregation(monkeypatch):
     Rows with the same normalized Style_Code and Shift_Start_Time should be
     grouped and serialized through the API.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        sku_view,
         make_base_sku_df(),
     )
 
@@ -185,8 +175,9 @@ def test_sku_api_multiple_sku_multiple_shift_aggregation(monkeypatch):
     Multiple Style_Code and Shift_Start_Time groups should produce multiple
     API records.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        sku_view,
         make_multi_sku_multi_shift_df(),
     )
 

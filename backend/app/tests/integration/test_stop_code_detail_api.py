@@ -5,13 +5,11 @@ These tests keep handler business-rule coverage in the corresponding unit
 tests and focus on route wiring, extractor boundary, response shape, JSON
 serialization, and request validation.
 """
-
-from unittest.mock import Mock
-
 from fastapi.testclient import TestClient
 
 import app.services.stop_view as stop_view
 from app.main import app
+from app.tests.mocks.common_mocks import patch_extract_base_data
 from app.tests.mocks.handle_stop_code_detail_mocks import (
     make_base_stop_code_detail_df,
     make_empty_stop_code_detail_df,
@@ -30,18 +28,6 @@ EXPECTED_COLUMNS = [
     "dur_sum",
     "dur_med",
 ]
-
-
-def _patch_extract_base_data(monkeypatch, df):
-    extract_mock = Mock(
-        side_effect=lambda extractor_cls, start_time, end_time, shift=0: df.copy()
-    )
-    monkeypatch.setattr(
-        stop_view,
-        "extract_base_data",
-        extract_mock,
-    )
-    return extract_mock
 
 
 def _get_stop_code_detail(**overrides):
@@ -64,8 +50,9 @@ def test_stop_code_detail_api_output_columns(monkeypatch):
     Case 1: Output schema.
     Verify the API returns the expected top-level response and row fields.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        stop_view,
         make_base_stop_code_detail_df(),
     )
 
@@ -84,8 +71,9 @@ def test_stop_code_detail_api_extract_base_data_arguments(monkeypatch):
     Verify the API path passes start and end to extract_base_data through
     handle_stop_code_detail. Current behavior does not pass shift or stop_code.
     """
-    extract_mock = _patch_extract_base_data(
+    extract_mock = patch_extract_base_data(
         monkeypatch,
+        stop_view,
         make_base_stop_code_detail_df(),
     )
 
@@ -105,8 +93,9 @@ def test_stop_code_detail_api_empty_df(monkeypatch):
     If extract_base_data returns an empty DataFrame, the API should return
     empty content.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        stop_view,
         make_empty_stop_code_detail_df(),
     )
 
@@ -121,8 +110,9 @@ def test_stop_code_detail_api_metric_serialization(monkeypatch):
     Case 4: Representative transformation and serialization.
     Timedelta metrics should serialize as seconds while counts remain ints.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        stop_view,
         make_base_stop_code_detail_df(),
     )
 

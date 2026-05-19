@@ -17,14 +17,12 @@ Test cases for /base/shift API:
    - Verify multiple Shift_Start_Time groups produce multiple API records.
 """
 
-
-from unittest.mock import Mock
-
 import pytest
 from fastapi.testclient import TestClient
 
 import app.services.shift_view as shift_view
 from app.main import app
+from app.tests.mocks.common_mocks import patch_extract_base_data
 from app.tests.mocks.handle_shift_view_mocks import (
     make_base_shift_df,
     make_empty_shift_df,
@@ -48,24 +46,13 @@ EXPECTED_COLUMNS = [
 ]
 
 
-def _patch_extract_base_data(monkeypatch, df):
-    extract_mock = Mock(
-        side_effect=lambda extractor_cls, start_time, end_time, shift=0: df.copy()
-    )
-    monkeypatch.setattr(
-        shift_view,
-        "extract_base_data",
-        extract_mock,
-    )
-    return extract_mock
-
-
 def test_shift_api_output_columns(monkeypatch):
     """
     Test final API response schema.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        shift_view,
         make_base_shift_df(),
     )
 
@@ -90,8 +77,9 @@ def test_shift_api_extract_base_data_arguments(monkeypatch):
     Verify that the API path passes request query parameters to
     extract_base_data through handle_shift_view.
     """
-    extract_mock = _patch_extract_base_data(
+    extract_mock = patch_extract_base_data(
         monkeypatch,
+        shift_view,
         make_base_shift_df(),
     )
 
@@ -118,8 +106,9 @@ def test_shift_api_empty_df(monkeypatch):
     If extract_base_data returns an empty DataFrame, the API should return
     empty content.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        shift_view,
         make_empty_shift_df(),
     )
 
@@ -141,8 +130,9 @@ def test_shift_api_single_shift_aggregation(monkeypatch):
     Normal case:
     three machine rows are grouped into one shift group and serialized.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        shift_view,
         make_base_shift_df(),
     )
 
@@ -174,8 +164,9 @@ def test_shift_api_multiple_shift_aggregation(monkeypatch):
     """
     Multiple shift groups should produce multiple API records.
     """
-    _patch_extract_base_data(
+    patch_extract_base_data(
         monkeypatch,
+        shift_view,
         make_multi_shift_df(),
     )
 
