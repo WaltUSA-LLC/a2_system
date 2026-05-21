@@ -44,8 +44,8 @@ function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDow
             return;
         }
 
-        if (getDateDiffInDays(start, end) > 14) {
-            setDateRangeErrorMessage('The difference between start and end time must be within 14 days.');
+        if (getDateDiffInDays(start, end) > 31) {
+            setDateRangeErrorMessage('The difference between start and end time must be within 31 days.');
             setDateRangeErrorOpen(true);
             return;
         }

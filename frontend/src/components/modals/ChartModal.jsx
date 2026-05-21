@@ -24,6 +24,9 @@ import {
 } from '@mui/x-charts';
 
 function LineBarChart({ chartDataset }) {
+    if(chartDataset.length>14){
+        chartDataset = chartDataset.slice(0,14);
+    }
     return (
         <>
             {chartDataset.length > 0 ? (
