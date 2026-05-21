@@ -80,7 +80,7 @@ SELECT
 FROM dbNautilus.dbo.STOPS_MONITOR AS sm, dbNautilus.dbo.STOPS AS s 
 WHERE sm.LastDateRec > @Start
     AND sm.LastDateRec <=  @End
-    AND sm.StopCode = 0
+    AND (sm.StopCode = 0 OR sm.LastStopCode <> 0)
     AND sm.LastStopCode = s.StopCode 
 """
 

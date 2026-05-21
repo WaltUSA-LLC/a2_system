@@ -113,7 +113,7 @@ def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, s
     df["Recover_time"] = df["Recover_time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["Stop_time"] = df["Stop_time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["Description"] = df["Description"].str.strip()
-    df = df.sort_values(["Start_Shift_Time", "duration"], ascending=[True, False])
+    df = df.sort_values(["Start_Shift_Time", "Stop_time"], ascending=[True, True])
     df = df.reset_index(names="id")
     df = df.astype(object).where(pd.notnull(df), None)
     return df

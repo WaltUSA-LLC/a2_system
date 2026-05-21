@@ -333,8 +333,8 @@ def test_handle_stop_mach_detail_formats_timestamps_as_strings(monkeypatch):
 
     assert isinstance(row["Stop_time"], str)
     assert isinstance(row["Recover_time"], str)
-    assert row["Stop_time"] == "2026-05-01 09:00:00"
-    assert row["Recover_time"] == "2026-05-01 09:15:00"
+    assert row["Stop_time"] == "2026-05-01 08:00:00"
+    assert row["Recover_time"] == "2026-05-01 08:05:00"
 
 
 def test_handle_stop_mach_detail_calculates_duration(monkeypatch):
@@ -368,12 +368,12 @@ def test_handle_stop_mach_detail_sorting(monkeypatch):
     result = _call_handle_stop_mach_detail(mach=1, style="ABC")
 
     assert list(result["Description"]) == [
-        "Day Long",
         "Day Short",
+        "Day Long",
         "Night Long",
         "Night Short",
     ]
-    assert list(result["id"]) == [2, 0, 1, 3]
+    assert list(result["id"]) == [0, 2, 1, 3]
 
 
 def test_handle_stop_mach_detail_null_values_become_none(monkeypatch):
