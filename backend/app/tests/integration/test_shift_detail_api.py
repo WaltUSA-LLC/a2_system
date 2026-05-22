@@ -2,7 +2,8 @@
 Test cases for /base/shift/detail API:
 
 1. Output schema
-   - Verify the API returns machine-detail records with expected fields.
+   - Verify the API returns machine-detail and staff records with expected
+     fields.
 
 2. Extractor arguments
    - Verify extract_base_data receives MESExtractor, start as both start/end,
@@ -16,19 +17,39 @@ Test cases for /base/shift/detail API:
 
 5. Duplicate machine rows
    - Verify duplicate MachID rows are preserved as detail records.
+
+6. Night shift staff
+   - Verify shift 2 returns the 19:00 staff record.
+
+7. No matching staff
+   - Verify a valid shift with no matching staff row returns empty staff.
+
+8. Empty staff schedule
+   - Verify an empty staff schedule returns empty staff while preserving
+     machine-detail content.
 """
 
 import pytest
 from fastapi.testclient import TestClient
 
+import app.services.staff_info as staff_info
 import app.services.shift_view as shift_view
 from app.main import app
-from app.tests.mocks.common_mocks import patch_extract_base_data
+from app.tests.mocks.common_mocks import (
+    patch_extract_base_data,
+    patch_get_staff_schedule_table,
+)
 from app.tests.mocks.handle_shift_mach_detail_mocks import (
     make_base_shift_mach_detail_df,
     make_empty_shift_mach_detail_df,
     make_shift_mach_detail_df_for_metrics_and_comments,
     make_shift_mach_detail_df_with_duplicate_mach,
+)
+from app.tests.mocks.staff_schedule_mocks import (
+    STAFF_ROLE_COLUMNS,
+    make_base_staff_schedule_df,
+    make_empty_staff_schedule_df,
+    make_multi_staff_schedule_df,
 )
 from extractors import MESExtractor
 
@@ -55,12 +76,18 @@ EXPECTED_COLUMNS = [
 def test_shift_detail_api_output_columns(monkeypatch):
     """
     Case 1: Output schema.
-    Verify the API returns machine-detail records with expected fields.
+    Verify the API returns machine-detail and staff records with expected
+    fields.
     """
     patch_extract_base_data(
         monkeypatch,
         shift_view,
         make_base_shift_mach_detail_df(),
+    )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_multi_staff_schedule_df(),
     )
 
     response = client.get(
@@ -72,13 +99,18 @@ def test_shift_detail_api_output_columns(monkeypatch):
     )
 
     assert response.status_code == 200
-    content = response.json()["content"]
+    payload = response.json()
+    content = payload["content"]
+    staff = payload["staff"]
 
+    assert list(payload.keys()) == ["content", "staff"]
     assert len(content) == 3
     assert list(content[0].keys()) == EXPECTED_COLUMNS
+    assert len(staff) == 1
+    assert list(staff[0].keys()) == STAFF_ROLE_COLUMNS
 
 
-def test_shift_detail_api_extract_base_data_arguments(monkeypatch):
+def test_shift_detail_api_detail_and_staff_lookup_arguments(monkeypatch):
     """
     Case 2: Extractor arguments.
     Verify that the API path passes start as both start_time and end_time,
@@ -88,6 +120,11 @@ def test_shift_detail_api_extract_base_data_arguments(monkeypatch):
         monkeypatch,
         shift_view,
         make_base_shift_mach_detail_df(),
+    )
+    staff_mock = patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_base_staff_schedule_df(),
     )
 
     response = client.get(
@@ -105,6 +142,10 @@ def test_shift_detail_api_extract_base_data_arguments(monkeypatch):
         "2026-05-01",
         1,
     )
+    staff_mock.assert_called_once_with(
+        "2026-05-01",
+        "2026-05-01",
+    )
 
 
 def test_shift_detail_api_empty_df(monkeypatch):
@@ -118,6 +159,11 @@ def test_shift_detail_api_empty_df(monkeypatch):
         shift_view,
         make_empty_shift_mach_detail_df(),
     )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_base_staff_schedule_df(),
+    )
 
     response = client.get(
         "/base/shift/detail",
@@ -128,7 +174,17 @@ def test_shift_detail_api_empty_df(monkeypatch):
     )
 
     assert response.status_code == 200
-    assert response.json() == {"content": []}
+    payload = response.json()
+
+    assert payload["content"] == []
+    assert payload["staff"] == [
+        {
+            "Creeler": "Alice",
+            "KO": "Bob",
+            "Tech": "Charlie",
+            "Yarner": "Dana",
+        }
+    ]
 
 
 def test_shift_detail_api_metrics_and_comments(monkeypatch):
@@ -149,6 +205,11 @@ def test_shift_detail_api_metrics_and_comments(monkeypatch):
         monkeypatch,
         shift_view,
         df,
+    )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_base_staff_schedule_df(),
     )
 
     response = client.get(
@@ -191,6 +252,11 @@ def test_shift_detail_api_duplicate_mach_rows_preserved(monkeypatch):
         shift_view,
         make_shift_mach_detail_df_with_duplicate_mach(),
     )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_base_staff_schedule_df(),
+    )
 
     response = client.get(
         "/base/shift/detail",
@@ -211,3 +277,103 @@ def test_shift_detail_api_duplicate_mach_rows_preserved(monkeypatch):
 
     assert len(content) == 3
     assert len(m1_records) == 2
+
+
+def test_shift_detail_api_night_shift_staff(monkeypatch):
+    """
+    Case 6: Night shift staff.
+    Verify shift 2 returns the staff record scheduled at 19:00.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        shift_view,
+        make_base_shift_mach_detail_df(),
+    )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_multi_staff_schedule_df(),
+    )
+
+    response = client.get(
+        "/base/shift/detail",
+        params={
+            "start": "2026-05-01",
+            "shift": 2,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["staff"] == [
+        {
+            "Creeler": "Evan",
+            "KO": "Fatima",
+            "Tech": "Grace",
+            "Yarner": "Hugo",
+        }
+    ]
+
+
+def test_shift_detail_api_no_matching_staff_returns_empty_staff(
+    monkeypatch,
+):
+    """
+    Case 7: No matching staff.
+    If the schedule lookup has no row for the requested shift start time, the
+    API should return an empty staff list.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        shift_view,
+        make_base_shift_mach_detail_df(),
+    )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_base_staff_schedule_df(),
+    )
+
+    response = client.get(
+        "/base/shift/detail",
+        params={
+            "start": "2026-05-01",
+            "shift": 2,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["staff"] == []
+
+
+def test_shift_detail_api_empty_staff_schedule_returns_empty_staff(
+    monkeypatch,
+):
+    """
+    Case 8: Empty staff schedule.
+    If staff schedule lookup returns an empty DataFrame, the API should return
+    empty staff while preserving machine-detail content.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        shift_view,
+        make_base_shift_mach_detail_df(),
+    )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_empty_staff_schedule_df(),
+    )
+
+    response = client.get(
+        "/base/shift/detail",
+        params={
+            "start": "2026-05-01",
+            "shift": 1,
+        },
+    )
+
+    payload = response.json()
+
+    assert response.status_code == 200
+    assert len(payload["content"]) == 3
+    assert payload["staff"] == []

@@ -7,6 +7,7 @@ backend/app/services/__pycache__
 backend/app/tests/unit/__pycache__
 backend/app/tests/integration/__pycache__
 backend/app/tests/mocks/__pycache__
+backend/cores/__pycache__
 backend/extractors/__pycache__
 backend/ingestors/__pycache__
 backend/extractors/data_outputs/*

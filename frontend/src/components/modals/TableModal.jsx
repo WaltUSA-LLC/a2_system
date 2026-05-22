@@ -7,6 +7,7 @@ import DialogActions from '@mui/material/DialogActions';
 import { DataGrid } from '@mui/x-data-grid';
 
 import { formatSeconds, minuteFilterOperators, hourFilterOperators } from "../utils";
+import { Typography } from '@mui/material';
 
 export function MachStopTableModal({open, onClose, rec, metaData}){
     const columns = [
@@ -283,8 +284,24 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
             fullWidth
             maxWidth="lg"
         >
-            {metaData.style ? <DialogTitle>Style: {metaData.style}, Shift: {metaData.date_time}</DialogTitle> :
-                <DialogTitle>Shift: {metaData.date_time}</DialogTitle>}
+            {metaData.style ? 
+                <DialogTitle>
+                    <Typography variant='h6' component='div'>
+                        Style: {metaData.style}, Shift: {metaData.date_time}
+                    </Typography>
+                    <Typography variant='body1'>
+                        KO: {metaData.ko}, Tech: {metaData.tech}, Creeler: {metaData.creeler}, Yarner: {metaData.yarner}
+                    </Typography>
+                </DialogTitle> :
+                <DialogTitle>
+                    <Typography variant='h6' component='div'>
+                        Shift: {metaData.date_time}
+                    </Typography>
+                    <Typography variant='body1'>
+                        KO: {metaData.ko}, Tech: {metaData.tech}, Creeler: {metaData.creeler}, Yarner: {metaData.yarner}
+                    </Typography>
+                </DialogTitle>
+            }
             <DialogContent>
                 <Box sx={{ height: 700, width: '100%' }}>
                     <DataGrid
