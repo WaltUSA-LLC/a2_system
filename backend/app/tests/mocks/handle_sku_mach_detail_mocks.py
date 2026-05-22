@@ -6,7 +6,7 @@ def make_empty_sku_mach_detail_df() -> pd.DataFrame:
 
 
 def make_base_sku_mach_detail_df() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -25,7 +25,7 @@ def make_base_sku_mach_detail_df() -> pd.DataFrame:
 
 
 def make_sku_mach_detail_df_without_matching_style() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -44,7 +44,7 @@ def make_sku_mach_detail_df_without_matching_style() -> pd.DataFrame:
 
 
 def make_sku_mach_detail_df_for_metrics_and_comments() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -63,7 +63,7 @@ def make_sku_mach_detail_df_for_metrics_and_comments() -> pd.DataFrame:
 
 
 def make_unsorted_sku_mach_detail_df() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -82,7 +82,7 @@ def make_unsorted_sku_mach_detail_df() -> pd.DataFrame:
 
 
 def make_sku_mach_detail_df_with_invalid_style_code() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {

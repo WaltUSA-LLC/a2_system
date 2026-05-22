@@ -156,7 +156,7 @@ def test_sku_api_single_sku_aggregation(monkeypatch):
     row = content[0]
     assert row["id"] == 0
     assert row["Style_Code"] == "ABC"
-    assert row["Shift_Start_Time"] == "2026-05-01 08:00:00"
+    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
     assert row["Mach_cnt"] == 2
     assert row["NAU_prs"] == 8
     assert row["MES_prs"] == 7
@@ -195,9 +195,9 @@ def test_sku_api_multiple_sku_multiple_shift_aggregation(monkeypatch):
         for record in content
     }
 
-    abc_shift_1 = result_by_style_shift[("ABC", "2026-05-01 08:00:00")]
-    xyz_shift_1 = result_by_style_shift[("XYZ", "2026-05-01 08:00:00")]
-    abc_shift_2 = result_by_style_shift[("ABC", "2026-05-01 20:00:00")]
+    abc_shift_1 = result_by_style_shift[("ABC", "2026-05-01 07:00:00")]
+    xyz_shift_1 = result_by_style_shift[("XYZ", "2026-05-01 07:00:00")]
+    abc_shift_2 = result_by_style_shift[("ABC", "2026-05-01 19:00:00")]
 
     assert abc_shift_1["Mach_cnt"] == 2
     assert abc_shift_1["NAU_prs"] == 6

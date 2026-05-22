@@ -25,7 +25,7 @@ def make_base_staff_schedule_df() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "ShiftStartTime": [
-                pd.Timestamp("2026-05-01 08:00:00"),
+                pd.Timestamp("2026-05-01 07:00:00"),
             ],
             "Creeler": [
                 "Alice",
@@ -47,8 +47,8 @@ def make_multi_staff_schedule_df() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "ShiftStartTime": [
-                pd.Timestamp("2026-05-01 08:00:00"),
-                pd.Timestamp("2026-05-01 20:00:00"),
+                pd.Timestamp("2026-05-01 07:00:00"),
+                pd.Timestamp("2026-05-01 19:00:00"),
             ],
             "Creeler": [
                 "Alice",
@@ -74,7 +74,7 @@ def make_unmatched_staff_schedule_df() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "ShiftStartTime": [
-                pd.Timestamp("2026-05-02 08:00:00"),
+                pd.Timestamp("2026-05-02 07:00:00"),
             ],
             "Creeler": [
                 "Iris",

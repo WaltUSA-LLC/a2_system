@@ -244,7 +244,7 @@ def test_handle_shift_view_shift_start_time_is_string(monkeypatch):
     row = result.iloc[0]
 
     assert isinstance(row["Shift_Start_Time"], str)
-    assert row["Shift_Start_Time"] == "2026-05-01 08:00:00"
+    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
 
 
 def test_handle_shift_view_single_shift_aggregation(monkeypatch):
@@ -279,7 +279,7 @@ def test_handle_shift_view_single_shift_aggregation(monkeypatch):
     assert len(result) == 1
     row = result.iloc[0]
     assert row["id"] == 0
-    assert row["Shift_Start_Time"] == "2026-05-01 08:00:00"
+    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
     assert row["Mach_cnt"] == 2
     assert row["NAU_prs"] == 8
     assert row["MES_prs"] == 11
@@ -324,8 +324,8 @@ def test_handle_shift_view_multiple_shift_aggregation(monkeypatch):
 
     result_by_shift = result.set_index("Shift_Start_Time")
 
-    shift_1 = result_by_shift.loc["2026-05-01 08:00:00", :]
-    shift_2 = result_by_shift.loc["2026-05-01 20:00:00", :]
+    shift_1 = result_by_shift.loc["2026-05-01 07:00:00", :]
+    shift_2 = result_by_shift.loc["2026-05-01 19:00:00", :]
 
     assert shift_1["Mach_cnt"] == 2
     assert shift_1["NAU_prs"] == 6
@@ -616,7 +616,7 @@ def test_handle_shift_view_staff_schedule_left_join_preserves_unmatched_shift(
     assert len(result) == 1
 
     row = result.iloc[0]
-    assert row["Shift_Start_Time"] == "2026-05-01 08:00:00"
+    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
     assert row["Creeler"] is None
     assert row["KO"] is None
     assert row["Tech"] is None
@@ -660,7 +660,7 @@ def test_handle_shift_view_empty_staff_schedule_preserves_shift_with_null_roles(
     )
 
     row = result.iloc[0]
-    assert row["Shift_Start_Time"] == "2026-05-01 08:00:00"
+    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
     assert row["Mach_cnt"] == 2
     assert row["Creeler"] is None
     assert row["KO"] is None

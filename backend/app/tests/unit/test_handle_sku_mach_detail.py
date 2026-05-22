@@ -202,7 +202,7 @@ def test_handle_sku_mach_detail_shift_start_time_is_string(monkeypatch):
     row = result.iloc[0]
 
     assert isinstance(row["Shift_Start_Time"], str)
-    assert row["Shift_Start_Time"] == "2026-05-01 08:00:00"
+    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
 
 
 def test_handle_sku_mach_detail_filters_by_style_without_size(monkeypatch):

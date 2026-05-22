@@ -96,10 +96,10 @@ def test_distribute_weight_same_mach_different_shifts_are_independent():
     assert result["Weight"].tolist() == pytest.approx([25, 75, 120, 180])
 
     result_by_shift = result.groupby("Shift_Start_Time")["Weight"].sum()
-    assert result_by_shift.loc[pd.Timestamp("2026-05-01 08:00:00")] == (
+    assert result_by_shift.loc[pd.Timestamp("2026-05-01 07:00:00")] == (
         pytest.approx(100)
     )
-    assert result_by_shift.loc[pd.Timestamp("2026-05-01 20:00:00")] == (
+    assert result_by_shift.loc[pd.Timestamp("2026-05-01 19:00:00")] == (
         pytest.approx(300)
     )
 

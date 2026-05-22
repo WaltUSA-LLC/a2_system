@@ -192,7 +192,7 @@ def test_shift_api_single_shift_aggregation(monkeypatch):
     assert len(content) == 1
     row = content[0]
     assert row["id"] == 0
-    assert row["Shift_Start_Time"] == "2026-05-01 08:00:00"
+    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
     assert row["Mach_cnt"] == 2
     assert row["NAU_prs"] == 8
     assert row["MES_prs"] == 7
@@ -239,8 +239,8 @@ def test_shift_api_multiple_shift_aggregation(monkeypatch):
         for record in content
     }
 
-    shift_1 = result_by_shift["2026-05-01 08:00:00"]
-    shift_2 = result_by_shift["2026-05-01 20:00:00"]
+    shift_1 = result_by_shift["2026-05-01 07:00:00"]
+    shift_2 = result_by_shift["2026-05-01 19:00:00"]
 
     assert shift_1["Mach_cnt"] == 2
     assert shift_1["NAU_prs"] == 6

@@ -2,7 +2,7 @@ import pandas as pd
 
 
 def make_single_row_same_mach_df() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -21,7 +21,7 @@ def make_single_row_same_mach_df() -> pd.DataFrame:
 
 
 def make_same_mach_same_shift_df() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -40,7 +40,7 @@ def make_same_mach_same_shift_df() -> pd.DataFrame:
 
 
 def make_different_mach_same_shift_df() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -64,8 +64,8 @@ def make_different_mach_same_shift_df() -> pd.DataFrame:
 
 
 def make_same_mach_different_shift_df() -> pd.DataFrame:
-    shift_1 = pd.Timestamp("2026-05-01 08:00:00")
-    shift_2 = pd.Timestamp("2026-05-01 20:00:00")
+    shift_1 = pd.Timestamp("2026-05-01 07:00:00")
+    shift_2 = pd.Timestamp("2026-05-01 19:00:00")
 
     return pd.DataFrame(
         {
@@ -84,7 +84,7 @@ def make_same_mach_different_shift_df() -> pd.DataFrame:
 
 
 def make_zero_on_time_same_mach_df() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -103,7 +103,7 @@ def make_zero_on_time_same_mach_df() -> pd.DataFrame:
 
 
 def make_mixed_zero_and_nonzero_on_time_df() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -122,7 +122,7 @@ def make_mixed_zero_and_nonzero_on_time_df() -> pd.DataFrame:
 
 
 def make_same_mach_df_with_extra_columns() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -142,7 +142,7 @@ def make_same_mach_df_with_extra_columns() -> pd.DataFrame:
 
 
 def make_same_mach_df_with_unexpected_different_weights() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {

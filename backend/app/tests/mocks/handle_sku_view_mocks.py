@@ -6,7 +6,7 @@ def make_empty_sku_df() -> pd.DataFrame:
 
 
 def make_base_sku_df() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -25,8 +25,8 @@ def make_base_sku_df() -> pd.DataFrame:
 
 
 def make_multi_sku_multi_shift_df() -> pd.DataFrame:
-    shift_1 = pd.Timestamp("2026-05-01 08:00:00")
-    shift_2 = pd.Timestamp("2026-05-01 20:00:00")
+    shift_1 = pd.Timestamp("2026-05-01 07:00:00")
+    shift_2 = pd.Timestamp("2026-05-01 19:00:00")
 
     return pd.DataFrame(
         {
@@ -45,7 +45,7 @@ def make_multi_sku_multi_shift_df() -> pd.DataFrame:
 
 
 def make_sku_df_with_nan_st_prs() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -65,7 +65,7 @@ def make_sku_df_with_nan_st_prs() -> pd.DataFrame:
 
 
 def make_sku_df_with_zero_st_prs() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -84,7 +84,7 @@ def make_sku_df_with_zero_st_prs() -> pd.DataFrame:
 
 
 def make_sku_df_with_invalid_style_code() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {

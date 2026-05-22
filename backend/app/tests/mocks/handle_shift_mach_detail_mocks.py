@@ -7,7 +7,7 @@ def make_empty_shift_mach_detail_df() -> pd.DataFrame:
 
 
 def make_base_shift_mach_detail_df() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -26,7 +26,7 @@ def make_base_shift_mach_detail_df() -> pd.DataFrame:
 
 
 def make_shift_mach_detail_df_for_metrics_and_comments() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -45,7 +45,7 @@ def make_shift_mach_detail_df_for_metrics_and_comments() -> pd.DataFrame:
 
 
 def make_shift_mach_detail_df_for_filter_shutdown() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -65,7 +65,7 @@ def make_shift_mach_detail_df_for_filter_shutdown() -> pd.DataFrame:
 
 
 def make_shift_mach_detail_df_that_filters_to_empty() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -85,7 +85,7 @@ def make_shift_mach_detail_df_that_filters_to_empty() -> pd.DataFrame:
 
 
 def make_shift_mach_detail_df_with_duplicate_mach() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -104,7 +104,7 @@ def make_shift_mach_detail_df_with_duplicate_mach() -> pd.DataFrame:
 
 
 def make_unsorted_shift_mach_detail_df() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -123,7 +123,7 @@ def make_unsorted_shift_mach_detail_df() -> pd.DataFrame:
 
 
 def make_shift_mach_detail_df_with_zero_time() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {
@@ -142,7 +142,7 @@ def make_shift_mach_detail_df_with_zero_time() -> pd.DataFrame:
 
 
 def make_shift_mach_detail_df_with_nan_st_prs() -> pd.DataFrame:
-    shift_time = pd.Timestamp("2026-05-01 08:00:00")
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
 
     return pd.DataFrame(
         {

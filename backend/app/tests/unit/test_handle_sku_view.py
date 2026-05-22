@@ -157,7 +157,7 @@ def test_handle_sku_view_shift_start_time_is_string(monkeypatch):
     row = result.iloc[0]
 
     assert isinstance(row["Shift_Start_Time"], str)
-    assert row["Shift_Start_Time"] == "2026-05-01 08:00:00"
+    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
 
 
 def test_handle_sku_view_normal_grouping(monkeypatch):
@@ -188,7 +188,7 @@ def test_handle_sku_view_normal_grouping(monkeypatch):
     row = result.iloc[0]
     assert row["id"] == 0
     assert row["Style_Code"] == "ABC"
-    assert row["Shift_Start_Time"] == "2026-05-01 08:00:00"
+    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
     assert row["Mach_cnt"] == 2
     assert row["NAU_prs"] == 8
     assert row["MES_prs"] == 11
@@ -223,9 +223,9 @@ def test_handle_sku_view_multiple_sku_multiple_shift(monkeypatch):
 
     result_by_style_shift = result.set_index(["Style_Code", "Shift_Start_Time"])
 
-    abc_shift_1 = result_by_style_shift.loc[("ABC", "2026-05-01 08:00:00"), :]
-    xyz_shift_1 = result_by_style_shift.loc[("XYZ", "2026-05-01 08:00:00"), :]
-    abc_shift_2 = result_by_style_shift.loc[("ABC", "2026-05-01 20:00:00"), :]
+    abc_shift_1 = result_by_style_shift.loc[("ABC", "2026-05-01 07:00:00"), :]
+    xyz_shift_1 = result_by_style_shift.loc[("XYZ", "2026-05-01 07:00:00"), :]
+    abc_shift_2 = result_by_style_shift.loc[("ABC", "2026-05-01 19:00:00"), :]
 
     assert abc_shift_1["Mach_cnt"] == 2
     assert abc_shift_1["NAU_prs"] == 6
