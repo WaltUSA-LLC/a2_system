@@ -1,7 +1,24 @@
 import numpy as np
 import pandas as pd
-from app.services.utils import get_staff_schedule_table
+from app.services.utils import extract_base_data
+from extractors import StaffScheduleExtractor
 from cores.constants import DAY_SHIFT, NIGHT_SHIFT, DAY_SHIFT_START, NIGHT_SHIFT_START
+
+
+def get_staff_schedule_table(start_time: str, end_time: str):
+    df = extract_base_data(StaffScheduleExtractor, start_time, end_time)
+    # make sure ShiftStartTime is datetime
+    df["ShiftStartTime"] = pd.to_datetime(df["ShiftStartTime"])
+
+    pivot_df = df.pivot_table(
+            index="ShiftStartTime",
+            columns="RoleName",
+            values="FirstName",
+            aggfunc=lambda x: ", ".join(x.dropna().astype(str))
+    ).reset_index()
+
+    return pivot_df
+
 
 def fetch_staff_info_by_date_and_shift(date:str, shift:str)->pd.DataFrame:
     df_staff = get_staff_schedule_table(date, date)

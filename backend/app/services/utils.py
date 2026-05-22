@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 from extractors import AppConfig
-from extractors import BaseExtractor, StaffScheduleExtractor
+from extractors import BaseExtractor
 from extractors.utils import parse_start_date
 
 # def validate_throughput(rec:pd.Series) -> pd.Series:
@@ -68,21 +68,6 @@ def distributeWeightForSameMach(df: pd.DataFrame) -> pd.DataFrame:
     )
     #print(cleaned_df[cleaned_df["MachID"]==100])
     return cleaned_df
-
-
-def get_staff_schedule_table(start_time: str, end_time: str):
-    df = extract_base_data(StaffScheduleExtractor, start_time, end_time)
-    # make sure ShiftStartTime is datetime
-    df["ShiftStartTime"] = pd.to_datetime(df["ShiftStartTime"])
-
-    pivot_df = df.pivot_table(
-            index="ShiftStartTime",
-            columns="RoleName",
-            values="FirstName",
-            aggfunc=lambda x: ", ".join(x.dropna().astype(str))
-    ).reset_index()
-
-    return pivot_df
 
 
 def extract_base_data(extractor_cls: type[BaseExtractor], start_time:str, end_time:str, shift:int=0)->pd.DataFrame:
