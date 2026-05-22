@@ -95,7 +95,15 @@ function SKUView() {
         axios.get(`${API_BASE_URL}/base/sku/detail?start=${date}&end=${date}&shift=${shift}&style=${params.row.Style_Code}`).then(
             resp => {
                 const records = resp.data.content ?? [];
+                const staff = resp.data.staff ?? [];
                 setModalRec(records);
+                setMetaData({date_time: params.row.Shift_Start_Time, 
+                    style:params.row.Style_Code,
+                    ko: staff[0].KO ? staff[0].KO : "None", 
+                    tech: staff[0].Tech ? staff[0].Tech : "None", 
+                    creeler: staff[0].Creeler ? staff[0].Creeler : "None", 
+                    yarner: staff[0].Yarner ? staff[0].Yarner : "None"
+                })
             }
         ).catch((err) => {
             console.error(err);
@@ -104,7 +112,6 @@ function SKUView() {
             return;
         });
         setTableOpen(true);
-        setMetaData({date_time: params.row.Shift_Start_Time, style:params.row.Style_Code})
     }
 
     function loadData(start, end, shift) {

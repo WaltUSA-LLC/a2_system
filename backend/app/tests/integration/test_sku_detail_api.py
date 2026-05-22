@@ -2,10 +2,12 @@
 Test cases for /base/sku/detail API:
 
 1. Output schema
-   - Verify the API returns SKU machine-detail records with expected fields.
+   - Verify the API returns SKU machine-detail and staff records with
+     expected fields.
 
-2. Extractor arguments
-   - Verify extract_base_data receives MESExtractor, start, end, and shift.
+2. Detail and staff lookup arguments
+   - Verify extract_base_data receives MESExtractor, start, end, and shift,
+     and staff lookup receives start as both start/end.
 
 3. Empty extractor result
    - Verify an empty extracted DataFrame returns empty API content.
@@ -18,20 +20,39 @@ Test cases for /base/sku/detail API:
 
 6. Metric and comment serialization
    - Verify calculated metrics and comments are returned as JSON-safe values.
+
+7. Night shift staff
+   - Verify shift 2 returns the 19:00 staff record.
+
+8. No matching staff
+   - Verify a valid shift with no matching staff row returns empty staff.
+
+9. Empty staff schedule
+   - Verify an empty staff schedule returns empty staff while preserving
+     SKU machine-detail content.
 """
 
-import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
+import app.services.staff_info as staff_info
 import app.services.sku_view as sku_view
 from app.main import app
-from app.tests.mocks.common_mocks import patch_extract_base_data
+from app.tests.mocks.common_mocks import (
+    patch_extract_base_data,
+    patch_get_staff_schedule_table,
+)
 from app.tests.mocks.handle_sku_mach_detail_mocks import (
     make_base_sku_mach_detail_df,
     make_empty_sku_mach_detail_df,
     make_sku_mach_detail_df_for_metrics_and_comments,
     make_sku_mach_detail_df_without_matching_style,
+)
+from app.tests.mocks.staff_schedule_mocks import (
+    STAFF_ROLE_COLUMNS,
+    make_base_staff_schedule_df,
+    make_empty_staff_schedule_df,
+    make_multi_staff_schedule_df,
 )
 from extractors import MESExtractor
 
@@ -57,12 +78,18 @@ EXPECTED_COLUMNS = [
 def test_sku_detail_api_output_columns(monkeypatch):
     """
     Case 1: Output schema.
-    Verify the API returns SKU machine-detail records with expected fields.
+    Verify the API returns SKU machine-detail and staff records with expected
+    fields.
     """
     patch_extract_base_data(
         monkeypatch,
         sku_view,
         make_base_sku_mach_detail_df(),
+    )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_multi_staff_schedule_df(),
     )
 
     response = client.get(
@@ -76,22 +103,33 @@ def test_sku_detail_api_output_columns(monkeypatch):
     )
 
     assert response.status_code == 200
-    content = response.json()["content"]
+    payload = response.json()
+    content = payload["content"]
+    staff = payload["staff"]
 
+    assert list(payload.keys()) == ["content", "staff"]
     assert len(content) == 2
     assert list(content[0].keys()) == EXPECTED_COLUMNS
+    assert len(staff) == 1
+    assert list(staff[0].keys()) == STAFF_ROLE_COLUMNS
 
 
-def test_sku_detail_api_extract_base_data_arguments(monkeypatch):
+def test_sku_detail_api_detail_and_staff_lookup_arguments(monkeypatch):
     """
-    Case 2: Extractor arguments.
+    Case 2: Detail and staff lookup arguments.
     Verify that the API path passes request query parameters to
-    extract_base_data through handle_sku_mach_detail.
+    extract_base_data through handle_sku_mach_detail, and passes start as both
+    start and end date to the staff schedule lookup.
     """
     extract_mock = patch_extract_base_data(
         monkeypatch,
         sku_view,
         make_base_sku_mach_detail_df(),
+    )
+    staff_mock = patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_base_staff_schedule_df(),
     )
 
     response = client.get(
@@ -111,6 +149,10 @@ def test_sku_detail_api_extract_base_data_arguments(monkeypatch):
         "2026-05-02",
         1,
     )
+    staff_mock.assert_called_once_with(
+        "2026-05-01",
+        "2026-05-01",
+    )
 
 
 def test_sku_detail_api_empty_df(monkeypatch):
@@ -124,6 +166,11 @@ def test_sku_detail_api_empty_df(monkeypatch):
         sku_view,
         make_empty_sku_mach_detail_df(),
     )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_base_staff_schedule_df(),
+    )
 
     response = client.get(
         "/base/sku/detail",
@@ -136,7 +183,17 @@ def test_sku_detail_api_empty_df(monkeypatch):
     )
 
     assert response.status_code == 200
-    assert response.json() == {"content": []}
+    payload = response.json()
+
+    assert payload["content"] == []
+    assert payload["staff"] == [
+        {
+            "Creeler": "Alice",
+            "KO": "Bob",
+            "Tech": "Charlie",
+            "Yarner": "Dana",
+        }
+    ]
 
 
 def test_sku_detail_api_filters_by_style_without_size(monkeypatch):
@@ -149,6 +206,11 @@ def test_sku_detail_api_filters_by_style_without_size(monkeypatch):
         monkeypatch,
         sku_view,
         make_base_sku_mach_detail_df(),
+    )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_base_staff_schedule_df(),
     )
 
     response = client.get(
@@ -179,6 +241,11 @@ def test_sku_detail_api_no_matching_style_returns_empty(monkeypatch):
         sku_view,
         make_sku_mach_detail_df_without_matching_style(),
     )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_base_staff_schedule_df(),
+    )
 
     response = client.get(
         "/base/sku/detail",
@@ -191,7 +258,17 @@ def test_sku_detail_api_no_matching_style_returns_empty(monkeypatch):
     )
 
     assert response.status_code == 200
-    assert response.json() == {"content": []}
+    payload = response.json()
+
+    assert payload["content"] == []
+    assert payload["staff"] == [
+        {
+            "Creeler": "Alice",
+            "KO": "Bob",
+            "Tech": "Charlie",
+            "Yarner": "Dana",
+        }
+    ]
 
 
 def test_sku_detail_api_metrics_and_comments(monkeypatch):
@@ -212,6 +289,11 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
         monkeypatch,
         sku_view,
         df,
+    )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_base_staff_schedule_df(),
     )
 
     response = client.get(
@@ -250,3 +332,109 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
     assert rounded_low["ON_Time_Occupation"] == pytest.approx(0.667)
     assert rounded_low["Mach_Efficiency"] == pytest.approx(0.333)
     assert rounded_low["Comment"] == "Low Ef"
+
+
+def test_sku_detail_api_night_shift_staff(monkeypatch):
+    """
+    Case 7: Night shift staff.
+    Verify shift 2 returns the staff record scheduled at 19:00.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        sku_view,
+        make_base_sku_mach_detail_df(),
+    )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_multi_staff_schedule_df(),
+    )
+
+    response = client.get(
+        "/base/sku/detail",
+        params={
+            "start": "2026-05-01",
+            "end": "2026-05-02",
+            "shift": 2,
+            "style": "ABC",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["staff"] == [
+        {
+            "Creeler": "Evan",
+            "KO": "Fatima",
+            "Tech": "Grace",
+            "Yarner": "Hugo",
+        }
+    ]
+
+
+def test_sku_detail_api_no_matching_staff_returns_empty_staff(
+    monkeypatch,
+):
+    """
+    Case 8: No matching staff.
+    If the schedule lookup has no row for the requested shift start time, the
+    API should return an empty staff list.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        sku_view,
+        make_base_sku_mach_detail_df(),
+    )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_base_staff_schedule_df(),
+    )
+
+    response = client.get(
+        "/base/sku/detail",
+        params={
+            "start": "2026-05-01",
+            "end": "2026-05-02",
+            "shift": 2,
+            "style": "ABC",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["staff"] == []
+
+
+def test_sku_detail_api_empty_staff_schedule_returns_empty_staff(
+    monkeypatch,
+):
+    """
+    Case 9: Empty staff schedule.
+    If staff schedule lookup returns an empty DataFrame, the API should return
+    empty staff while preserving SKU machine-detail content.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        sku_view,
+        make_base_sku_mach_detail_df(),
+    )
+    patch_get_staff_schedule_table(
+        monkeypatch,
+        staff_info,
+        make_empty_staff_schedule_df(),
+    )
+
+    response = client.get(
+        "/base/sku/detail",
+        params={
+            "start": "2026-05-01",
+            "end": "2026-05-02",
+            "shift": 1,
+            "style": "ABC",
+        },
+    )
+
+    payload = response.json()
+
+    assert response.status_code == 200
+    assert len(payload["content"]) == 2
+    assert payload["staff"] == []

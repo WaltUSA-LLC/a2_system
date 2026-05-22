@@ -28,7 +28,6 @@ def get_shift_detail(start:str, shift: int):
     return {"content": df.to_dict(orient="records"),
             "staff": df_staff.to_dict(orient="records")}
 
-
 @router.get("/sku")
 def get_sku(start:str, end:str, shift: int):
     df = handle_sku_view(start, end, shift)
@@ -37,7 +36,9 @@ def get_sku(start:str, end:str, shift: int):
 @router.get("/sku/detail")
 def get_sku_detail(start:str, end:str, shift: int, style:str):
     df = handle_sku_mach_detail(start, end, shift, style)
-    return {"content": df.to_dict(orient="records")}
+    df_staff = fetch_staff_info_by_date_and_shift(start, shift)
+    return {"content": df.to_dict(orient="records"),
+            "staff": df_staff.to_dict(orient="records")}
 
 @router.get("/stop/code")
 def get_stop_by_code(start:str, end:str, shift: int):
