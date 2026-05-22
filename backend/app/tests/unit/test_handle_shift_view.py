@@ -10,43 +10,35 @@ Test cases for handle_shift_view:
 3. Empty extractor result
    - Verify an empty extracted DataFrame returns an empty result immediately.
 
-4. Shift_Start_Time formatting
-   - Verify Shift_Start_Time is converted from pandas Timestamp to string.
-
-5. Single-shift aggregation
+4. Single-shift aggregation
    - Verify machine count, throughput totals, efficiency, and time occupation.
 
-6. Multiple-shift aggregation
+5. Multiple-shift aggregation
    - Verify multiple Shift_Start_Time groups produce multiple output rows.
 
-7. Duplicate machine count
+6. Duplicate machine count
    - Verify repeated MachID values are counted once in Mach_cnt.
 
-8. Shutdown machine filtering
+7. Shutdown machine filtering
    - Verify filterShutdownMach affects totals and estimator call counts.
 
-9. Infinite efficiency handling
+8. Infinite efficiency handling
    - Verify infinite eff is replaced with None.
 
-10. NaN value handling
+9. NaN value handling
     - Verify NaN Time_Occupation is replaced with None.
 
-11. Filtered-empty result
+10. Filtered-empty result
     - Verify filtering all rows should return an empty result.
 
-12. Current NaN ST_prs behavior
+11. Current NaN ST_prs behavior
     - Verify pandas groupby sum skips NaN ST_prs values in current code.
-
-13. Unmatched staff schedule
-    - Verify shifts without matching staff rows are preserved with null roles.
-
-14. Empty staff schedule
-    - Verify empty staff schedule preserves shift rows with null roles.
 """
 
 
 from unittest.mock import Mock
 
+import pandas as pd
 import pytest
 
 import app.services.shift_view as shift_view
@@ -55,7 +47,7 @@ from app.tests.mocks.common_mocks import (
     make_call_counting_mocks,
     patch_common_dependencies,
     patch_extract_base_data,
-    patch_get_staff_schedule_table,
+    patch_merge_staff_info_to_view,
 )
 
 from app.tests.mocks.handle_shift_view_mocks import (
@@ -70,14 +62,6 @@ from app.tests.mocks.handle_shift_view_mocks import (
     make_shift_df_with_zero_time,
 )
 
-from app.tests.mocks.staff_schedule_mocks import (
-    make_base_staff_schedule_df,
-    make_empty_staff_schedule_df,
-    make_multi_staff_schedule_df,
-    make_unmatched_staff_schedule_df,
-)
-
-
 EXPECTED_COLUMNS = [
     "id",
     "Shift_Start_Time",
@@ -87,16 +71,19 @@ EXPECTED_COLUMNS = [
     "ST_prs",
     "eff",
     "Time_Occupation",
-    "Creeler",
-    "KO",
-    "Tech",
-    "Yarner",
 ]
 
 
 def _filter_marked_shutdown_mach(df):
     filtered_df = df[~df["Should_Filter"]].copy()
     return filtered_df.drop(columns=["Should_Filter"])
+
+
+def _assert_merge_staff_info_called_once(mock, start_time, end_time):
+    mock.assert_called_once()
+    _, actual_start_time, actual_end_time = mock.call_args.args
+    assert actual_start_time == start_time
+    assert actual_end_time == end_time
 
 
 def test_handle_shift_view_output_columns(monkeypatch):
@@ -115,10 +102,9 @@ def test_handle_shift_view_output_columns(monkeypatch):
         shift_view,
         mocks,
     )
-    patch_get_staff_schedule_table(
+    patch_merge_staff_info_to_view(
         monkeypatch,
         shift_view,
-        make_base_staff_schedule_df(),
     )
 
     result = shift_view.handle_shift_view(
@@ -149,10 +135,9 @@ def test_handle_shift_view_calls_invoked_functions(monkeypatch):
         shift_view,
         mocks,
     )
-    staff_schedule_mock = patch_get_staff_schedule_table(
+    staff_merge_mock = patch_merge_staff_info_to_view(
         monkeypatch,
         shift_view,
-        make_base_staff_schedule_df(),
     )
 
     result = shift_view.handle_shift_view(
@@ -167,7 +152,8 @@ def test_handle_shift_view_calls_invoked_functions(monkeypatch):
     mocks["filterShutdownMach"].assert_called_once()
     assert mocks["estimate_mes_output_prs"].call_count == len(raw_df)
     assert mocks["estimate_st_output_prs"].call_count == len(raw_df)
-    staff_schedule_mock.assert_called_once_with(
+    _assert_merge_staff_info_called_once(
+        staff_merge_mock,
         "2026-05-01",
         "2026-05-02",
     )
@@ -190,10 +176,9 @@ def test_handle_shift_view_empty_df(monkeypatch):
         shift_view,
         mocks,
     )
-    staff_schedule_mock = patch_get_staff_schedule_table(
+    staff_merge_mock = patch_merge_staff_info_to_view(
         monkeypatch,
         shift_view,
-        make_base_staff_schedule_df(),
     )
 
     result = shift_view.handle_shift_view(
@@ -210,41 +195,7 @@ def test_handle_shift_view_empty_df(monkeypatch):
     mocks["filterShutdownMach"].assert_not_called()
     mocks["estimate_mes_output_prs"].assert_not_called()
     mocks["estimate_st_output_prs"].assert_not_called()
-    staff_schedule_mock.assert_not_called()
-
-
-def test_handle_shift_view_shift_start_time_is_string(monkeypatch):
-    """
-    Shift_Start_Time should be converted from Timestamp to string.
-    """
-    patch_extract_base_data(
-        monkeypatch,
-        shift_view,
-        make_base_shift_df(),
-    )
-
-    mocks = make_call_counting_mocks()
-    patch_common_dependencies(
-        monkeypatch,
-        shift_view,
-        mocks,
-    )
-    patch_get_staff_schedule_table(
-        monkeypatch,
-        shift_view,
-        make_base_staff_schedule_df(),
-    )
-
-    result = shift_view.handle_shift_view(
-        start_time="2026-05-01 00:00:00",
-        end_time="2026-05-02 00:00:00",
-        shift=1,
-    )
-
-    row = result.iloc[0]
-
-    assert isinstance(row["Shift_Start_Time"], str)
-    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
+    staff_merge_mock.assert_not_called()
 
 
 def test_handle_shift_view_single_shift_aggregation(monkeypatch):
@@ -264,11 +215,7 @@ def test_handle_shift_view_single_shift_aggregation(monkeypatch):
         shift_view,
         mocks,
     )
-    patch_get_staff_schedule_table(
-        monkeypatch,
-        shift_view,
-        make_base_staff_schedule_df(),
-    )
+    patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
         start_time="2026-05-01 00:00:00",
@@ -279,17 +226,13 @@ def test_handle_shift_view_single_shift_aggregation(monkeypatch):
     assert len(result) == 1
     row = result.iloc[0]
     assert row["id"] == 0
-    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
+    assert row["Shift_Start_Time"] == pd.Timestamp("2026-05-01 07:00:00")
     assert row["Mach_cnt"] == 2
     assert row["NAU_prs"] == 8
     assert row["MES_prs"] == 11
     assert row["ST_prs"] == 30
     assert row["eff"] == pytest.approx(0.367)
     assert row["Time_Occupation"] == pytest.approx(170/200)
-    assert row["Creeler"] == "Alice"
-    assert row["KO"] == "Bob"
-    assert row["Tech"] == "Charlie"
-    assert row["Yarner"] == "Dana"
 
 
 def test_handle_shift_view_multiple_shift_aggregation(monkeypatch):
@@ -308,11 +251,7 @@ def test_handle_shift_view_multiple_shift_aggregation(monkeypatch):
         shift_view,
         mocks,
     )
-    patch_get_staff_schedule_table(
-        monkeypatch,
-        shift_view,
-        make_multi_staff_schedule_df(),
-    )
+    patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
         start_time="2026-05-01 00:00:00",
@@ -324,8 +263,8 @@ def test_handle_shift_view_multiple_shift_aggregation(monkeypatch):
 
     result_by_shift = result.set_index("Shift_Start_Time")
 
-    shift_1 = result_by_shift.loc["2026-05-01 07:00:00", :]
-    shift_2 = result_by_shift.loc["2026-05-01 19:00:00", :]
+    shift_1 = result_by_shift.loc[pd.Timestamp("2026-05-01 07:00:00"), :]
+    shift_2 = result_by_shift.loc[pd.Timestamp("2026-05-01 19:00:00"), :]
 
     assert shift_1["Mach_cnt"] == 2
     assert shift_1["NAU_prs"] == 6
@@ -333,21 +272,12 @@ def test_handle_shift_view_multiple_shift_aggregation(monkeypatch):
     assert shift_1["ST_prs"] == 20
     assert shift_1["eff"] == pytest.approx(0.4)
     assert shift_1["Time_Occupation"] == pytest.approx(0.889)
-    assert shift_1["Creeler"] == "Alice"
-    assert shift_1["KO"] == "Bob"
-    assert shift_1["Tech"] == "Charlie"
-    assert shift_1["Yarner"] == "Dana"
-
     assert shift_2["Mach_cnt"] == 2
     assert shift_2["NAU_prs"] == 10
     assert shift_2["MES_prs"] == 10
     assert shift_2["ST_prs"] == 30
     assert shift_2["eff"] == pytest.approx(0.333)
     assert shift_2["Time_Occupation"] == pytest.approx(0.75)
-    assert shift_2["Creeler"] == "Evan"
-    assert shift_2["KO"] == "Fatima"
-    assert shift_2["Tech"] == "Grace"
-    assert shift_2["Yarner"] == "Hugo"
 
 
 def test_handle_shift_view_duplicate_mach_counted_once(monkeypatch):
@@ -366,11 +296,7 @@ def test_handle_shift_view_duplicate_mach_counted_once(monkeypatch):
         shift_view,
         mocks,
     )
-    patch_get_staff_schedule_table(
-        monkeypatch,
-        shift_view,
-        make_base_staff_schedule_df(),
-    )
+    patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
         start_time="2026-05-01 00:00:00",
@@ -410,11 +336,7 @@ def test_handle_shift_view_filter_shutdown_mach_affects_aggregation(
         shift_view,
         mocks,
     )
-    patch_get_staff_schedule_table(
-        monkeypatch,
-        shift_view,
-        make_base_staff_schedule_df(),
-    )
+    patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
         start_time="2026-05-01 00:00:00",
@@ -451,11 +373,7 @@ def test_handle_shift_view_infinite_efficiency_becomes_none(monkeypatch):
         shift_view,
         mocks,
     )
-    patch_get_staff_schedule_table(
-        monkeypatch,
-        shift_view,
-        make_base_staff_schedule_df(),
-    )
+    patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
         start_time="2026-05-01 00:00:00",
@@ -487,11 +405,7 @@ def test_handle_shift_view_nan_time_occupation_becomes_none(monkeypatch):
         shift_view,
         mocks,
     )
-    patch_get_staff_schedule_table(
-        monkeypatch,
-        shift_view,
-        make_base_staff_schedule_df(),
-    )
+    patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
         start_time="2026-05-01 00:00:00",
@@ -527,10 +441,9 @@ def test_handle_shift_view_filtered_empty_returns_empty(
         shift_view,
         mocks,
     )
-    staff_schedule_mock = patch_get_staff_schedule_table(
+    staff_merge_mock = patch_merge_staff_info_to_view(
         monkeypatch,
         shift_view,
-        make_base_staff_schedule_df(),
     )
 
     result = shift_view.handle_shift_view(
@@ -540,7 +453,7 @@ def test_handle_shift_view_filtered_empty_returns_empty(
     )
 
     assert result.empty
-    staff_schedule_mock.assert_not_called()
+    staff_merge_mock.assert_not_called()
 
 
 def test_handle_shift_view_nan_st_prs_current_behavior(monkeypatch):
@@ -561,11 +474,7 @@ def test_handle_shift_view_nan_st_prs_current_behavior(monkeypatch):
         shift_view,
         mocks,
     )
-    patch_get_staff_schedule_table(
-        monkeypatch,
-        shift_view,
-        make_base_staff_schedule_df(),
-    )
+    patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
         start_time="2026-05-01 00:00:00",
@@ -580,89 +489,3 @@ def test_handle_shift_view_nan_st_prs_current_behavior(monkeypatch):
     assert row["ST_prs"] == 10
     assert row["eff"] == pytest.approx(0.8)
     assert row["Time_Occupation"] == pytest.approx(0.889)
-
-
-def test_handle_shift_view_staff_schedule_left_join_preserves_unmatched_shift(
-    monkeypatch,
-):
-    """
-    A shift without matching staff schedule should remain in the output with
-    null role values.
-    """
-    patch_extract_base_data(
-        monkeypatch,
-        shift_view,
-        make_base_shift_df(),
-    )
-
-    mocks = make_call_counting_mocks()
-    patch_common_dependencies(
-        monkeypatch,
-        shift_view,
-        mocks,
-    )
-    patch_get_staff_schedule_table(
-        monkeypatch,
-        shift_view,
-        make_unmatched_staff_schedule_df(),
-    )
-
-    result = shift_view.handle_shift_view(
-        start_time="2026-05-01 00:00:00",
-        end_time="2026-05-02 00:00:00",
-        shift=1,
-    )
-
-    assert len(result) == 1
-
-    row = result.iloc[0]
-    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
-    assert row["Creeler"] is None
-    assert row["KO"] is None
-    assert row["Tech"] is None
-    assert row["Yarner"] is None
-
-
-def test_handle_shift_view_empty_staff_schedule_preserves_shift_with_null_roles(
-    monkeypatch,
-):
-    """
-    An empty staff schedule should not remove shift aggregation rows.
-    """
-    patch_extract_base_data(
-        monkeypatch,
-        shift_view,
-        make_base_shift_df(),
-    )
-
-    mocks = make_call_counting_mocks()
-    patch_common_dependencies(
-        monkeypatch,
-        shift_view,
-        mocks,
-    )
-    staff_schedule_mock = patch_get_staff_schedule_table(
-        monkeypatch,
-        shift_view,
-        make_empty_staff_schedule_df(),
-    )
-
-    result = shift_view.handle_shift_view(
-        start_time="2026-05-01 00:00:00",
-        end_time="2026-05-02 00:00:00",
-        shift=1,
-    )
-
-    assert len(result) == 1
-    staff_schedule_mock.assert_called_once_with(
-        "2026-05-01 00:00:00",
-        "2026-05-02 00:00:00",
-    )
-
-    row = result.iloc[0]
-    assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
-    assert row["Mach_cnt"] == 2
-    assert row["Creeler"] is None
-    assert row["KO"] is None
-    assert row["Tech"] is None
-    assert row["Yarner"] is None

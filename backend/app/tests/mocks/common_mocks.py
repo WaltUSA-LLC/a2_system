@@ -1,9 +1,8 @@
 import math
 from unittest.mock import Mock
 
-import numpy as np
 import pandas as pd
-
+import numpy as np
 
 def fake_distribute_weight_for_same_mach(df: pd.DataFrame) -> pd.DataFrame:
     return df
@@ -87,6 +86,35 @@ def patch_get_staff_schedule_table(monkeypatch, module, df: pd.DataFrame):
     )
 
     return mock_get_staff_schedule_table
+
+
+def patch_merge_staff_info_to_view(monkeypatch, module):
+    """
+    Patch merge_staff_info_to_view inside the module under test.
+    If df is omitted, the patched merge returns the input view DataFrame.
+
+    Example:
+        patch_merge_staff_info_to_view(
+            monkeypatch,
+            shift_view,
+            make_base_shift_view_df(),
+        )
+    """
+
+    def fake_merge_staff_info_to_view(view_df, start_time, end_time):
+        df = view_df.copy()
+        df = df.replace([np.nan, np.inf, -np.inf], None)
+        return df
+    
+    mock_merge_staff_info_to_view = Mock(side_effect=fake_merge_staff_info_to_view)
+
+    monkeypatch.setattr(
+        module,
+        "merge_staff_info_to_view",
+        mock_merge_staff_info_to_view,
+    )
+
+    return mock_merge_staff_info_to_view
 
 
 def patch_common_dependencies(monkeypatch, module, mocks: dict):

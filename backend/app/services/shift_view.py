@@ -1,13 +1,14 @@
+import pandas as pd
+import numpy as np
 from extractors import MESExtractor
 from app.services.utils import extract_base_data, \
     clean_weight, \
     estimate_st_output_prs, \
     estimate_mes_output_prs, \
     distributeWeightForSameMach, \
-    filterShutdownMach, \
-    get_staff_schedule_table
-import pandas as pd
-import numpy as np
+    filterShutdownMach
+from app.services.staff_info import merge_staff_info_to_view
+
 
 def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(MESExtractor, start_time, end_time, shift)
@@ -45,14 +46,8 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
 
     df_shift.reset_index(inplace=True)
     df_shift = df_shift.reset_index(names="id")
-    df_shift = df_shift.replace([np.nan, np.inf, -np.inf], None)
-
-    df_staff = get_staff_schedule_table(start_time, end_time)
-    df_shift = df_shift.merge(df_staff, left_on="Shift_Start_Time", right_on="ShiftStartTime", how="left")
-    df_shift = df_shift.drop(columns=["ShiftStartTime"], errors="ignore")
-    df_shift["Shift_Start_Time"] = df_shift["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
-    df_shift = df_shift.replace([np.nan, np.inf, -np.inf], None)
-
+    #df_shift = df_shift.replace([np.nan, np.inf, -np.inf], None)
+    df_shift = merge_staff_info_to_view(df_shift, start_time, end_time)
     return df_shift
 
 

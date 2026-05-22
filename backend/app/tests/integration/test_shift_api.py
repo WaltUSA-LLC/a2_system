@@ -25,6 +25,7 @@ Test cases for /base/shift API:
 import pytest
 from fastapi.testclient import TestClient
 
+import app.services.staff_info as staff_info
 import app.services.shift_view as shift_view
 from app.main import app
 from app.tests.mocks.common_mocks import (
@@ -73,7 +74,7 @@ def test_shift_api_output_columns(monkeypatch):
     )
     patch_get_staff_schedule_table(
         monkeypatch,
-        shift_view,
+        staff_info,
         make_base_staff_schedule_df(),
     )
 
@@ -105,7 +106,7 @@ def test_shift_api_extract_base_data_arguments(monkeypatch):
     )
     staff_schedule_mock = patch_get_staff_schedule_table(
         monkeypatch,
-        shift_view,
+        staff_info,
         make_base_staff_schedule_df(),
     )
 
@@ -143,7 +144,7 @@ def test_shift_api_empty_df(monkeypatch):
     )
     staff_schedule_mock = patch_get_staff_schedule_table(
         monkeypatch,
-        shift_view,
+        staff_info,
         make_base_staff_schedule_df(),
     )
 
@@ -173,7 +174,7 @@ def test_shift_api_single_shift_aggregation(monkeypatch):
     )
     patch_get_staff_schedule_table(
         monkeypatch,
-        shift_view,
+        staff_info,
         make_base_staff_schedule_df(),
     )
 
@@ -216,7 +217,7 @@ def test_shift_api_multiple_shift_aggregation(monkeypatch):
     )
     patch_get_staff_schedule_table(
         monkeypatch,
-        shift_view,
+        staff_info,
         make_multi_staff_schedule_df(),
     )
 

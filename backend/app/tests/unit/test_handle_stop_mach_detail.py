@@ -42,7 +42,7 @@ Test cases for handle_stop_mach_detail:
     - Verify duration is Recover_time minus Stop_time.
 
 14. Sorting
-    - Verify rows sort by Start_Shift_Time asc and duration desc.
+    - Verify rows sort by Shift_Start_Time asc and duration desc.
 
 15. Null conversion
     - Verify pandas null values are converted to Python None.
@@ -55,10 +55,14 @@ Test cases for handle_stop_mach_detail:
 from unittest.mock import Mock
 
 import pandas as pd
+import pytest
 
 import app.services.stop_view as stop_view
 
-from app.tests.mocks.common_mocks import patch_extract_base_data
+from app.tests.mocks.common_mocks import (
+    patch_extract_base_data,
+    patch_merge_staff_info_to_view,
+)
 from app.tests.mocks.handle_stop_mach_detail_mocks import (
     make_base_stop_mach_detail_df,
     make_empty_stop_mach_detail_df,
@@ -82,8 +86,13 @@ EXPECTED_COLUMNS = [
     "Stop_time",
     "Recover_time",
     "duration",
-    "Start_Shift_Time",
+    "Shift_Start_Time",
 ]
+
+
+@pytest.fixture(autouse=True)
+def patch_staff_info_merge(monkeypatch):
+    return patch_merge_staff_info_to_view(monkeypatch, stop_view)
 
 
 def _call_handle_stop_mach_detail(shift=0, mach=1, style="ABC"):
@@ -237,7 +246,7 @@ def test_handle_stop_mach_detail_shift_1_filters_day_shift(monkeypatch):
     result = _call_handle_stop_mach_detail(shift=1, mach=1, style="ABC")
 
     assert set(result["Description"]) == {"Day Start", "Day End"}
-    assert set(result["Start_Shift_Time"]) == {"2026-05-01 07:00:00"}
+    assert set(result["Shift_Start_Time"]) == {"2026-05-01 07:00:00"}
 
 
 def test_handle_stop_mach_detail_shift_2_filters_night_shift(monkeypatch):
@@ -257,7 +266,7 @@ def test_handle_stop_mach_detail_shift_2_filters_night_shift(monkeypatch):
         "Night Start",
         "Night End",
     }
-    assert set(result["Start_Shift_Time"]) == {
+    assert set(result["Shift_Start_Time"]) == {
         "2026-04-30 19:00:00",
         "2026-05-01 19:00:00",
     }
@@ -356,7 +365,7 @@ def test_handle_stop_mach_detail_calculates_duration(monkeypatch):
 
 def test_handle_stop_mach_detail_sorting(monkeypatch):
     """
-    Rows should sort by Start_Shift_Time ascending and duration descending.
+    Rows should sort by Shift_Start_Time ascending and duration descending.
     reset_index keeps the original row index as id.
     """
     patch_extract_base_data(

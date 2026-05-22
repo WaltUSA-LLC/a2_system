@@ -12,8 +12,8 @@ import { Typography } from '@mui/material';
 export function MachStopTableModal({open, onClose, rec, metaData}){
     const columns = [
         {
-            field: 'Start_Shift_Time',
-            headerName: 'Start Shift Time',
+            field: 'Shift_Start_Time',
+            headerName: 'Shift Start Time',
             flex: 1,
             type: 'string',
             align: 'center',
@@ -61,7 +61,22 @@ export function MachStopTableModal({open, onClose, rec, metaData}){
             valueFormatter: (value) => formatSeconds(value),
             filterOperators: minuteFilterOperators,
         },
-        
+        {
+            field: 'KO',
+            headerName: 'KO',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'Tech',
+            headerName: 'Tech',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
     ];
 
 
@@ -70,7 +85,7 @@ export function MachStopTableModal({open, onClose, rec, metaData}){
             open={open}
             onClose={onClose}
             fullWidth
-            maxWidth="lg"
+            maxWidth="xl"
         >
             <DialogTitle>The Details of Mach# {metaData.mach} with StyleCode# {metaData.style}</DialogTitle>
             <DialogContent>
