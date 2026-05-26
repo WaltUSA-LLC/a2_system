@@ -1,8 +1,7 @@
 import { Route, Routes } from "react-router-dom";
-import './App.css'
 
+import { Grid } from "@mui/material";
 import TopBar from './components/TopBar';
-import Navigation from './components/Navigation';
 import ShiftView from "./components/views/ShiftView";
 import SKUView from './components/views/SKUView';
 import MachsView from './components/views/MachsView';
@@ -12,10 +11,11 @@ import StopsViewByMach from './components/views/StopsViewByMach';
 
 function App() {
     return (
-        <>
-            <TopBar />
-            <div className='nav-and-content'>
-                <Navigation />
+        <Grid container spacing={2} sx={{ width: '100%' }}>
+            <Grid size={12}>
+                <TopBar />
+            </Grid>
+            <Grid size={12}>
                 <Routes>
                     {/* <Route path="/machs-view" element={<MachsView />} /> */}
                     <Route path="/sku-view" element={<SKUView />} />
@@ -23,8 +23,8 @@ function App() {
                     <Route path="/stops-view/code" element={<StopsViewByCode />} />
                     <Route path="/stops-view/mach" element={<StopsViewByMach />} />
                 </Routes>
-            </div>
-        </>
+            </Grid>
+        </Grid>
   );
 }
 
