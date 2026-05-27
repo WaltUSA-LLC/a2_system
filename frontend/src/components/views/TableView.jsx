@@ -8,7 +8,10 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
+import { IconButton, Tooltip } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import AutoGraphOutlinedIcon from '@mui/icons-material/AutoGraphOutlined';
+
 
 function formatDate(date) {
     return new Intl.DateTimeFormat('en-CA', {
@@ -141,14 +144,23 @@ function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDow
                     <Button
                         variant="contained"
                         onClick={handleShowData}
+                        sx={{
+                            bgcolor: "primary.light",
+                            color: "primary.contrastText",
+                            "&:hover": {
+                            bgcolor: "primary.main",
+                            },
+                        }}
                     >
                         Show Data
                     </Button>
-                    { hasData ? (
-                        <Button variant="text" onClick={handleOpenChart}>
-                            Chart
-                        </Button>
-                    ) : null }
+                    
+                    <Tooltip title="Chart" placement="right-start">
+                        <IconButton sx={{ visibility: hasData ? "visible" : "hidden", color:"primary.light"}} onClick={handleOpenChart}>
+                            <AutoGraphOutlinedIcon />
+                        </IconButton>
+                    </Tooltip>
+                    
                 </Box>
             </Box>
 
