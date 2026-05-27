@@ -16,19 +16,21 @@ def parse_start_date(raw: str) -> datetime:
 
 
 def normalize_style(style_code: Any) -> str:
-        if pd.isna(style_code):
-            return ""
-        style_code = style_code.strip()
-        if len(style_code)==0:
-            return ""
-        style_code = style_code.upper()
-        [style, size] = style_code.split()
-        if '-' in style:
-            style = style.split('-')[0]
-        if 'CN' in style:
-            style = style[:-2]
-        #print(style+'-'+size)
+    if pd.isna(style_code):
+        return ""
+    style_code = style_code.strip()
+    if len(style_code)==0:
+        return ""
+    style_code = style_code.upper()
+    [style, size] = style_code.split()
+    if '2612' in style:
         return style+'-'+size
+    if '-' in style:
+        style = style.split('-')[0]
+    if 'CN' in style:
+        style = style[:-2]
+    #print(style+'-'+size)
+    return style+'-'+size
 
 
 def format_percentage_columns(ws, df, col_names) -> None:
