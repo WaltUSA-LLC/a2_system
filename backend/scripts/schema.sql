@@ -25,7 +25,7 @@ INSERT INTO Operator (ID, FirstName, LastName)
 VALUES (1060, 'Jamie', NULL);
 
 INSERT INTO Operator (ID, FirstName, LastName)
-VALUES (9001, 'Lisa', NULL);
+VALUES (9001, 'Lisa', 'Wan');
 
 INSERT INTO Operator (ID, FirstName, LastName)
 VALUES (9002, 'Sunny', 'Yuan');
@@ -59,3 +59,6 @@ VALUES (1069, 'Shannon', null);
 
 INSERT INTO Operator (ID, FirstName, LastName)
 VALUES (1062, 'Danny', 'Franco');
+
+INSERT INTO Operator (ID, FirstName, LastName)
+VALUES (1071, 'Deliang', 'Han');
