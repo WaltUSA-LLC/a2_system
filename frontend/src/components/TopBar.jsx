@@ -20,7 +20,7 @@ function TopBar() {
             <Toolbar>
                 <img
                     src={photo}
-                    alt="SockSight"
+                    alt="SockIQ"
                     style={{
                         width: 38,
                         height: 38,
