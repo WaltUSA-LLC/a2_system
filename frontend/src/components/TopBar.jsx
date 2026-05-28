@@ -38,7 +38,7 @@ function TopBar() {
                         letterSpacing: 0,
                         lineHeight: 1.2,}}
                 >
-                    SockSight
+                    SockIQ
                 </Typography>
                 <Stack 
                     direction='row' 
