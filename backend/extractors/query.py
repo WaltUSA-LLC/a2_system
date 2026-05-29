@@ -98,3 +98,23 @@ WITH specific_schedule AS(
 SELECT ShiftStartTime, ID, FirstName, LastName, RoleName
 FROM specific_schedule AS ss JOIN dbA2.dbo.Operator AS op ON ss.OperatorID = op.ID
 """
+
+
+PQC_QUERY = """
+DECLARE @Start DATETIME2(0) = :start_dt;
+DECLARE @End   DATETIME2(0) = :end_dt;
+DECLARE @Shift  INT = :shift;
+
+SELECT kcp.knitted AS Date, kcp.Shift AS Shift, MachineId AS MachID, 
+    ItemStyle AS Style_Code, Name, toeHole, brokenNDL, missNDL, missYarn, fanYarn, logoIssue,
+    dirty, feisha, other   
+FROM operator_log.dbo.knitCHN_pqc kcp 
+WHERE kcp.Knitted >= CAST(@Start AS date) 
+    AND kcp.Knitted <= CAST(@End AS date) 
+    AND (@Shift = 0 or (CAST(kcp.Shift AS time) =
+        CASE 
+            WHEN @Shift = 1 THEN CAST('07:00:00' AS time)
+            WHEN @Shift = 2 THEN CAST('19:00:00' AS time)
+        END
+    ))
+"""

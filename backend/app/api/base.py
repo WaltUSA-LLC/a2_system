@@ -7,6 +7,7 @@ from app.services.stop_view import handle_stop_view_by_mach
 from app.services.stop_view import handle_stop_mach_detail
 from app.services.stop_view import handle_stop_code_detail
 from app.services.staff_info import fetch_staff_info_by_date_and_shift
+from app.services.pqc_view import handle_pqc_view
 
 router = APIRouter()
 
@@ -63,4 +64,9 @@ def get_stop_by_mach_detail(start:str, end:str, shift: int, mach: int, style: st
 @router.get("/stop/code/detail")
 def get_stop_by_code_detail(start:str, end:str, shift: int, stop_code:int):
     df = handle_stop_code_detail(start, end, shift, stop_code)
+    return {"content": df.to_dict(orient="records")}
+
+@router.get("/pqc")
+def get_sku(start:str, end:str, shift: int):
+    df = handle_pqc_view(start, end, shift)
     return {"content": df.to_dict(orient="records")}

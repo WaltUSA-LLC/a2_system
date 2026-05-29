@@ -65,6 +65,9 @@ function TopBar() {
                     >
                         Stop
                     </Button>
+                    <Button color='inherit' component={RouterLink} to="/pqc-view">
+                        PQC
+                    </Button>
                 </Stack>
                 <Menu
                     anchorEl={anchorEl}

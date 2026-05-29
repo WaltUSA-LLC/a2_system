@@ -7,6 +7,7 @@ import SKUView from './components/views/SKUView';
 import MachsView from './components/views/MachsView';
 import StopsViewByCode from './components/views/StopsViewByCode';
 import StopsViewByMach from './components/views/StopsViewByMach';
+import PQCView from "./components/views/PQCView";
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
                     <Route path="/shift-view" element={<ShiftView />} />
                     <Route path="/stops-view/code" element={<StopsViewByCode />} />
                     <Route path="/stops-view/mach" element={<StopsViewByMach />} />
+                    <Route path="/pqc-view" element={<PQCView />} />
                 </Routes>
             </Grid>
         </Grid>

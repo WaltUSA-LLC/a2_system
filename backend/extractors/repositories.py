@@ -27,9 +27,9 @@ class DataRepository:
         self.query = query
 
     def fetch_data_with_start_date(self, start_dt: datetime, shift: int=None) -> pd.DataFrame:
-        params = {"start_dt": start_dt, "shift": shift} if shift else {"start_dt": start_dt}
+        params = {"start_dt": start_dt, "shift": shift} if shift is not None else {"start_dt": start_dt}
         return pd.read_sql_query(text(self.query), con=self.engine, params=params)
     
     def fetch_data_with_start_end_date(self, start_dt: datetime, end_dt: datetime, shift: int=None) -> pd.DataFrame:
-        params = {"start_dt": start_dt, "end_dt": end_dt, "shift": shift} if shift else {"start_dt": start_dt, "end_dt": end_dt}
+        params = {"start_dt": start_dt, "end_dt": end_dt, "shift": shift} if shift is not None else {"start_dt": start_dt, "end_dt": end_dt}
         return pd.read_sql_query(text(self.query), con=self.engine, params=params)
