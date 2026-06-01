@@ -69,7 +69,7 @@ export const hourFilterOperators = [
 
 
 export function formatSeconds(sec) {
-    sec = Number(sec ?? 0);
+    sec = Math.round(Number(sec ?? 0));
     const h = Math.floor(sec / 3600);
     const m = Math.floor((sec % 3600) / 60);
     const s = sec % 60;

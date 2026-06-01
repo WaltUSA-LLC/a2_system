@@ -346,3 +346,153 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
         </Dialog>
     );
 }
+
+
+export function PQCStaffDetailTableModal({open, onClose, rec, metaData}) {
+    const columns = [
+        {
+            field: 'DateRec',
+            headerName: 'Date Rec',
+            flex: 2,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'MachID',
+            headerName: 'Mach ID',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'Style_Code',
+            headerName: 'Style Code',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'toeHole',
+            headerName: 'Hole',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'brokenNDL',
+            headerName: 'N-Brok',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Needle Broken',
+        },
+        {
+            field: 'missNDL',
+            headerName: 'N-Miss',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Needle Missing',
+        },
+        {
+            field: 'missYarn',
+            headerName: 'Y-Brok',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Yarn Broken',
+        },
+        {
+            field: 'fanYarn',
+            headerName: 'Y-Rtn',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Yarn Return',
+        },
+        {
+            field: 'feisha',
+            headerName: 'Y-Fly',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Yarn Fly',
+        },
+        {
+            field: 'logoIssue',
+            headerName: 'Logo',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Logo Issue',
+        },
+        {
+            field: 'dirty',
+            headerName: 'Stain',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'other',
+            headerName: 'Other',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+    ];
+
+
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            maxWidth="xl"
+        >
+            <DialogTitle>
+                <Typography variant='h6' component='div'>
+                    {metaData.name}'s records at shift {metaData.date_time}
+                </Typography>
+            </DialogTitle>
+            <DialogContent>
+                <Box sx={{ height: 700, width: '100%' }}>
+                    <DataGrid
+                        rows={rec}
+                        columns={columns}
+                        initialState={{
+                            pagination: {
+                                paginationModel: {
+                                    pageSize: 10,
+                                },
+                            },
+                        }}
+                        pageSizeOptions={[10, 20, 30]}
+                        disableRowSelectionOnClick
+                        showToolbar
+                        sx={{
+                            '& .MuiDataGrid-columnHeaderTitle': {
+                            fontWeight: 'bold',
+                            },
+                        }}
+                    />
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Close</Button>
+            </DialogActions>
+        </Dialog>
+    );
+}

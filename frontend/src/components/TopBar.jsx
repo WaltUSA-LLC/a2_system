@@ -5,14 +5,23 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import photo from "../assets/sock.png";
 
 function TopBar() {
-    const [anchorEl, setAnchorEl] = useState();
+    const [anchorElStop, setAnchorElStop] = useState();
+    const [anchorElPQC, setAnchorElPQC] = useState();
 
-    function handleClick(event){
-        setAnchorEl(event.currentTarget);
+    function handleClickStop(event){
+        setAnchorElStop(event.currentTarget);
     }
 
-    function handleClose(){
-        setAnchorEl(null);
+    function handleCloseStop(){
+        setAnchorElStop(null);
+    }
+
+    function handleClickPQC(event){
+        setAnchorElPQC(event.currentTarget);
+    }
+
+    function handleClosePQC(){
+        setAnchorElPQC(null);
     }
 
     return (
@@ -61,18 +70,22 @@ function TopBar() {
                     <Button
                         color='inherit'
                         endIcon={<KeyboardArrowDownIcon />}
-                        onClick={handleClick}
+                        onClick={handleClickStop}
                     >
                         Stop
                     </Button>
-                    <Button color='inherit' component={RouterLink} to="/pqc-view">
+                    <Button
+                        color='inherit'
+                        endIcon={<KeyboardArrowDownIcon />}
+                        onClick={handleClickPQC}
+                    >
                         PQC
                     </Button>
                 </Stack>
                 <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleClose}
+                    anchorEl={anchorElStop}
+                    open={Boolean(anchorElStop)}
+                    onClose={handleCloseStop}
                     anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'right'
@@ -89,8 +102,30 @@ function TopBar() {
                         },
                     }}
                 >
-                    <MenuItem component={RouterLink} to="/stops-view/mach" onClick={handleClose}>By Mach</MenuItem>
-                    <MenuItem component={RouterLink} to="/stops-view/code" onClick={handleClose}>By Code</MenuItem>
+                    <MenuItem component={RouterLink} to="/stops-view/mach" onClick={handleCloseStop}>By Mach</MenuItem>
+                    <MenuItem component={RouterLink} to="/stops-view/code" onClick={handleCloseStop}>By Code</MenuItem>
+                </Menu>
+                <Menu
+                    anchorEl={anchorElPQC}
+                    open={Boolean(anchorElPQC)}
+                    onClose={handleClosePQC}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right'
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right'
+                    }}
+                    sx={{
+                        '& .MuiMenuItem-root': {
+                            fontSize: '1rem',
+                            fontWeight: 600,
+                            letterSpacing: 0,
+                        },
+                    }}
+                >
+                    <MenuItem component={RouterLink} to="/pqc-view/staff" onClick={handleClosePQC}>By Staff</MenuItem>
                 </Menu>
             </Toolbar>
         </AppBar>
