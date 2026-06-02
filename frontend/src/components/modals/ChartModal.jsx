@@ -155,11 +155,12 @@ export function ShiftChartModal({ open, onClose, rec }) {
     const vocab = {'Mach_cnt':'Mach Count', 
                    'MES_prs':'MES Throughput (prs)', 
                    'NAU_prs':'NAU Throughput (prs)', 
+                   'Discard_prs':'Discard (prs)',
                    'Time_Occupation':'ON Time Occupation',
                    'eff':'Mach Efficiency'};
         
     const propertyOptions = Object.keys(rec[0] ?? {}).filter(
-        (property) => ['Mach_cnt', 'MES_prs', 'NAU_prs', 'Time_Occupation', 'eff'].includes(property)
+        (property) => ['Mach_cnt', 'MES_prs', 'NAU_prs', 'Discard_prs', 'Time_Occupation', 'eff'].includes(property)
     );
 
     function handlePropertyChange(event) {

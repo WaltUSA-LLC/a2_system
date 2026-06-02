@@ -65,6 +65,7 @@ EXPECTED_COLUMNS = [
     "Weight",
     "MES_prs",
     "NAU_prs",
+    "Discard_prs",
     "ON_Time",
     "OFF_Time",
     "ON_Time_Occupation",
@@ -232,11 +233,13 @@ def test_shift_detail_api_metrics_and_comments(monkeypatch):
     low = result_by_mach["M_LOW"]
 
     assert good["MES_prs"] == 9
+    assert good["Discard_prs"] == 1
     assert good["ON_Time_Occupation"] == pytest.approx(0.9)
     assert good["Mach_Efficiency"] == pytest.approx(1.8)
     assert good["Comment"] == "Good"
 
     assert low["MES_prs"] == 1
+    assert low["Discard_prs"] == 3
     assert low["ON_Time_Occupation"] == pytest.approx(0.9)
     assert low["Mach_Efficiency"] == pytest.approx(0.2)
     assert low["Comment"] == "Low Ef"
@@ -277,6 +280,7 @@ def test_shift_detail_api_duplicate_mach_rows_preserved(monkeypatch):
 
     assert len(content) == 3
     assert len(m1_records) == 2
+    assert [record["Discard_prs"] for record in m1_records] == [1, 3]
 
 
 def test_shift_detail_api_night_shift_staff(monkeypatch):

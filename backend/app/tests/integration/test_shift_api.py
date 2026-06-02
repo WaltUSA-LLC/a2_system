@@ -20,6 +20,7 @@ Test cases for /base/shift API:
 5. Multiple-shift aggregation
    - Verify multiple Shift_Start_Time groups produce multiple API records
      with their matching staff schedule fields.
+
 """
 
 import pytest
@@ -53,6 +54,7 @@ EXPECTED_COLUMNS = [
     "Mach_cnt",
     "NAU_prs",
     "MES_prs",
+    "Discard_prs",
     "ST_prs",
     "eff",
     "Time_Occupation",
@@ -197,6 +199,7 @@ def test_shift_api_single_shift_aggregation(monkeypatch):
     assert row["Mach_cnt"] == 2
     assert row["NAU_prs"] == 8
     assert row["MES_prs"] == 7
+    assert row["Discard_prs"] == 6
     assert row["ST_prs"] == 10
     assert row["eff"] == pytest.approx(0.7)
     assert row["Time_Occupation"] == pytest.approx(0.85)
@@ -246,6 +249,7 @@ def test_shift_api_multiple_shift_aggregation(monkeypatch):
     assert shift_1["Mach_cnt"] == 2
     assert shift_1["NAU_prs"] == 6
     assert shift_1["MES_prs"] == 8
+    assert shift_1["Discard_prs"] == 3
     assert shift_1["ST_prs"] == 9
     assert shift_1["eff"] == pytest.approx(0.889)
     assert shift_1["Time_Occupation"] == pytest.approx(0.889)
@@ -257,6 +261,7 @@ def test_shift_api_multiple_shift_aggregation(monkeypatch):
     assert shift_2["Mach_cnt"] == 2
     assert shift_2["NAU_prs"] == 10
     assert shift_2["MES_prs"] == 10
+    assert shift_2["Discard_prs"] == 7
     assert shift_2["ST_prs"] == 6
     assert shift_2["eff"] == pytest.approx(1.667)
     assert shift_2["Time_Occupation"] == pytest.approx(0.75)

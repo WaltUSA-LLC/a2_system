@@ -242,6 +242,14 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
             headerAlign: 'center',
         },
         {
+            field: 'Discard_prs',
+            headerName: 'Discard (prs)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
             field: "ON_Time",
             headerName: "ON Time",
             type: 'number',

@@ -27,6 +27,7 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     # total throughput 
     s_nau_prs = df_on_mach.groupby("Shift_Start_Time")["NAU_prs"].sum()
     s_mes_prs = df_on_mach.groupby("Shift_Start_Time")["MES_prs"].sum()
+    s_discard_prs = df_on_mach.groupby("Shift_Start_Time")["Discard_prs"].sum()
     s_st_prs = df_on_mach.groupby("Shift_Start_Time")["ST_prs"].sum()  # need to be fixed
     s_eff = (s_mes_prs / s_st_prs).round(3) # need to be fixed
 
@@ -39,6 +40,7 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df_shift = pd.DataFrame({"Mach_cnt": s_run_mach,
                              "NAU_prs": s_nau_prs,
                              "MES_prs": s_mes_prs,
+                             "Discard_prs": s_discard_prs,
                              "ST_prs": s_st_prs,
                              "eff": s_eff,
                              "Time_Occupation": s_time_ocup
@@ -69,7 +71,7 @@ def handle_shift_mach_detail(start_time:str, shift:int)->pd.DataFrame:
     df["Comment"] = ""
     df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
     df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
-    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
+    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "Discard_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
     df = df.reset_index(names="id")
     df = df.replace([np.nan, np.inf, -np.inf], None)
     df = df.sort_values(by="MachID", ascending=True)

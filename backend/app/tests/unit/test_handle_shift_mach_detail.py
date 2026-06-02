@@ -18,7 +18,7 @@ Test cases for handle_shift_mach_detail:
    - Verify Shift_Start_Time is converted from pandas Timestamp to string.
 
 6. Metric calculations
-   - Verify MES_prs, ON_Time_Occupation, and Mach_Efficiency calculations.
+   - Verify MES_prs, Discard_prs, ON_Time_Occupation, and Mach_Efficiency.
 
 7. Comment assignment
    - Verify Mach_Efficiency >= 0.8 is Good and < 0.8 is Low Ef.
@@ -36,7 +36,7 @@ Test cases for handle_shift_mach_detail:
     - Verify output preserves source row order after filtering.
 
 12. Null and infinite value handling
-    - Verify zero-time, zero-ST, and NaN-ST current behavior.
+    - Verify zero-time, zero-ST, NaN-ST, and NaN-Discard current behavior.
 """
 
 
@@ -60,6 +60,7 @@ from app.tests.mocks.handle_shift_mach_detail_mocks import (
     make_shift_mach_detail_df_for_metrics_and_comments,
     make_shift_mach_detail_df_that_filters_to_empty,
     make_shift_mach_detail_df_with_duplicate_mach,
+    make_shift_mach_detail_df_with_nan_discard_prs,
     make_shift_mach_detail_df_with_nan_st_prs,
     make_shift_mach_detail_df_with_zero_time,
     make_unsorted_shift_mach_detail_df,
@@ -74,6 +75,7 @@ EXPECTED_COLUMNS = [
     "Weight",
     "MES_prs",
     "NAU_prs",
+    "Discard_prs",
     "ON_Time",
     "OFF_Time",
     "ON_Time_Occupation",
@@ -236,8 +238,8 @@ def test_handle_shift_mach_detail_shift_start_time_is_string(monkeypatch):
 
 def test_handle_shift_mach_detail_calculates_metrics(monkeypatch):
     """
-    Verify machine-level MES output, ON time occupation, and efficiency
-    calculations.
+    Verify machine-level MES output, discard pass-through, ON time occupation,
+    and efficiency calculations.
     """
     patch_extract_base_data(
         monkeypatch,
@@ -260,14 +262,17 @@ def test_handle_shift_mach_detail_calculates_metrics(monkeypatch):
     result_by_mach = result.set_index("MachID")
 
     assert result_by_mach.loc["M_GOOD", "MES_prs"] == 9
+    assert result_by_mach.loc["M_GOOD", "Discard_prs"] == 1
     assert result_by_mach.loc["M_GOOD", "ON_Time_Occupation"] == pytest.approx(0.9)
     assert result_by_mach.loc["M_GOOD", "Mach_Efficiency"] == pytest.approx(0.9)
 
     assert result_by_mach.loc["M_BOUNDARY", "MES_prs"] == 8
+    assert result_by_mach.loc["M_BOUNDARY", "Discard_prs"] == 2
     assert result_by_mach.loc["M_BOUNDARY", "ON_Time_Occupation"] == pytest.approx(0.8)
     assert result_by_mach.loc["M_BOUNDARY", "Mach_Efficiency"] == pytest.approx(0.8)
 
     assert result_by_mach.loc["M_LOW", "MES_prs"] == 1
+    assert result_by_mach.loc["M_LOW", "Discard_prs"] == 3
     assert result_by_mach.loc["M_LOW", "ON_Time_Occupation"] == pytest.approx(0.333)
     assert result_by_mach.loc["M_LOW", "Mach_Efficiency"] == pytest.approx(0.333)
 
@@ -334,6 +339,7 @@ def test_handle_shift_mach_detail_filter_shutdown_mach_affects_rows(
 
     assert len(result) == 2
     assert list(result["MachID"]) == ["M_KEEP_1", "M_KEEP_2"]
+    assert list(result["Discard_prs"]) == [1, 3]
     assert "M_STOP" not in set(result["MachID"])
     assert mocks["estimate_mes_output_prs"].call_count == 2
     assert mocks["estimate_st_output_prs"].call_count == 2
@@ -400,6 +406,7 @@ def test_handle_shift_mach_detail_duplicate_mach_rows_are_preserved(
     assert list(result["MachID"]) == ["M1", "M1", "M2"]
     assert list(result["Weight"]) == [7, 5, 6]
     assert list(result["NAU_prs"]) == [5, 3, 4]
+    assert list(result["Discard_prs"]) == [1, 3, 2]
 
 
 def test_handle_shift_mach_detail_ascending_row_order(monkeypatch):
@@ -425,6 +432,7 @@ def test_handle_shift_mach_detail_ascending_row_order(monkeypatch):
     )
 
     assert list(result["MachID"]) == ["M1", "M2", "M3"]
+    assert list(result["Discard_prs"]) == [1, 2, 3]
 
 
 def test_handle_shift_mach_detail_zero_time_becomes_none(monkeypatch):
@@ -484,3 +492,30 @@ def test_handle_shift_mach_detail_nan_st_prs_becomes_none(monkeypatch):
 
     assert row["Mach_Efficiency"] is None
     assert row["Comment"] == ""
+
+
+def test_handle_shift_mach_detail_nan_discard_prs_becomes_none(monkeypatch):
+    """
+    If Discard_prs is NaN, the final null conversion should convert it to None.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        shift_view,
+        make_shift_mach_detail_df_with_nan_discard_prs(),
+    )
+
+    mocks = make_call_counting_mocks()
+    patch_common_dependencies(
+        monkeypatch,
+        shift_view,
+        mocks,
+    )
+
+    result = shift_view.handle_shift_mach_detail(
+        start_time="2026-05-01 00:00:00",
+        shift=1,
+    )
+
+    row = result.iloc[0]
+
+    assert row["Discard_prs"] is None

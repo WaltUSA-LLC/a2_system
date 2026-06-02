@@ -48,6 +48,14 @@ function ShiftView() {
             headerAlign: 'center',
         },
         {
+            field: 'Discard_prs',
+            headerName: 'Discard (prs)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
             field: 'ST_prs',
             headerName: 'ST (prs)',
             flex: 1,
