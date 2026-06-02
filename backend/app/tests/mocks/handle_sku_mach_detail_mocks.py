@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 
@@ -19,7 +20,7 @@ def make_base_sku_mach_detail_df() -> pd.DataFrame:
             "Weight": [8, 5, 7],
             "Prs_Weight": [1000, 1000, 1000],
             "NAU_prs": [6, 4, 5],
-            "Discard_prs": [0, 0, 0],
+            "Discard_prs": [1, 2, 3],
         }
     )
 
@@ -57,7 +58,7 @@ def make_sku_mach_detail_df_for_metrics_and_comments() -> pd.DataFrame:
             "Weight": [8, 7, 1],
             "Prs_Weight": [1000, 1000, 1000],
             "NAU_prs": [6, 5, 1],
-            "Discard_prs": [0, 0, 0],
+            "Discard_prs": [1, 2, 3],
         }
     )
 
@@ -76,7 +77,7 @@ def make_unsorted_sku_mach_detail_df() -> pd.DataFrame:
             "Weight": [7, 8, 6],
             "Prs_Weight": [1000, 1000, 1000],
             "NAU_prs": [5, 6, 4],
-            "Discard_prs": [0, 0, 0],
+            "Discard_prs": [3, 1, 2],
         }
     )
 
@@ -96,5 +97,24 @@ def make_sku_mach_detail_df_with_invalid_style_code() -> pd.DataFrame:
             "Prs_Weight": [1000, 1000, 1000],
             "NAU_prs": [2, 4, 6],
             "Discard_prs": [0, 0, 0],
+        }
+    )
+
+
+def make_sku_mach_detail_df_with_nan_discard_prs() -> pd.DataFrame:
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
+
+    return pd.DataFrame(
+        {
+            "Style_Code": ["abc red"],
+            "Shift_Start_Time": [shift_time],
+            "MachID": ["M1"],
+            "ON_Time": [100],
+            "OFF_Time": [0],
+            "Avg_Cycle": [10],
+            "Weight": [5],
+            "Prs_Weight": [1000],
+            "NAU_prs": [4],
+            "Discard_prs": [np.nan],
         }
     )

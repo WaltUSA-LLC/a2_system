@@ -48,6 +48,14 @@ function SKUView() {
             headerAlign: 'center',
         },
         {
+            field: 'Discard_prs',
+            headerName: 'Discard (prs)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
             field: 'ON_Time_Occupation',
             headerName: 'ON Time (%)',
             flex: 1,

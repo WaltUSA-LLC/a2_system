@@ -19,7 +19,7 @@ def make_base_sku_df() -> pd.DataFrame:
             "Weight": [3, 5, 3],
             "Prs_Weight": [1000, 1000, 1000],
             "NAU_prs": [2, 4, 2],
-            "Discard_prs": [0, 0, 0],
+            "Discard_prs": [1, 2, 3],
         }
     )
 
@@ -39,7 +39,7 @@ def make_multi_sku_multi_shift_df() -> pd.DataFrame:
             "Weight": [3, 5, 4, 6,],
             "Prs_Weight": [1000, 1000, 1000, 1000,],
             "NAU_prs": [2, 4, 7, 3,],
-            "Discard_prs": [0, 0, 0, 0,],
+            "Discard_prs": [1, 2, 3, 4,],
         }
     )
 
@@ -98,5 +98,24 @@ def make_sku_df_with_invalid_style_code() -> pd.DataFrame:
             "Prs_Weight": [1000, 1000],
             "NAU_prs": [2, 4],
             "Discard_prs": [0, 0],
+        }
+    )
+
+
+def make_sku_df_with_nan_discard_prs() -> pd.DataFrame:
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
+
+    return pd.DataFrame(
+        {
+            "Style_Code": ["abc red", "ABC blue"],
+            "Shift_Start_Time": [shift_time, shift_time],
+            "MachID": ["M1", "M2"],
+            "ON_Time": [100, 60],
+            "OFF_Time": [0, 20],
+            "Avg_Cycle": [10, 10],
+            "Weight": [3, 5],
+            "Prs_Weight": [1000, 1000],
+            "NAU_prs": [2, 4],
+            "Discard_prs": [1, np.nan],
         }
     )

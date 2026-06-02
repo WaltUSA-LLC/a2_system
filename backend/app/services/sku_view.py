@@ -29,16 +29,16 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df_on_time_occupation = df_on_time/(df_on_time + df_off_time)
     #calc sku eff
     df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
-    #df["Real_prs"] = df[["NAU_prs", "ST_prs", "MES_prs", "ON_Time", "Discard_prs", "Avg_Cycle"]].apply(validate_throughput, axis=1)
     df_nau_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["NAU_prs"].sum()
     df_mes_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["MES_prs"].sum()
-    #df_real_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["Real_prs"].sum()
+    df_discard_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["Discard_prs"].sum()
     df_st_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["ST_prs"].agg(lambda s: np.nan if s.isna().any() else s.sum())
     df_sku_eff = df_mes_prs/df_st_prs
 
     df_sku=pd.DataFrame({"Mach_cnt": df_mach_cnt,
                 "NAU_prs": df_nau_prs,
                 "MES_prs": df_mes_prs,
+                "Discard_prs": df_discard_prs,
                 "ON_Time_Occupation": df_on_time_occupation,
                 "Efficiency":df_sku_eff})
     df_sku.reset_index(inplace=True)
@@ -75,7 +75,7 @@ def handle_sku_mach_detail(start_time:str, end_time:str, shift:int, style:str)->
     df["Comment"] = ""
     df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
     df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
-    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "MES_prs", "NAU_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
+    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "MES_prs", "NAU_prs", "Discard_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
     df = df.reset_index(names="id")
     df = df.replace([np.nan, np.inf, -np.inf], None)
     df = df.sort_values(by="MachID", ascending=True)

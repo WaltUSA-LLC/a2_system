@@ -30,6 +30,12 @@ Test cases for handle_sku_view:
 
 10. Filtered-empty result
     - Verify filtering all rows should return an empty result with schema.
+
+11. Shutdown machine filtering
+    - Verify filtered rows do not contribute to Discard_prs totals.
+
+12. Current NaN Discard_prs behavior
+    - Verify pandas groupby sum skips NaN Discard_prs values in current code.
 """
 
 
@@ -50,6 +56,7 @@ from app.tests.mocks.handle_sku_view_mocks import (
     make_empty_sku_df,
     make_multi_sku_multi_shift_df,
     make_sku_df_with_invalid_style_code,
+    make_sku_df_with_nan_discard_prs,
     make_sku_df_with_nan_st_prs,
     make_sku_df_with_zero_st_prs,
 )
@@ -62,6 +69,7 @@ EXPECTED_COLUMNS = [
     "Mach_cnt",
     "NAU_prs",
     "MES_prs",
+    "Discard_prs",
     "ON_Time_Occupation",
     "Efficiency",
 ]
@@ -69,6 +77,10 @@ EXPECTED_COLUMNS = [
 
 def _filter_all_shutdown_mach(df):
     return df.iloc[0:0].copy()
+
+
+def _filter_m2_shutdown_mach(df):
+    return df[df["MachID"] != "M2"].copy()
 
 
 def test_handle_sku_view_output_columns(monkeypatch):
@@ -192,6 +204,7 @@ def test_handle_sku_view_normal_grouping(monkeypatch):
     assert row["Mach_cnt"] == 2
     assert row["NAU_prs"] == 8
     assert row["MES_prs"] == 11
+    assert row["Discard_prs"] == 6
     assert row["ON_Time_Occupation"] == pytest.approx(170 / 200)
     assert row["Efficiency"] == pytest.approx(11 / 30)
 
@@ -230,20 +243,61 @@ def test_handle_sku_view_multiple_sku_multiple_shift(monkeypatch):
     assert abc_shift_1["Mach_cnt"] == 2
     assert abc_shift_1["NAU_prs"] == 6
     assert abc_shift_1["MES_prs"] == 8
+    assert abc_shift_1["Discard_prs"] == 3
     assert abc_shift_1["ON_Time_Occupation"] == pytest.approx(160 / 180)
     assert abc_shift_1["Efficiency"] == pytest.approx(8 / 20)
 
     assert xyz_shift_1["Mach_cnt"] == 1
     assert xyz_shift_1["NAU_prs"] == 7
     assert xyz_shift_1["MES_prs"] == 4
+    assert xyz_shift_1["Discard_prs"] == 3
     assert xyz_shift_1["ON_Time_Occupation"] == pytest.approx(80 / 100)
     assert xyz_shift_1["Efficiency"] == pytest.approx(4 / 10)
 
     assert abc_shift_2["Mach_cnt"] == 1
     assert abc_shift_2["NAU_prs"] == 3
     assert abc_shift_2["MES_prs"] == 6
+    assert abc_shift_2["Discard_prs"] == 4
     assert abc_shift_2["ON_Time_Occupation"] == pytest.approx(90 / 100)
     assert abc_shift_2["Efficiency"] == pytest.approx(6 / 10)
+
+
+def test_handle_sku_view_filter_shutdown_mach_affects_discard_aggregation(
+    monkeypatch,
+):
+    """
+    filterShutdownMach should remove rows before Discard_prs totals are
+    grouped.
+    """
+    raw_df = make_base_sku_df()
+
+    patch_extract_base_data(
+        monkeypatch,
+        sku_view,
+        raw_df,
+    )
+
+    mocks = make_call_counting_mocks()
+    mocks["filterShutdownMach"] = Mock(
+        side_effect=_filter_m2_shutdown_mach
+    )
+    patch_common_dependencies(
+        monkeypatch,
+        sku_view,
+        mocks,
+    )
+
+    result = sku_view.handle_sku_view(
+        start_time="2026-05-01 00:00:00",
+        end_time="2026-05-02 00:00:00",
+        shift=1,
+    )
+
+    assert len(result) == 1
+    row = result.iloc[0]
+    assert row["Discard_prs"] == 4
+    assert mocks["estimate_mes_output_prs"].call_count == 2
+    assert mocks["estimate_st_output_prs"].call_count == 2
 
 
 def test_handle_sku_view_empty_df(monkeypatch):
@@ -309,6 +363,36 @@ def test_handle_sku_view_nan_st_prs_efficiency_becomes_none(monkeypatch):
     assert row["Style_Code"] == "XYZ"
     assert row["MES_prs"] == 8
     assert row["Efficiency"] is None
+
+
+def test_handle_sku_view_nan_discard_prs_current_behavior(monkeypatch):
+    """
+    Current behavior:
+    pandas groupby sum skips NaN Discard_prs values, so the group Discard_prs
+    is based on the non-NaN rows.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        sku_view,
+        make_sku_df_with_nan_discard_prs(),
+    )
+
+    mocks = make_call_counting_mocks()
+    patch_common_dependencies(
+        monkeypatch,
+        sku_view,
+        mocks,
+    )
+
+    result = sku_view.handle_sku_view(
+        start_time="2026-05-01 00:00:00",
+        end_time="2026-05-02 00:00:00",
+        shift=1,
+    )
+
+    assert len(result) == 1
+    row = result.iloc[0]
+    assert row["Discard_prs"] == 1
 
 
 def test_handle_sku_view_infinite_efficiency_becomes_none(monkeypatch):

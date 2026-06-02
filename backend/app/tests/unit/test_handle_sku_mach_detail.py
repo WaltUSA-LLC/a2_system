@@ -21,13 +21,14 @@ Test cases for handle_sku_mach_detail:
    - Verify no matching style returns an empty result with the final schema.
 
 7. Metric calculations
-   - Verify ON_Time_Occupation and Mach_Efficiency calculations and rounding.
+   - Verify Discard_prs pass-through, ON_Time_Occupation, and
+     Mach_Efficiency calculations and rounding.
 
 8. Comment assignment
    - Verify Mach_Efficiency >= 0.8 is Good and < 0.8 is Low Ef.
 
 9. Machine sorting
-   - Verify output rows are sorted by MachID.
+   - Verify output rows are sorted by MachID and retain their Discard_prs.
 
 10. Invalid Style_Code handling
     - Verify empty or None Style_Code values are excluded without error.
@@ -37,6 +38,12 @@ Test cases for handle_sku_mach_detail:
 
 12. Filtered-empty result
     - Verify filtering all rows should return an empty result with schema.
+
+13. Shutdown machine filtering
+    - Verify filtered rows do not appear in Discard_prs output.
+
+14. NaN Discard_prs handling
+    - Verify NaN Discard_prs is converted to None.
 """
 
 
@@ -57,6 +64,7 @@ from app.tests.mocks.handle_sku_mach_detail_mocks import (
     make_empty_sku_mach_detail_df,
     make_sku_mach_detail_df_for_metrics_and_comments,
     make_sku_mach_detail_df_with_invalid_style_code,
+    make_sku_mach_detail_df_with_nan_discard_prs,
     make_sku_mach_detail_df_without_matching_style,
     make_unsorted_sku_mach_detail_df,
 )
@@ -68,6 +76,7 @@ EXPECTED_COLUMNS = [
         "Style_Code",
         "MES_prs",
         "NAU_prs",
+        "Discard_prs",
         "ON_Time",
         "OFF_Time",
         "ON_Time_Occupation",
@@ -78,6 +87,10 @@ EXPECTED_COLUMNS = [
 
 def _filter_all_shutdown_mach(df):
     return df.iloc[0:0].copy()
+
+
+def _filter_m2_shutdown_mach(df):
+    return df[df["MachID"] != "M2"].copy()
 
 
 def test_handle_sku_mach_detail_output_columns(monkeypatch):
@@ -296,14 +309,17 @@ def test_handle_sku_mach_detail_calculates_metrics(monkeypatch):
     result_by_mach = result.set_index("MachID")
 
     assert result_by_mach.loc["M1", "MES_prs"] == 8
+    assert result_by_mach.loc["M1", "Discard_prs"] == 1
     assert result_by_mach.loc["M1", "ON_Time_Occupation"] == pytest.approx(0.8)
     assert result_by_mach.loc["M1", "Mach_Efficiency"] == pytest.approx(0.8)
 
     assert result_by_mach.loc["M2", "MES_prs"] == 7
+    assert result_by_mach.loc["M2", "Discard_prs"] == 2
     assert result_by_mach.loc["M2", "ON_Time_Occupation"] == pytest.approx(0.5)
     assert result_by_mach.loc["M2", "Mach_Efficiency"] == pytest.approx(0.7)
 
     assert result_by_mach.loc["M3", "MES_prs"] == 1
+    assert result_by_mach.loc["M3", "Discard_prs"] == 3
     assert result_by_mach.loc["M3", "ON_Time_Occupation"] == pytest.approx(0.333)
     assert result_by_mach.loc["M3", "Mach_Efficiency"] == pytest.approx(0.333)
 
@@ -365,6 +381,46 @@ def test_handle_sku_mach_detail_sorts_by_mach_id(monkeypatch):
     )
 
     assert list(result["MachID"]) == ["M1", "M2", "M3"]
+    assert list(result["Discard_prs"]) == [1, 2, 3]
+
+
+def test_handle_sku_mach_detail_filter_shutdown_mach_affects_rows(
+    monkeypatch,
+):
+    """
+    filterShutdownMach should remove rows before Discard_prs output and
+    estimator calls are calculated.
+    """
+    raw_df = make_base_sku_mach_detail_df()
+
+    patch_extract_base_data(
+        monkeypatch,
+        sku_view,
+        raw_df,
+    )
+
+    mocks = make_call_counting_mocks()
+    mocks["filterShutdownMach"] = Mock(
+        side_effect=_filter_m2_shutdown_mach
+    )
+    patch_common_dependencies(
+        monkeypatch,
+        sku_view,
+        mocks,
+    )
+
+    result = sku_view.handle_sku_mach_detail(
+        start_time="2026-05-01 00:00:00",
+        end_time="2026-05-02 00:00:00",
+        shift=1,
+        style="ABC",
+    )
+
+    assert len(result) == 1
+    assert list(result["MachID"]) == ["M1"]
+    assert list(result["Discard_prs"]) == [2]
+    assert mocks["estimate_mes_output_prs"].call_count == 2
+    assert mocks["estimate_st_output_prs"].call_count == 1
 
 
 def test_handle_sku_mach_detail_invalid_style_code_is_excluded(monkeypatch):
@@ -458,3 +514,32 @@ def test_handle_sku_mach_detail_filtered_empty_returns_empty_with_schema(
     )
 
     assert result.empty
+
+
+def test_handle_sku_mach_detail_nan_discard_prs_becomes_none(monkeypatch):
+    """
+    If Discard_prs is NaN, the final null conversion should convert it to None.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        sku_view,
+        make_sku_mach_detail_df_with_nan_discard_prs(),
+    )
+
+    mocks = make_call_counting_mocks()
+    patch_common_dependencies(
+        monkeypatch,
+        sku_view,
+        mocks,
+    )
+
+    result = sku_view.handle_sku_mach_detail(
+        start_time="2026-05-01 00:00:00",
+        end_time="2026-05-02 00:00:00",
+        shift=1,
+        style="ABC",
+    )
+
+    row = result.iloc[0]
+
+    assert row["Discard_prs"] is None

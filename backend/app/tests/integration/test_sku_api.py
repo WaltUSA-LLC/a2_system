@@ -41,6 +41,7 @@ EXPECTED_COLUMNS = [
     "Mach_cnt",
     "NAU_prs",
     "MES_prs",
+    "Discard_prs",
     "ON_Time_Occupation",
     "Efficiency",
 ]
@@ -160,6 +161,7 @@ def test_sku_api_single_sku_aggregation(monkeypatch):
     assert row["Mach_cnt"] == 2
     assert row["NAU_prs"] == 8
     assert row["MES_prs"] == 7
+    assert row["Discard_prs"] == 6
     assert row["ON_Time_Occupation"] == pytest.approx(0.85)
     assert row["Efficiency"] == pytest.approx(0.7)
 
@@ -202,17 +204,20 @@ def test_sku_api_multiple_sku_multiple_shift_aggregation(monkeypatch):
     assert abc_shift_1["Mach_cnt"] == 2
     assert abc_shift_1["NAU_prs"] == 6
     assert abc_shift_1["MES_prs"] == 8
+    assert abc_shift_1["Discard_prs"] == 3
     assert abc_shift_1["ON_Time_Occupation"] == pytest.approx(160 / 180)
     assert abc_shift_1["Efficiency"] == pytest.approx(8 / 9)
 
     assert xyz_shift_1["Mach_cnt"] == 1
     assert xyz_shift_1["NAU_prs"] == 7
     assert xyz_shift_1["MES_prs"] == 4
+    assert xyz_shift_1["Discard_prs"] == 3
     assert xyz_shift_1["ON_Time_Occupation"] == pytest.approx(80 / 100)
     assert xyz_shift_1["Efficiency"] == pytest.approx(4 / 5)
 
     assert abc_shift_2["Mach_cnt"] == 1
     assert abc_shift_2["NAU_prs"] == 3
     assert abc_shift_2["MES_prs"] == 6
+    assert abc_shift_2["Discard_prs"] == 4
     assert abc_shift_2["ON_Time_Occupation"] == pytest.approx(90 / 100)
     assert abc_shift_2["Efficiency"] == pytest.approx(6 / 5)

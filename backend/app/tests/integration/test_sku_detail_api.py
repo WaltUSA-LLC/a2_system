@@ -19,7 +19,8 @@ Test cases for /base/sku/detail API:
    - Verify no matching style returns empty API content.
 
 6. Metric and comment serialization
-   - Verify calculated metrics and comments are returned as JSON-safe values.
+   - Verify Discard_prs, calculated metrics, and comments are returned as
+     JSON-safe values.
 
 7. Night shift staff
    - Verify shift 2 returns the 19:00 staff record.
@@ -67,6 +68,7 @@ EXPECTED_COLUMNS = [
     "Style_Code",
     "MES_prs",
     "NAU_prs",
+    "Discard_prs",
     "ON_Time",
     "OFF_Time",
     "ON_Time_Occupation",
@@ -319,16 +321,19 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
     rounded_low = result_by_mach["M3"]
 
     assert good["MES_prs"] == 8
+    assert good["Discard_prs"] == 1
     assert good["ON_Time_Occupation"] == pytest.approx(0.8)
     assert good["Mach_Efficiency"] == pytest.approx(1.6)
     assert good["Comment"] == "Good"
 
     assert low["MES_prs"] == 1
+    assert low["Discard_prs"] == 2
     assert low["ON_Time_Occupation"] == pytest.approx(0.5)
     assert low["Mach_Efficiency"] == pytest.approx(0.2)
     assert low["Comment"] == "Low Ef"
 
     assert rounded_low["MES_prs"] == 1
+    assert rounded_low["Discard_prs"] == 3
     assert rounded_low["ON_Time_Occupation"] == pytest.approx(0.667)
     assert rounded_low["Mach_Efficiency"] == pytest.approx(0.333)
     assert rounded_low["Comment"] == "Low Ef"

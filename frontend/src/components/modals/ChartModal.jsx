@@ -330,7 +330,7 @@ export function SKUChartModal({ open, onClose, rec }) {
 
         
     const propertyOptions = Object.keys(rec[0] ?? {}).filter(
-        (property) => ['MES_prs', 'NAU_prs', 'ON_Time_Occupation', 'Efficiency'].includes(property)
+        (property) => ['MES_prs', 'NAU_prs', 'Discard_prs', 'ON_Time_Occupation', 'Efficiency'].includes(property)
     );
 
     useEffect(() => {
