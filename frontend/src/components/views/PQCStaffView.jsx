@@ -67,7 +67,7 @@ function PQCStaffView() {
         },
         {
             field: 'defects',
-            renderHeader: (params) => renderHeaderWithUnit('Defects', 'PCS', params.colDef.description),
+            renderHeader: (params) => renderHeaderWithUnit('Defect', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',

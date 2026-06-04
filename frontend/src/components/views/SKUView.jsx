@@ -4,6 +4,7 @@ import axios from "axios";
 import TableView from "./TableView";
 import { SKUChartModal } from '../modals/ChartModal';
 import { MachDetailTableModal } from '../modals/TableModal';
+import { renderHeaderWithUnit } from "../utils";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -33,7 +34,7 @@ function SKUView() {
         },
         {
             field: 'MES_prs',
-            headerName: 'MES (prs)',
+            renderHeader: () => renderHeaderWithUnit('MES', 'PRS'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -41,7 +42,7 @@ function SKUView() {
         },
         {
             field: 'NAU_prs',
-            headerName: 'NAU (prs)',
+            renderHeader: () => renderHeaderWithUnit('NAU', 'PRS'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -49,7 +50,7 @@ function SKUView() {
         },
         {
             field: 'Discard_prs',
-            headerName: 'Discard (prs)',
+            renderHeader: () => renderHeaderWithUnit('Discard', 'PRS'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -57,7 +58,7 @@ function SKUView() {
         },
         {
             field: 'ON_Time_Occupation',
-            headerName: 'ON Time (%)',
+            renderHeader: () => renderHeaderWithUnit('ON Time', '%'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -67,7 +68,7 @@ function SKUView() {
         },
         {
             field: 'Efficiency',
-            headerName: 'Mach Eff (%)',
+            renderHeader: () => renderHeaderWithUnit('Mach Eff', '%'),
             flex: 1,
             type: 'number',
             align: 'center',

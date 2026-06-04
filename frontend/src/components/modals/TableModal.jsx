@@ -147,7 +147,7 @@ export function CodeStopTableModal({open, onClose, rec, metaData}){
         },
         {
             field: 'dur_sum',
-            headerName: 'Duration (SUM)',
+            renderHeader: () => renderHeaderWithUnit('Duration', 'SUM'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -157,7 +157,7 @@ export function CodeStopTableModal({open, onClose, rec, metaData}){
         },
         {
             field: 'dur_med',
-            headerName: 'Duration (MED)',
+            renderHeader: () => renderHeaderWithUnit('Duration', 'MED'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -227,7 +227,7 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
         },
         {
             field: 'MES_prs',
-            headerName: 'MES (prs)',
+            renderHeader: () => renderHeaderWithUnit('MES', 'PRS'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -235,7 +235,7 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
         },
         {
             field: 'NAU_prs',
-            headerName: 'NAU (prs)',
+            renderHeader: () => renderHeaderWithUnit('NAU', 'PRS'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -243,7 +243,7 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
         },
         {
             field: 'Discard_prs',
-            headerName: 'Discard (prs)',
+            renderHeader: () => renderHeaderWithUnit('Discard', 'PRS'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -251,7 +251,7 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
         },
         {
             field: 'defects',
-            headerName: 'Defect (prs)',
+            renderHeader: (params) => renderHeaderWithUnit('Defect', 'PRS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -289,7 +289,7 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
         },
         {
             field: 'ON_Time_Occupation',
-            headerName: 'ON Time (%)',
+            renderHeader: () => renderHeaderWithUnit('ON Time', '%'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -299,7 +299,7 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
         },
         {
             field: 'Mach_Efficiency',
-            headerName: 'Mach Eff (%)',
+            renderHeader: () => renderHeaderWithUnit('Mach Eff', '%'),
             flex: 1,
             type: 'number',
             align: 'center',

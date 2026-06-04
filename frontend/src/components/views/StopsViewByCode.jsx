@@ -4,7 +4,7 @@ import axios from 'axios';
 import TableView from "./TableView";
 import { CodeStopTableModal } from "../modals/TableModal";
 import { CodeStopChartModal } from '../modals/ChartModal';
-import { formatSeconds, minuteFilterOperators } from "../utils";
+import { formatSeconds, minuteFilterOperators, renderHeaderWithUnit } from "../utils";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -56,6 +56,7 @@ function StopsViewByCode() {
         {
             field: 'dur_sum',
             headerName: 'Duration (SUM)',
+            renderHeader: () => renderHeaderWithUnit('Duration', 'SUM'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -65,7 +66,7 @@ function StopsViewByCode() {
         },
         {
             field: 'dur_med',
-            headerName: 'Duration (Medium)',
+            renderHeader: () => renderHeaderWithUnit('Duration', 'MED'),
             flex: 1,
             type: 'number',
             align: 'center',
