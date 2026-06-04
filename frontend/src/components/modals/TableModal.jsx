@@ -250,6 +250,24 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
             headerAlign: 'center',
         },
         {
+            field: 'defects',
+            headerName: 'Defect (prs)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'PQC defects',
+        },
+        {
+            field: 'pqc_cnt',
+            headerName: 'Checks',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'PQC checks',
+        },
+        {
             field: "ON_Time",
             headerName: "ON Time",
             type: 'number',
@@ -305,7 +323,7 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
             open={open}
             onClose={onClose}
             fullWidth
-            maxWidth="lg"
+            maxWidth="xl"
         >
             {metaData.style ? 
                 <DialogTitle>

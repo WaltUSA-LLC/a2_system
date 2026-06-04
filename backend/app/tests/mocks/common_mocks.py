@@ -66,6 +66,25 @@ def patch_extract_base_data(monkeypatch, module, df: pd.DataFrame):
     return mock_extract_base_data
 
 
+def patch_extract_pqc_data(monkeypatch, module, df: pd.DataFrame):
+    """
+    Patch _extract_pqc_data inside the module under test.
+    """
+
+    def fake_extract_pqc_data(start_time, end_time, shift):
+        return df.copy()
+
+    mock_extract_pqc_data = Mock(side_effect=fake_extract_pqc_data)
+
+    monkeypatch.setattr(
+        module,
+        "_extract_pqc_data",
+        mock_extract_pqc_data,
+    )
+
+    return mock_extract_pqc_data
+
+
 def patch_get_staff_schedule_table(monkeypatch, module, df: pd.DataFrame):
     """
     Patch get_staff_schedule_table inside the module under test.
@@ -88,17 +107,54 @@ def patch_get_staff_schedule_table(monkeypatch, module, df: pd.DataFrame):
     return mock_get_staff_schedule_table
 
 
+def patch_merge_pqc_to_mach_dialog(monkeypatch, module):
+    """
+    Patch merge_pqc_to_mach_dialog inside the module under test.
+    If df is omitted, the patched merge returns the input view DataFrame.
+    """
+
+    def fake_merge_pqc_to_mach_dialog(view_df, start_time, shift):
+        df = view_df.copy()
+        df = df.replace([np.nan, np.inf, -np.inf], None)
+        return df
+
+    mock_merge_pqc_to_mach_dialog = Mock(side_effect=fake_merge_pqc_to_mach_dialog)
+
+    monkeypatch.setattr(
+        module,
+        "merge_pqc_to_mach_dialog",
+        mock_merge_pqc_to_mach_dialog,
+    )
+
+    return mock_merge_pqc_to_mach_dialog
+
+
+def patch_merge_pqc_to_shift_view(monkeypatch, module):
+    """
+    Patch merge_pqc_to_shift_view inside the module under test.
+    If df is omitted, the patched merge returns the input view DataFrame.
+    """
+
+    def fake_merge_pqc_to_shift_view(view_df, start_time, end_time, shift):
+        df = view_df.copy()
+        df = df.replace([np.nan, np.inf, -np.inf], None)
+        return df
+
+    mock_merge_pqc_to_shift_view = Mock(side_effect=fake_merge_pqc_to_shift_view)
+
+    monkeypatch.setattr(
+        module,
+        "merge_pqc_to_shift_view",
+        mock_merge_pqc_to_shift_view,
+    )
+
+    return mock_merge_pqc_to_shift_view
+
+
 def patch_merge_staff_info_to_view(monkeypatch, module):
     """
     Patch merge_staff_info_to_view inside the module under test.
     If df is omitted, the patched merge returns the input view DataFrame.
-
-    Example:
-        patch_merge_staff_info_to_view(
-            monkeypatch,
-            shift_view,
-            make_base_shift_view_df(),
-        )
     """
 
     def fake_merge_staff_info_to_view(view_df, start_time, end_time):

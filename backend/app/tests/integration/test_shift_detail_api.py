@@ -2,8 +2,8 @@
 Test cases for /base/shift/detail API:
 
 1. Output schema
-   - Verify the API returns machine-detail and staff records with expected
-     fields.
+   - Verify the API returns machine-detail, PQC, and staff records with
+     expected fields.
 
 2. Extractor arguments
    - Verify extract_base_data receives MESExtractor, start as both start/end,
@@ -32,11 +32,13 @@ Test cases for /base/shift/detail API:
 import pytest
 from fastapi.testclient import TestClient
 
+import app.services.pqc_view as pqc_view
 import app.services.staff_info as staff_info
 import app.services.shift_view as shift_view
 from app.main import app
 from app.tests.mocks.common_mocks import (
     patch_extract_base_data,
+    patch_extract_pqc_data,
     patch_get_staff_schedule_table,
 )
 from app.tests.mocks.handle_shift_mach_detail_mocks import (
@@ -44,6 +46,10 @@ from app.tests.mocks.handle_shift_mach_detail_mocks import (
     make_empty_shift_mach_detail_df,
     make_shift_mach_detail_df_for_metrics_and_comments,
     make_shift_mach_detail_df_with_duplicate_mach,
+)
+from app.tests.mocks.pqc_view_mocks import (
+    make_base_pqc_mach_detail_df,
+    make_metrics_pqc_mach_detail_df,
 )
 from app.tests.mocks.staff_schedule_mocks import (
     STAFF_ROLE_COLUMNS,
@@ -71,6 +77,8 @@ EXPECTED_COLUMNS = [
     "ON_Time_Occupation",
     "Mach_Efficiency",
     "Comment",
+    "defects",
+    "pqc_cnt",
 ]
 
 
@@ -89,6 +97,11 @@ def test_shift_detail_api_output_columns(monkeypatch):
         monkeypatch,
         staff_info,
         make_multi_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_mach_detail_df(),
     )
 
     response = client.get(
@@ -127,6 +140,11 @@ def test_shift_detail_api_detail_and_staff_lookup_arguments(monkeypatch):
         staff_info,
         make_base_staff_schedule_df(),
     )
+    pqc_extract_mock = patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_mach_detail_df(),
+    )
 
     response = client.get(
         "/base/shift/detail",
@@ -147,6 +165,11 @@ def test_shift_detail_api_detail_and_staff_lookup_arguments(monkeypatch):
         "2026-05-01",
         "2026-05-01",
     )
+    pqc_extract_mock.assert_called_once_with(
+        "2026-05-01",
+        "2026-05-01",
+        1,
+    )
 
 
 def test_shift_detail_api_empty_df(monkeypatch):
@@ -165,6 +188,11 @@ def test_shift_detail_api_empty_df(monkeypatch):
         staff_info,
         make_base_staff_schedule_df(),
     )
+    pqc_extract_mock = patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_mach_detail_df(),
+    )
 
     response = client.get(
         "/base/shift/detail",
@@ -178,6 +206,7 @@ def test_shift_detail_api_empty_df(monkeypatch):
     payload = response.json()
 
     assert payload["content"] == []
+    pqc_extract_mock.assert_not_called()
     assert payload["staff"] == [
         {
             "Creeler": "Alice",
@@ -212,6 +241,11 @@ def test_shift_detail_api_metrics_and_comments(monkeypatch):
         staff_info,
         make_base_staff_schedule_df(),
     )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_metrics_pqc_mach_detail_df(),
+    )
 
     response = client.get(
         "/base/shift/detail",
@@ -237,12 +271,16 @@ def test_shift_detail_api_metrics_and_comments(monkeypatch):
     assert good["ON_Time_Occupation"] == pytest.approx(0.9)
     assert good["Mach_Efficiency"] == pytest.approx(1.8)
     assert good["Comment"] == "Good"
+    assert good["defects"] == 2
+    assert good["pqc_cnt"] == 2
 
     assert low["MES_prs"] == 1
     assert low["Discard_prs"] == 3
     assert low["ON_Time_Occupation"] == pytest.approx(0.9)
     assert low["Mach_Efficiency"] == pytest.approx(0.2)
     assert low["Comment"] == "Low Ef"
+    assert low["defects"] == 3
+    assert low["pqc_cnt"] == 1
 
 
 def test_shift_detail_api_duplicate_mach_rows_preserved(monkeypatch):
@@ -259,6 +297,11 @@ def test_shift_detail_api_duplicate_mach_rows_preserved(monkeypatch):
         monkeypatch,
         staff_info,
         make_base_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_mach_detail_df(),
     )
 
     response = client.get(
@@ -281,6 +324,8 @@ def test_shift_detail_api_duplicate_mach_rows_preserved(monkeypatch):
     assert len(content) == 3
     assert len(m1_records) == 2
     assert [record["Discard_prs"] for record in m1_records] == [1, 3]
+    assert [record["defects"] for record in m1_records] == [2, None]
+    assert [record["pqc_cnt"] for record in m1_records] == [2, None]
 
 
 def test_shift_detail_api_night_shift_staff(monkeypatch):
@@ -297,6 +342,11 @@ def test_shift_detail_api_night_shift_staff(monkeypatch):
         monkeypatch,
         staff_info,
         make_multi_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_mach_detail_df(),
     )
 
     response = client.get(
@@ -336,6 +386,11 @@ def test_shift_detail_api_no_matching_staff_returns_empty_staff(
         staff_info,
         make_base_staff_schedule_df(),
     )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_mach_detail_df(),
+    )
 
     response = client.get(
         "/base/shift/detail",
@@ -366,6 +421,11 @@ def test_shift_detail_api_empty_staff_schedule_returns_empty_staff(
         monkeypatch,
         staff_info,
         make_empty_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_mach_detail_df(),
     )
 
     response = client.get(

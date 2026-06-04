@@ -2,8 +2,8 @@
 Test cases for /base/shift API:
 
 1. Output schema
-   - Verify the API returns content records with expected shift and staff
-     schedule fields.
+   - Verify the API returns content records with expected shift, PQC, and
+     staff schedule fields.
 
 2. Extractor arguments
    - Verify extract_base_data receives MESExtractor, start, end, and shift,
@@ -15,28 +15,34 @@ Test cases for /base/shift API:
 
 4. Single-shift aggregation
    - Verify one Shift_Start_Time group is aggregated and serialized with
-     matching staff schedule fields.
+     matching PQC and staff schedule fields.
 
 5. Multiple-shift aggregation
    - Verify multiple Shift_Start_Time groups produce multiple API records
-     with their matching staff schedule fields.
+     with their matching PQC and staff schedule fields.
 
 """
 
 import pytest
 from fastapi.testclient import TestClient
 
+import app.services.pqc_view as pqc_view
 import app.services.staff_info as staff_info
 import app.services.shift_view as shift_view
 from app.main import app
 from app.tests.mocks.common_mocks import (
     patch_extract_base_data,
+    patch_extract_pqc_data,
     patch_get_staff_schedule_table,
 )
 from app.tests.mocks.handle_shift_view_mocks import (
     make_base_shift_df,
     make_empty_shift_df,
     make_multi_shift_df,
+)
+from app.tests.mocks.pqc_view_mocks import (
+    make_base_pqc_shift_df,
+    make_multi_pqc_shift_df,
 )
 from app.tests.mocks.staff_schedule_mocks import (
     make_base_staff_schedule_df,
@@ -58,6 +64,8 @@ EXPECTED_COLUMNS = [
     "ST_prs",
     "eff",
     "Time_Occupation",
+    "defects",
+    "pqc_cnt",
     "Creeler",
     "KO",
     "Tech",
@@ -78,6 +86,11 @@ def test_shift_api_output_columns(monkeypatch):
         monkeypatch,
         staff_info,
         make_base_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_shift_df(),
     )
 
     response = client.get(
@@ -111,6 +124,11 @@ def test_shift_api_extract_base_data_arguments(monkeypatch):
         staff_info,
         make_base_staff_schedule_df(),
     )
+    pqc_extract_mock = patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_shift_df(),
+    )
 
     response = client.get(
         "/base/shift",
@@ -132,6 +150,11 @@ def test_shift_api_extract_base_data_arguments(monkeypatch):
         "2026-05-01",
         "2026-05-02",
     )
+    pqc_extract_mock.assert_called_once_with(
+        "2026-05-01",
+        "2026-05-02",
+        1,
+    )
 
 
 def test_shift_api_empty_df(monkeypatch):
@@ -149,6 +172,11 @@ def test_shift_api_empty_df(monkeypatch):
         staff_info,
         make_base_staff_schedule_df(),
     )
+    pqc_extract_mock = patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_shift_df(),
+    )
 
     response = client.get(
         "/base/shift",
@@ -161,6 +189,7 @@ def test_shift_api_empty_df(monkeypatch):
 
     assert response.status_code == 200
     assert response.json() == {"content": []}
+    pqc_extract_mock.assert_not_called()
     staff_schedule_mock.assert_not_called()
 
 
@@ -178,6 +207,11 @@ def test_shift_api_single_shift_aggregation(monkeypatch):
         monkeypatch,
         staff_info,
         make_base_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_shift_df(),
     )
 
     response = client.get(
@@ -203,6 +237,8 @@ def test_shift_api_single_shift_aggregation(monkeypatch):
     assert row["ST_prs"] == 10
     assert row["eff"] == pytest.approx(0.7)
     assert row["Time_Occupation"] == pytest.approx(0.85)
+    assert row["defects"] == 2
+    assert row["pqc_cnt"] == 2
     assert row["Creeler"] == "Alice"
     assert row["KO"] == "Bob"
     assert row["Tech"] == "Charlie"
@@ -222,6 +258,11 @@ def test_shift_api_multiple_shift_aggregation(monkeypatch):
         monkeypatch,
         staff_info,
         make_multi_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_multi_pqc_shift_df(),
     )
 
     response = client.get(
@@ -253,6 +294,8 @@ def test_shift_api_multiple_shift_aggregation(monkeypatch):
     assert shift_1["ST_prs"] == 9
     assert shift_1["eff"] == pytest.approx(0.889)
     assert shift_1["Time_Occupation"] == pytest.approx(0.889)
+    assert shift_1["defects"] == 2
+    assert shift_1["pqc_cnt"] == 2
     assert shift_1["Creeler"] == "Alice"
     assert shift_1["KO"] == "Bob"
     assert shift_1["Tech"] == "Charlie"
@@ -265,6 +308,8 @@ def test_shift_api_multiple_shift_aggregation(monkeypatch):
     assert shift_2["ST_prs"] == 6
     assert shift_2["eff"] == pytest.approx(1.667)
     assert shift_2["Time_Occupation"] == pytest.approx(0.75)
+    assert shift_2["defects"] == 3
+    assert shift_2["pqc_cnt"] == 3
     assert shift_2["Creeler"] == "Evan"
     assert shift_2["KO"] == "Fatima"
     assert shift_2["Tech"] == "Grace"

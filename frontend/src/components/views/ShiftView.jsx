@@ -18,7 +18,7 @@ function ShiftView() {
         {
             field: 'Shift_Start_Time',
             headerName: 'Shift Start Time',
-            flex: 1,
+            flex: 2,
             type: 'string',
             align: 'center',
             headerAlign: 'center',
@@ -82,6 +82,24 @@ function ShiftView() {
             headerAlign: 'center',
             valueGetter: (value) => value * 100,
             valueFormatter: (value) => `${value.toFixed(1)}%`,
+        },
+        {
+            field: 'defects',
+            headerName: 'Defect (prs)',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'PQC defects',
+        },
+        {
+            field: 'pqc_cnt',
+            headerName: 'Checks',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'PQC checks',
         },
         {
             field: 'KO',

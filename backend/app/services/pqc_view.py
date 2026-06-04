@@ -1,14 +1,20 @@
 import pandas as pd
 import numpy as np
+from fastapi import HTTPException
 from extractors import PQCExtractor
 from app.services.utils import extract_base_data
 
-def handle_pqc_view_by_staff(start_time:str, end_time:str, shift:int)->pd.DataFrame:
+def _extract_pqc_data(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(PQCExtractor, start_time, end_time, shift)
     df["Date"] = pd.to_datetime(df["Date"]).dt.date
     df["Shift_Start_Time"] = pd.to_datetime(df["Date"].astype(str) + " " + df["Shift"].astype(str))
     df["Name"] = df["Name"].str.split("-").str[1].str.strip()
     df = df.drop(columns=["Date", "Shift"])
+    return df
+
+
+def handle_pqc_view_by_staff(start_time:str, end_time:str, shift:int)->pd.DataFrame:
+    df = _extract_pqc_data(start_time, end_time, shift)
     
     df = df.groupby(["Shift_Start_Time", "Name"], as_index=False).agg(
         pqc_cnt=("MachID", "size"),
@@ -38,11 +44,7 @@ def handle_pqc_view_by_staff(start_time:str, end_time:str, shift:int)->pd.DataFr
 
 
 def handle_pqc_view_by_staff_detail(start_time:str, shift:int, name:str)->pd.DataFrame:
-    df = extract_base_data(PQCExtractor, start_time, start_time, shift)
-    df["Date"] = pd.to_datetime(df["Date"]).dt.date
-    df["Shift_Start_Time"] = pd.to_datetime(df["Date"].astype(str) + " " + df["Shift"].astype(str))
-    df["Name"] = df["Name"].str.split("-").str[1].str.strip()
-    df = df.drop(columns=["Date", "Shift"])
+    df = _extract_pqc_data(start_time, start_time, shift)
     df = df[df["Name"]==name]
 
     df = df[["DateRec", "MachID", "Style_Code", "toeHole", "brokenNDL", "missNDL", "fanYarn", "missYarn", "logoIssue", "dirty", "feisha", "other"]]
@@ -53,14 +55,16 @@ def handle_pqc_view_by_staff_detail(start_time:str, shift:int, name:str)->pd.Dat
     return df
 
 
-def handle_pqc_mach_detail(start_time:str, end_time:str, shift:int)->pd.DataFrame:
-    df = extract_base_data(PQCExtractor, start_time, end_time, shift)
-    df["Date"] = pd.to_datetime(df["Date"]).dt.date
-    df["Shift_Start_Time"] = pd.to_datetime(df["Date"].astype(str) + " " + df["Shift"].astype(str))
-    df["Name"] = df["Name"].str.split("-").str[1].str.strip()
-    df = df.drop(columns=["Date", "Shift"])
+def merge_pqc_to_mach_dialog(df:pd.DataFrame, start_time:str, shift:int)->pd.DataFrame:
+    if shift == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="shift can't be zero in mach dialog."
+        )
+    
+    df_defect = _extract_pqc_data(start_time, start_time, shift)
 
-    df = df.groupby(["Shift_Start_Time", "MachID", "Style_Code"], as_index=False).agg(
+    df_defect = df_defect.groupby(["MachID", "Style_Code"], as_index=False).agg(
         pqc_cnt=("MachID", "size"),
         toeHole=("toeHole", "sum"),
         brokenNDL=("brokenNDL", "sum"),
@@ -72,10 +76,32 @@ def handle_pqc_mach_detail(start_time:str, end_time:str, shift:int)->pd.DataFram
         feisha=("feisha", "sum"),
         other=("other", "sum")
     )
-    df["defects"] = df[["toeHole", "brokenNDL", "missNDL", "fanYarn", \
+    df_defect["defects"] = df_defect[["toeHole", "brokenNDL", "missNDL", "fanYarn", \
                         "missYarn", "logoIssue", "dirty", "feisha", "other"]].apply(lambda rec: sum(rec),axis=1)
+    df_defect["defects"] = df_defect["defects"] // 2
+    df_defect = df_defect[["MachID", "Style_Code", "defects", "pqc_cnt"]]
+    df = df.merge(df_defect, on=["MachID", "Style_Code"], how="left")
+    return df
 
-    df = df.sort_values(["Shift_Start_Time", "MachID"])
-    df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
-    df = df.reset_index(names="id")
+
+def merge_pqc_to_shift_view(df:pd.DataFrame, start_time:str, end_time:str, shift:int)->pd.DataFrame:
+    df_defect = _extract_pqc_data(start_time, end_time, shift)
+
+    df_defect = df_defect.groupby(["Shift_Start_Time"], as_index=False).agg(
+        pqc_cnt=("MachID", "size"),
+        toeHole=("toeHole", "sum"),
+        brokenNDL=("brokenNDL", "sum"),
+        missNDL=("missNDL", "sum"),
+        fanYarn=("fanYarn", "sum"),
+        missYarn=("missYarn", "sum"),
+        logoIssue=("logoIssue", "sum"),
+        dirty=("dirty", "sum"),
+        feisha=("feisha", "sum"),
+        other=("other", "sum")
+    )
+    df_defect["defects"] = df_defect[["toeHole", "brokenNDL", "missNDL", "fanYarn", \
+                        "missYarn", "logoIssue", "dirty", "feisha", "other"]].apply(lambda rec: sum(rec),axis=1)
+    df_defect["defects"] = df_defect["defects"] // 2
+    df_defect = df_defect[["Shift_Start_Time", "defects", "pqc_cnt"]]
+    df = df.merge(df_defect, on="Shift_Start_Time", how="left")
     return df

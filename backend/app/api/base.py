@@ -7,7 +7,6 @@ from app.services.stop_view import handle_stop_view_by_mach
 from app.services.stop_view import handle_stop_mach_detail
 from app.services.stop_view import handle_stop_code_detail
 from app.services.staff_info import fetch_staff_info_by_date_and_shift
-from app.services.pqc_view import handle_pqc_mach_detail
 from app.services.pqc_view import handle_pqc_view_by_staff
 from app.services.pqc_view import handle_pqc_view_by_staff_detail
 
@@ -76,9 +75,4 @@ def get_pqc_staff(start:str, end:str, shift: int):
 @router.get("/pqc/staff/detail")
 def get_pqc_staff_detail(start:str, shift: int, name: str):
     df = handle_pqc_view_by_staff_detail(start, shift, name)
-    return {"content": df.to_dict(orient="records")}
-
-@router.get("/pqc/mach")
-def get_pqc_mach(start:str, end:str, shift: int):
-    df = handle_pqc_mach_detail(start, end, shift)
     return {"content": df.to_dict(orient="records")}

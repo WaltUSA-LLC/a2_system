@@ -8,6 +8,7 @@ from app.services.utils import extract_base_data, \
     distributeWeightForSameMach, \
     filterShutdownMach
 from app.services.staff_info import merge_staff_info_to_view
+from app.services.pqc_view import merge_pqc_to_shift_view, merge_pqc_to_mach_dialog
 
 
 def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
@@ -48,7 +49,8 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
 
     df_shift.reset_index(inplace=True)
     df_shift = df_shift.reset_index(names="id")
-    #df_shift = df_shift.replace([np.nan, np.inf, -np.inf], None)
+    
+    df_shift = merge_pqc_to_shift_view(df_shift, start_time, end_time, shift)
     df_shift = merge_staff_info_to_view(df_shift, start_time, end_time)
     return df_shift
 
@@ -72,6 +74,8 @@ def handle_shift_mach_detail(start_time:str, shift:int)->pd.DataFrame:
     df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
     df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
     df = df[["MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "Discard_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
+    
+    df = merge_pqc_to_mach_dialog(df, start_time, shift)
     df = df.reset_index(names="id")
     df = df.replace([np.nan, np.inf, -np.inf], None)
     df = df.sort_values(by="MachID", ascending=True)

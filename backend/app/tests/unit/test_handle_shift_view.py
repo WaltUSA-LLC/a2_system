@@ -51,6 +51,7 @@ from app.tests.mocks.common_mocks import (
     patch_common_dependencies,
     patch_extract_base_data,
     patch_merge_staff_info_to_view,
+    patch_merge_pqc_to_shift_view,
 )
 
 from app.tests.mocks.handle_shift_view_mocks import (
@@ -91,6 +92,14 @@ def _assert_merge_staff_info_called_once(mock, start_time, end_time):
     assert actual_end_time == end_time
 
 
+def _assert_merge_pqc_into_shift_view_called_once(mock, start_time, end_time, shift):
+    mock.assert_called_once()
+    _, actual_start_time, actual_end_time, actual_shift = mock.call_args.args
+    assert actual_start_time == start_time
+    assert actual_end_time == end_time
+    assert actual_shift == shift
+
+
 def test_handle_shift_view_output_columns(monkeypatch):
     """
     Test final output schema.
@@ -108,6 +117,11 @@ def test_handle_shift_view_output_columns(monkeypatch):
         mocks,
     )
     patch_merge_staff_info_to_view(
+        monkeypatch,
+        shift_view,
+    )
+
+    patch_merge_pqc_to_shift_view(
         monkeypatch,
         shift_view,
     )
@@ -144,6 +158,10 @@ def test_handle_shift_view_calls_invoked_functions(monkeypatch):
         monkeypatch,
         shift_view,
     )
+    pqc_merge_mock = patch_merge_pqc_to_shift_view(
+        monkeypatch,
+        shift_view,
+    )
 
     result = shift_view.handle_shift_view(
         start_time="2026-05-01",
@@ -161,6 +179,12 @@ def test_handle_shift_view_calls_invoked_functions(monkeypatch):
         staff_merge_mock,
         "2026-05-01",
         "2026-05-02",
+    )
+    _assert_merge_pqc_into_shift_view_called_once(
+        pqc_merge_mock,
+        "2026-05-01",
+        "2026-05-02",
+        1,
     )
 
 
@@ -185,6 +209,10 @@ def test_handle_shift_view_empty_df(monkeypatch):
         monkeypatch,
         shift_view,
     )
+    pqc_merge_mock = patch_merge_pqc_to_shift_view(
+        monkeypatch,
+        shift_view,
+    )
 
     result = shift_view.handle_shift_view(
         start_time="2026-05-01",
@@ -200,6 +228,7 @@ def test_handle_shift_view_empty_df(monkeypatch):
     mocks["filterShutdownMach"].assert_not_called()
     mocks["estimate_mes_output_prs"].assert_not_called()
     mocks["estimate_st_output_prs"].assert_not_called()
+    pqc_merge_mock.assert_not_called()
     staff_merge_mock.assert_not_called()
 
 
@@ -220,6 +249,7 @@ def test_handle_shift_view_single_shift_aggregation(monkeypatch):
         shift_view,
         mocks,
     )
+    patch_merge_pqc_to_shift_view(monkeypatch, shift_view)
     patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
@@ -257,6 +287,7 @@ def test_handle_shift_view_multiple_shift_aggregation(monkeypatch):
         shift_view,
         mocks,
     )
+    patch_merge_pqc_to_shift_view(monkeypatch, shift_view)
     patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
@@ -304,6 +335,7 @@ def test_handle_shift_view_duplicate_mach_counted_once(monkeypatch):
         shift_view,
         mocks,
     )
+    patch_merge_pqc_to_shift_view(monkeypatch, shift_view)
     patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
@@ -345,6 +377,7 @@ def test_handle_shift_view_filter_shutdown_mach_affects_aggregation(
         shift_view,
         mocks,
     )
+    patch_merge_pqc_to_shift_view(monkeypatch, shift_view)
     patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
@@ -383,6 +416,7 @@ def test_handle_shift_view_infinite_efficiency_becomes_none(monkeypatch):
         shift_view,
         mocks,
     )
+    patch_merge_pqc_to_shift_view(monkeypatch, shift_view)
     patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
@@ -415,6 +449,7 @@ def test_handle_shift_view_nan_time_occupation_becomes_none(monkeypatch):
         shift_view,
         mocks,
     )
+    patch_merge_pqc_to_shift_view(monkeypatch, shift_view)
     patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
@@ -455,6 +490,10 @@ def test_handle_shift_view_filtered_empty_returns_empty(
         monkeypatch,
         shift_view,
     )
+    pqc_merge_mock = patch_merge_pqc_to_shift_view(
+        monkeypatch,
+        shift_view,
+    )
 
     result = shift_view.handle_shift_view(
         start_time="2026-05-01 00:00:00",
@@ -463,6 +502,7 @@ def test_handle_shift_view_filtered_empty_returns_empty(
     )
 
     assert result.empty
+    pqc_merge_mock.assert_not_called()
     staff_merge_mock.assert_not_called()
 
 
@@ -484,6 +524,7 @@ def test_handle_shift_view_nan_st_prs_current_behavior(monkeypatch):
         shift_view,
         mocks,
     )
+    patch_merge_pqc_to_shift_view(monkeypatch, shift_view)
     patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
@@ -519,6 +560,7 @@ def test_handle_shift_view_nan_discard_prs_current_behavior(monkeypatch):
         shift_view,
         mocks,
     )
+    patch_merge_pqc_to_shift_view(monkeypatch, shift_view)
     patch_merge_staff_info_to_view(monkeypatch, shift_view)
 
     result = shift_view.handle_shift_view(
