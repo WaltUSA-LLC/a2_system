@@ -1,4 +1,6 @@
 import { GridFilterInputValue } from "@mui/x-data-grid";
+import Tooltip from "@mui/material/Tooltip";
+import { createElement } from "react";
 
 export const minuteFilterOperators = [
         {
@@ -74,4 +76,29 @@ export function formatSeconds(sec) {
     const m = Math.floor((sec % 3600) / 60);
     const s = sec % 60;
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+
+export function renderHeaderWithUnit(label, unit, description = "") {
+    const header = createElement(
+        "span",
+        { style: { fontWeight: "bold" } },
+        label,
+        " ",
+        createElement(
+            "span",
+            { style: { fontSize: "0.5rem", fontWeight: 500 } },
+            '('+unit+')'
+        )
+    );
+
+    if (!description) {
+        return header;
+    }
+
+    return createElement(
+        Tooltip,
+        { title: description, arrow: true },
+        header
+    );
 }

@@ -3,7 +3,7 @@ import axios from "axios";
 
 import TableView from "./TableView";
 import { PQCStaffDetailTableModal } from '../modals/TableModal';
-import { formatSeconds, minuteFilterOperators } from "../utils";
+import { formatSeconds, minuteFilterOperators, renderHeaderWithUnit } from "../utils";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -67,7 +67,7 @@ function PQCStaffView() {
         },
         {
             field: 'defects',
-            headerName: 'Defects',
+            renderHeader: (params) => renderHeaderWithUnit('Defects', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -76,7 +76,7 @@ function PQCStaffView() {
         },
         {
             field: 'toeHole',
-            headerName: 'Hole',
+            renderHeader: () => renderHeaderWithUnit('Hole', 'PCS'),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -84,7 +84,7 @@ function PQCStaffView() {
         },
         {
             field: 'brokenNDL',
-            headerName: 'N-Brok',
+            renderHeader: (params) => renderHeaderWithUnit('N-Brok', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -93,7 +93,7 @@ function PQCStaffView() {
         },
         {
             field: 'missNDL',
-            headerName: 'N-Miss',
+            renderHeader: (params) => renderHeaderWithUnit('N-Miss', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -102,25 +102,25 @@ function PQCStaffView() {
         },
         {
             field: 'missYarn',
-            headerName: 'Y-Brok',
+            renderHeader: (params) => renderHeaderWithUnit('Y-Miss', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
             headerAlign: 'center',
-            description: 'Yarn Broken',
+            description: 'Yarn Miss',
         },
         {
             field: 'fanYarn',
-            headerName: 'Y-Rtn',
+            renderHeader: (params) => renderHeaderWithUnit('Y-Rtn', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
             headerAlign: 'center',
-            description: 'Yarn Return',
+            description: 'Yarn Misplace',
         },
         {
             field: 'feisha',
-            headerName: 'Y-Fly',
+            renderHeader: (params) => renderHeaderWithUnit('Y-Fly', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -129,7 +129,7 @@ function PQCStaffView() {
         },
         {
             field: 'logoIssue',
-            headerName: 'Logo',
+            renderHeader: (params) => renderHeaderWithUnit('Logo', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -138,7 +138,8 @@ function PQCStaffView() {
         },
         {
             field: 'dirty',
-            headerName: 'Stain',
+            headerName: 'Stain (PCS)',
+            renderHeader: (params) => renderHeaderWithUnit('Stain', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -146,7 +147,7 @@ function PQCStaffView() {
         },
         {
             field: 'other',
-            headerName: 'Other',
+            renderHeader: (params) => renderHeaderWithUnit('Other', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',

@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import { DataGrid } from '@mui/x-data-grid';
 
-import { formatSeconds, minuteFilterOperators, hourFilterOperators } from "../utils";
+import { formatSeconds, minuteFilterOperators, hourFilterOperators, renderHeaderWithUnit } from "../utils";
 import { Typography } from '@mui/material';
 
 export function MachStopTableModal({open, onClose, rec, metaData}){
@@ -402,7 +402,7 @@ export function PQCStaffDetailTableModal({open, onClose, rec, metaData}) {
         },
         {
             field: 'toeHole',
-            headerName: 'Hole',
+            renderHeader: (params) => renderHeaderWithUnit('Hole', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -410,7 +410,7 @@ export function PQCStaffDetailTableModal({open, onClose, rec, metaData}) {
         },
         {
             field: 'brokenNDL',
-            headerName: 'N-Brok',
+            renderHeader: (params) => renderHeaderWithUnit('N-Brok', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -419,7 +419,7 @@ export function PQCStaffDetailTableModal({open, onClose, rec, metaData}) {
         },
         {
             field: 'missNDL',
-            headerName: 'N-Miss',
+            renderHeader: (params) => renderHeaderWithUnit('N-Miss', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -428,16 +428,16 @@ export function PQCStaffDetailTableModal({open, onClose, rec, metaData}) {
         },
         {
             field: 'missYarn',
-            headerName: 'Y-Brok',
+            renderHeader: (params) => renderHeaderWithUnit('Y-Miss', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
             headerAlign: 'center',
-            description: 'Yarn Broken',
+            description: 'Yarn Miss',
         },
         {
             field: 'fanYarn',
-            headerName: 'Y-Rtn',
+            renderHeader: (params) => renderHeaderWithUnit('Y-Rtn', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -446,7 +446,7 @@ export function PQCStaffDetailTableModal({open, onClose, rec, metaData}) {
         },
         {
             field: 'feisha',
-            headerName: 'Y-Fly',
+            renderHeader: (params) => renderHeaderWithUnit('Y-Fly', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -455,7 +455,7 @@ export function PQCStaffDetailTableModal({open, onClose, rec, metaData}) {
         },
         {
             field: 'logoIssue',
-            headerName: 'Logo',
+            renderHeader: (params) => renderHeaderWithUnit('Logo', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -464,7 +464,7 @@ export function PQCStaffDetailTableModal({open, onClose, rec, metaData}) {
         },
         {
             field: 'dirty',
-            headerName: 'Stain',
+            renderHeader: (params) => renderHeaderWithUnit('Stain', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
@@ -472,7 +472,7 @@ export function PQCStaffDetailTableModal({open, onClose, rec, metaData}) {
         },
         {
             field: 'other',
-            headerName: 'Other',
+            renderHeader: (params) => renderHeaderWithUnit('Other', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
             align: 'center',
