@@ -63,7 +63,7 @@ def make_base_pqc_mach_detail_df():
         {
             "Shift_Start_Time": [shift_time, shift_time, shift_time, shift_time],
             "MachID": ["M1", "M1", "M2", "M3"],
-            "Style_Code": ["abc red", "abc red", "ABC blue", "xyz black"],
+            "Style_Code": ["ABC RED", "ABC RED", "ABC BLUE", "XYZ BLACK"],
             "toeHole": [1, 1, 0, 0],
             "brokenNDL": [1, 0, 1, 0],
             "missNDL": [0, 1, 1, 0],
@@ -84,7 +84,49 @@ def make_metrics_pqc_mach_detail_df():
         {
             "Shift_Start_Time": [shift_time, shift_time, shift_time, shift_time],
             "MachID": ["M_GOOD", "M_GOOD", "M_BOUNDARY", "M_LOW"],
-            "Style_Code": ["abc red", "abc red", "ABC blue", "abc green"],
+            "Style_Code": ["ABC RED", "ABC RED", "ABC BLUE", "ABC GREEN"],
+            "toeHole": [1, 1, 0, 1],
+            "brokenNDL": [1, 0, 1, 1],
+            "missNDL": [0, 1, 1, 1],
+            "fanYarn": [0, 0, 0, 1],
+            "missYarn": [0, 0, 0, 1],
+            "logoIssue": [0, 0, 0, 1],
+            "dirty": [0, 0, 0, 0],
+            "feisha": [0, 0, 0, 0],
+            "other": [0, 0, 0, 0],
+        }
+    )
+
+
+def make_base_pqc_sku_mach_detail_df():
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
+
+    return pd.DataFrame(
+        {
+            "Shift_Start_Time": [shift_time, shift_time, shift_time, shift_time],
+            "MachID": ["M1", "M2", "M2", "M3"],
+            "Style_Code": ["ABC BLUE", "ABC RED", "ABC RED", "XYZ BLACK"],
+            "toeHole": [0, 1, 1, 0],
+            "brokenNDL": [1, 1, 0, 0],
+            "missNDL": [1, 0, 1, 0],
+            "fanYarn": [0, 0, 0, 0],
+            "missYarn": [0, 0, 0, 0],
+            "logoIssue": [0, 0, 0, 0],
+            "dirty": [0, 0, 0, 0],
+            "feisha": [0, 0, 0, 0],
+            "other": [0, 0, 0, 0],
+        }
+    )
+
+
+def make_metrics_pqc_sku_mach_detail_df():
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
+
+    return pd.DataFrame(
+        {
+            "Shift_Start_Time": [shift_time, shift_time, shift_time, shift_time],
+            "MachID": ["M1", "M1", "M2", "M3"],
+            "Style_Code": ["ABC RED", "ABC RED", "ABC BLUE", "ABC GREEN"],
             "toeHole": [1, 1, 0, 1],
             "brokenNDL": [1, 0, 1, 1],
             "missNDL": [0, 1, 1, 1],

@@ -49,6 +49,7 @@ from app.tests.mocks.common_mocks import (
     make_call_counting_mocks,
     patch_common_dependencies,
     patch_extract_base_data,
+    patch_merge_pqc_to_sku_view,
 )
 
 from app.tests.mocks.handle_sku_view_mocks import (
@@ -83,6 +84,14 @@ def _filter_m2_shutdown_mach(df):
     return df[df["MachID"] != "M2"].copy()
 
 
+def _assert_merge_pqc_to_sku_view_called_once(mock, start_time, end_time, shift):
+    mock.assert_called_once()
+    _, actual_start_time, actual_end_time, actual_shift = mock.call_args.args
+    assert actual_start_time == start_time
+    assert actual_end_time == end_time
+    assert actual_shift == shift
+
+
 def test_handle_sku_view_output_columns(monkeypatch):
     """
     Test final output schema.
@@ -99,6 +108,7 @@ def test_handle_sku_view_output_columns(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_sku_view(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -128,6 +138,10 @@ def test_handle_sku_view_calls_invoked_functions(monkeypatch):
         sku_view,
         mocks,
     )
+    pqc_merge_mock = patch_merge_pqc_to_sku_view(
+        monkeypatch,
+        sku_view,
+    )
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -141,6 +155,12 @@ def test_handle_sku_view_calls_invoked_functions(monkeypatch):
     mocks["filterShutdownMach"].assert_called_once()
     assert mocks["estimate_mes_output_prs"].call_count == len(raw_df)
     assert mocks["estimate_st_output_prs"].call_count == len(raw_df)
+    _assert_merge_pqc_to_sku_view_called_once(
+        pqc_merge_mock,
+        "2026-05-01 00:00:00",
+        "2026-05-02 00:00:00",
+        1,
+    )
 
 
 def test_handle_sku_view_shift_start_time_is_string(monkeypatch):
@@ -159,6 +179,7 @@ def test_handle_sku_view_shift_start_time_is_string(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_sku_view(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -189,6 +210,7 @@ def test_handle_sku_view_normal_grouping(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_sku_view(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -225,6 +247,7 @@ def test_handle_sku_view_multiple_sku_multiple_shift(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_sku_view(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -286,6 +309,7 @@ def test_handle_sku_view_filter_shutdown_mach_affects_discard_aggregation(
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_sku_view(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -317,6 +341,10 @@ def test_handle_sku_view_empty_df(monkeypatch):
         sku_view,
         mocks,
     )
+    pqc_merge_mock = patch_merge_pqc_to_sku_view(
+        monkeypatch,
+        sku_view,
+    )
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -330,6 +358,7 @@ def test_handle_sku_view_empty_df(monkeypatch):
     mocks["filterShutdownMach"].assert_not_called()
     mocks["estimate_mes_output_prs"].assert_not_called()
     mocks["estimate_st_output_prs"].assert_not_called()
+    pqc_merge_mock.assert_not_called()
 
 
 def test_handle_sku_view_nan_st_prs_efficiency_becomes_none(monkeypatch):
@@ -351,6 +380,7 @@ def test_handle_sku_view_nan_st_prs_efficiency_becomes_none(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_sku_view(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -383,6 +413,7 @@ def test_handle_sku_view_nan_discard_prs_current_behavior(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_sku_view(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -413,6 +444,7 @@ def test_handle_sku_view_infinite_efficiency_becomes_none(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_sku_view(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -446,6 +478,7 @@ def test_handle_sku_view_invalid_style_code_is_dropped(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_sku_view(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -476,6 +509,10 @@ def test_handle_sku_view_filtered_empty_returns_empty_with_schema(monkeypatch):
         sku_view,
         mocks,
     )
+    pqc_merge_mock = patch_merge_pqc_to_sku_view(
+        monkeypatch,
+        sku_view,
+    )
 
     result = sku_view.handle_sku_view(
         start_time="2026-05-01 00:00:00",
@@ -484,3 +521,4 @@ def test_handle_sku_view_filtered_empty_returns_empty_with_schema(monkeypatch):
     )
 
     assert result.empty
+    pqc_merge_mock.assert_not_called()

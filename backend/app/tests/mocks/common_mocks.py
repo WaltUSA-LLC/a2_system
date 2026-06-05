@@ -151,6 +151,28 @@ def patch_merge_pqc_to_shift_view(monkeypatch, module):
     return mock_merge_pqc_to_shift_view
 
 
+def patch_merge_pqc_to_sku_view(monkeypatch, module):
+    """
+    Patch merge_pqc_to_sku_view inside the module under test.
+    If df is omitted, the patched merge returns the input view DataFrame.
+    """
+
+    def fake_merge_pqc_to_sku_view(view_df, start_time, end_time, shift):
+        df = view_df.copy()
+        df = df.replace([np.nan, np.inf, -np.inf], None)
+        return df
+
+    mock_merge_pqc_to_sku_view = Mock(side_effect=fake_merge_pqc_to_sku_view)
+
+    monkeypatch.setattr(
+        module,
+        "merge_pqc_to_sku_view",
+        mock_merge_pqc_to_sku_view,
+    )
+
+    return mock_merge_pqc_to_sku_view
+
+
 def patch_merge_staff_info_to_view(monkeypatch, module):
     """
     Patch merge_staff_info_to_view inside the module under test.

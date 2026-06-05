@@ -2,31 +2,43 @@
 Test cases for /base/sku API:
 
 1. Output schema
-   - Verify the API returns SKU records with expected fields.
+   - Verify the API returns SKU records with expected PQC fields.
 
 2. Extractor arguments
-   - Verify extract_base_data receives MESExtractor, start, end, and shift.
+   - Verify extract_base_data receives MESExtractor, start, end, and shift,
+     and PQC extraction receives start, end, and shift.
 
 3. Empty extractor result
-   - Verify an empty extracted DataFrame returns empty API content.
+   - Verify an empty extracted DataFrame returns empty API content without
+     querying PQC data.
 
 4. Single SKU aggregation
-   - Verify one Style_Code and Shift_Start_Time group is aggregated and serialized.
+   - Verify one Style_Code and Shift_Start_Time group is aggregated and
+     serialized with matching PQC fields.
 
 5. Multiple SKU and multiple shift aggregation
-   - Verify multiple Style_Code and Shift_Start_Time groups produce records.
+   - Verify multiple Style_Code and Shift_Start_Time groups produce records
+     with matching PQC fields.
 """
 
 import pytest
 from fastapi.testclient import TestClient
 
+import app.services.pqc_view as pqc_view
 import app.services.sku_view as sku_view
 from app.main import app
-from app.tests.mocks.common_mocks import patch_extract_base_data
+from app.tests.mocks.common_mocks import (
+    patch_extract_base_data,
+    patch_extract_pqc_data,
+)
 from app.tests.mocks.handle_sku_view_mocks import (
     make_base_sku_df,
     make_empty_sku_df,
     make_multi_sku_multi_shift_df,
+)
+from app.tests.mocks.pqc_view_mocks import (
+    make_base_pqc_shift_df,
+    make_multi_pqc_shift_df,
 )
 from extractors import MESExtractor
 
@@ -44,6 +56,8 @@ EXPECTED_COLUMNS = [
     "Discard_prs",
     "ON_Time_Occupation",
     "Efficiency",
+    "defects",
+    "pqc_cnt",
 ]
 
 
@@ -56,6 +70,11 @@ def test_sku_api_output_columns(monkeypatch):
         monkeypatch,
         sku_view,
         make_base_sku_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_shift_df(),
     )
 
     response = client.get(
@@ -85,6 +104,11 @@ def test_sku_api_extract_base_data_arguments(monkeypatch):
         sku_view,
         make_base_sku_df(),
     )
+    pqc_extract_mock = patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_shift_df(),
+    )
 
     response = client.get(
         "/base/sku",
@@ -102,6 +126,11 @@ def test_sku_api_extract_base_data_arguments(monkeypatch):
         "2026-05-02",
         1,
     )
+    pqc_extract_mock.assert_called_once_with(
+        "2026-05-01",
+        "2026-05-02",
+        1,
+    )
 
 
 def test_sku_api_empty_df(monkeypatch):
@@ -115,6 +144,11 @@ def test_sku_api_empty_df(monkeypatch):
         sku_view,
         make_empty_sku_df(),
     )
+    pqc_extract_mock = patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_shift_df(),
+    )
 
     response = client.get(
         "/base/sku",
@@ -127,6 +161,7 @@ def test_sku_api_empty_df(monkeypatch):
 
     assert response.status_code == 200
     assert response.json() == {"content": []}
+    pqc_extract_mock.assert_not_called()
 
 
 def test_sku_api_single_sku_aggregation(monkeypatch):
@@ -139,6 +174,11 @@ def test_sku_api_single_sku_aggregation(monkeypatch):
         monkeypatch,
         sku_view,
         make_base_sku_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_shift_df(),
     )
 
     response = client.get(
@@ -164,6 +204,8 @@ def test_sku_api_single_sku_aggregation(monkeypatch):
     assert row["Discard_prs"] == 6
     assert row["ON_Time_Occupation"] == pytest.approx(0.85)
     assert row["Efficiency"] == pytest.approx(0.7)
+    assert row["defects"] == 2
+    assert row["pqc_cnt"] == 2
 
 
 def test_sku_api_multiple_sku_multiple_shift_aggregation(monkeypatch):
@@ -176,6 +218,11 @@ def test_sku_api_multiple_sku_multiple_shift_aggregation(monkeypatch):
         monkeypatch,
         sku_view,
         make_multi_sku_multi_shift_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_multi_pqc_shift_df(),
     )
 
     response = client.get(
@@ -207,6 +254,8 @@ def test_sku_api_multiple_sku_multiple_shift_aggregation(monkeypatch):
     assert abc_shift_1["Discard_prs"] == 3
     assert abc_shift_1["ON_Time_Occupation"] == pytest.approx(160 / 180)
     assert abc_shift_1["Efficiency"] == pytest.approx(8 / 9)
+    assert abc_shift_1["defects"] == 2
+    assert abc_shift_1["pqc_cnt"] == 2
 
     assert xyz_shift_1["Mach_cnt"] == 1
     assert xyz_shift_1["NAU_prs"] == 7
@@ -214,6 +263,8 @@ def test_sku_api_multiple_sku_multiple_shift_aggregation(monkeypatch):
     assert xyz_shift_1["Discard_prs"] == 3
     assert xyz_shift_1["ON_Time_Occupation"] == pytest.approx(80 / 100)
     assert xyz_shift_1["Efficiency"] == pytest.approx(4 / 5)
+    assert xyz_shift_1["defects"] is None
+    assert xyz_shift_1["pqc_cnt"] is None
 
     assert abc_shift_2["Mach_cnt"] == 1
     assert abc_shift_2["NAU_prs"] == 3
@@ -221,3 +272,5 @@ def test_sku_api_multiple_sku_multiple_shift_aggregation(monkeypatch):
     assert abc_shift_2["Discard_prs"] == 4
     assert abc_shift_2["ON_Time_Occupation"] == pytest.approx(90 / 100)
     assert abc_shift_2["Efficiency"] == pytest.approx(6 / 5)
+    assert abc_shift_2["defects"] is None
+    assert abc_shift_2["pqc_cnt"] is None

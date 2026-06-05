@@ -10,6 +10,7 @@ def _extract_pqc_data(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df["Shift_Start_Time"] = pd.to_datetime(df["Date"].astype(str) + " " + df["Shift"].astype(str))
     df["Name"] = df["Name"].str.split("-").str[1].str.strip()
     df = df.drop(columns=["Date", "Shift"])
+    df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().upper() if isinstance(x, str) and x.strip() else None)
     return df
 
 
@@ -104,4 +105,29 @@ def merge_pqc_to_shift_view(df:pd.DataFrame, start_time:str, end_time:str, shift
     df_defect["defects"] = df_defect["defects"] // 2
     df_defect = df_defect[["Shift_Start_Time", "defects", "pqc_cnt"]]
     df = df.merge(df_defect, on="Shift_Start_Time", how="left")
+    return df
+
+
+def merge_pqc_to_sku_view(df:pd.DataFrame, start_time:str, end_time:str, shift:int)->pd.DataFrame:
+    df_defect = _extract_pqc_data(start_time, end_time, shift)
+    df_defect["Style_Code"] = df_defect["Style_Code"].apply(lambda x: x.strip().split()[0].upper() if isinstance(x, str) and x.strip() else None)
+
+    df_defect = df_defect.groupby(["Style_Code", "Shift_Start_Time"], as_index=False).agg(
+        pqc_cnt=("MachID", "size"),
+        toeHole=("toeHole", "sum"),
+        brokenNDL=("brokenNDL", "sum"),
+        missNDL=("missNDL", "sum"),
+        fanYarn=("fanYarn", "sum"),
+        missYarn=("missYarn", "sum"),
+        logoIssue=("logoIssue", "sum"),
+        dirty=("dirty", "sum"),
+        feisha=("feisha", "sum"),
+        other=("other", "sum")
+    )
+    df_defect["defects"] = df_defect[["toeHole", "brokenNDL", "missNDL", "fanYarn", \
+                        "missYarn", "logoIssue", "dirty", "feisha", "other"]].apply(lambda rec: sum(rec),axis=1)
+    df_defect["defects"] = df_defect["defects"] // 2
+    df_defect = df_defect[["Shift_Start_Time", "Style_Code", "defects", "pqc_cnt"]]
+    
+    df = df.merge(df_defect, on=["Style_Code", "Shift_Start_Time"], how="left")
     return df

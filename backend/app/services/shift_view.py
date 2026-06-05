@@ -64,6 +64,7 @@ def handle_shift_mach_detail(start_time:str, shift:int)->pd.DataFrame:
     df = filterShutdownMach(df)
     if len(df)==0:
         return pd.DataFrame()
+    df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().upper() if isinstance(x, str) and x.strip() else None)
     df["MES_prs"] = df[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
     df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
 

@@ -2,15 +2,17 @@
 Test cases for /base/sku/detail API:
 
 1. Output schema
-   - Verify the API returns SKU machine-detail and staff records with
+   - Verify the API returns SKU machine-detail, PQC, and staff records with
      expected fields.
 
 2. Detail and staff lookup arguments
    - Verify extract_base_data receives MESExtractor, start, end, and shift,
-     and staff lookup receives start as both start/end.
+     PQC extraction receives start as both start/end, and staff lookup
+     receives start as both start/end.
 
 3. Empty extractor result
-   - Verify an empty extracted DataFrame returns empty API content.
+   - Verify an empty extracted DataFrame returns empty API content without
+     querying PQC data.
 
 4. Style filtering
    - Verify style filtering uses Style_Code without size/color suffix.
@@ -20,7 +22,7 @@ Test cases for /base/sku/detail API:
 
 6. Metric and comment serialization
    - Verify Discard_prs, calculated metrics, and comments are returned as
-     JSON-safe values.
+     JSON-safe values with matching PQC fields.
 
 7. Night shift staff
    - Verify shift 2 returns the 19:00 staff record.
@@ -36,11 +38,13 @@ Test cases for /base/sku/detail API:
 import pytest
 from fastapi.testclient import TestClient
 
+import app.services.pqc_view as pqc_view
 import app.services.staff_info as staff_info
 import app.services.sku_view as sku_view
 from app.main import app
 from app.tests.mocks.common_mocks import (
     patch_extract_base_data,
+    patch_extract_pqc_data,
     patch_get_staff_schedule_table,
 )
 from app.tests.mocks.handle_sku_mach_detail_mocks import (
@@ -48,6 +52,10 @@ from app.tests.mocks.handle_sku_mach_detail_mocks import (
     make_empty_sku_mach_detail_df,
     make_sku_mach_detail_df_for_metrics_and_comments,
     make_sku_mach_detail_df_without_matching_style,
+)
+from app.tests.mocks.pqc_view_mocks import (
+    make_base_pqc_sku_mach_detail_df,
+    make_metrics_pqc_sku_mach_detail_df,
 )
 from app.tests.mocks.staff_schedule_mocks import (
     STAFF_ROLE_COLUMNS,
@@ -74,6 +82,8 @@ EXPECTED_COLUMNS = [
     "ON_Time_Occupation",
     "Mach_Efficiency",
     "Comment",
+    "defects",
+    "pqc_cnt",
 ]
 
 
@@ -92,6 +102,11 @@ def test_sku_detail_api_output_columns(monkeypatch):
         monkeypatch,
         staff_info,
         make_multi_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -133,6 +148,11 @@ def test_sku_detail_api_detail_and_staff_lookup_arguments(monkeypatch):
         staff_info,
         make_base_staff_schedule_df(),
     )
+    pqc_extract_mock = patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_sku_mach_detail_df(),
+    )
 
     response = client.get(
         "/base/sku/detail",
@@ -155,6 +175,11 @@ def test_sku_detail_api_detail_and_staff_lookup_arguments(monkeypatch):
         "2026-05-01",
         "2026-05-01",
     )
+    pqc_extract_mock.assert_called_once_with(
+        "2026-05-01",
+        "2026-05-01",
+        1,
+    )
 
 
 def test_sku_detail_api_empty_df(monkeypatch):
@@ -172,6 +197,11 @@ def test_sku_detail_api_empty_df(monkeypatch):
         monkeypatch,
         staff_info,
         make_base_staff_schedule_df(),
+    )
+    pqc_extract_mock = patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -196,6 +226,7 @@ def test_sku_detail_api_empty_df(monkeypatch):
             "Yarner": "Dana",
         }
     ]
+    pqc_extract_mock.assert_not_called()
 
 
 def test_sku_detail_api_filters_by_style_without_size(monkeypatch):
@@ -213,6 +244,11 @@ def test_sku_detail_api_filters_by_style_without_size(monkeypatch):
         monkeypatch,
         staff_info,
         make_base_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -232,6 +268,16 @@ def test_sku_detail_api_filters_by_style_without_size(monkeypatch):
     assert {row["Style_Code"] for row in content} == {"ABC RED", "ABC BLUE"}
     assert "XYZ BLACK" not in {row["Style_Code"] for row in content}
 
+    result_by_mach = {
+        record["MachID"]: record
+        for record in content
+    }
+
+    assert result_by_mach["M1"]["defects"] == 1
+    assert result_by_mach["M1"]["pqc_cnt"] == 1
+    assert result_by_mach["M2"]["defects"] == 2
+    assert result_by_mach["M2"]["pqc_cnt"] == 2
+
 
 def test_sku_detail_api_no_matching_style_returns_empty(monkeypatch):
     """
@@ -247,6 +293,11 @@ def test_sku_detail_api_no_matching_style_returns_empty(monkeypatch):
         monkeypatch,
         staff_info,
         make_base_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -297,6 +348,11 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
         staff_info,
         make_base_staff_schedule_df(),
     )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_metrics_pqc_sku_mach_detail_df(),
+    )
 
     response = client.get(
         "/base/sku/detail",
@@ -325,18 +381,24 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
     assert good["ON_Time_Occupation"] == pytest.approx(0.8)
     assert good["Mach_Efficiency"] == pytest.approx(1.6)
     assert good["Comment"] == "Good"
+    assert good["defects"] == 2
+    assert good["pqc_cnt"] == 2
 
     assert low["MES_prs"] == 1
     assert low["Discard_prs"] == 2
     assert low["ON_Time_Occupation"] == pytest.approx(0.5)
     assert low["Mach_Efficiency"] == pytest.approx(0.2)
     assert low["Comment"] == "Low Ef"
+    assert low["defects"] == 1
+    assert low["pqc_cnt"] == 1
 
     assert rounded_low["MES_prs"] == 1
     assert rounded_low["Discard_prs"] == 3
     assert rounded_low["ON_Time_Occupation"] == pytest.approx(0.667)
     assert rounded_low["Mach_Efficiency"] == pytest.approx(0.333)
     assert rounded_low["Comment"] == "Low Ef"
+    assert rounded_low["defects"] == 3
+    assert rounded_low["pqc_cnt"] == 1
 
 
 def test_sku_detail_api_night_shift_staff(monkeypatch):
@@ -353,6 +415,11 @@ def test_sku_detail_api_night_shift_staff(monkeypatch):
         monkeypatch,
         staff_info,
         make_multi_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -394,6 +461,11 @@ def test_sku_detail_api_no_matching_staff_returns_empty_staff(
         staff_info,
         make_base_staff_schedule_df(),
     )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_sku_mach_detail_df(),
+    )
 
     response = client.get(
         "/base/sku/detail",
@@ -426,6 +498,11 @@ def test_sku_detail_api_empty_staff_schedule_returns_empty_staff(
         monkeypatch,
         staff_info,
         make_empty_staff_schedule_df(),
+    )
+    patch_extract_pqc_data(
+        monkeypatch,
+        pqc_view,
+        make_base_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(

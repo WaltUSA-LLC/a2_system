@@ -1,4 +1,5 @@
 from extractors import MESExtractor
+from app.services.pqc_view import merge_pqc_to_sku_view, merge_pqc_to_mach_dialog
 from app.services.utils import estimate_st_output_prs, \
     estimate_mes_output_prs, \
     extract_base_data, \
@@ -42,6 +43,7 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
                 "ON_Time_Occupation": df_on_time_occupation,
                 "Efficiency":df_sku_eff})
     df_sku.reset_index(inplace=True)
+    df_sku = merge_pqc_to_sku_view(df_sku, start_time, end_time, shift)
     df_sku = df_sku.reset_index(names="id")
     df_sku = df_sku.replace([np.nan, np.inf, -np.inf], None)
     df_sku["Shift_Start_Time"] = df_sku["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -76,6 +78,7 @@ def handle_sku_mach_detail(start_time:str, end_time:str, shift:int, style:str)->
     df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
     df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
     df = df[["MachID", "Shift_Start_Time", 'Style_Code', "MES_prs", "NAU_prs", "Discard_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
+    df = merge_pqc_to_mach_dialog(df, start_time, shift)
     df = df.reset_index(names="id")
     df = df.replace([np.nan, np.inf, -np.inf], None)
     df = df.sort_values(by="MachID", ascending=True)

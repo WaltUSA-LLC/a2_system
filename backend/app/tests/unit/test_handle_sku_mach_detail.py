@@ -57,6 +57,7 @@ from app.tests.mocks.common_mocks import (
     make_call_counting_mocks,
     patch_common_dependencies,
     patch_extract_base_data,
+    patch_merge_pqc_to_mach_dialog,
 )
 
 from app.tests.mocks.handle_sku_mach_detail_mocks import (
@@ -93,6 +94,13 @@ def _filter_m2_shutdown_mach(df):
     return df[df["MachID"] != "M2"].copy()
 
 
+def _assert_merge_pqc_to_mach_dialog_called_once(mock, start_time, shift):
+    mock.assert_called_once()
+    _, actual_start_time, actual_shift = mock.call_args.args
+    assert actual_start_time == start_time
+    assert actual_shift == shift
+
+
 def test_handle_sku_mach_detail_output_columns(monkeypatch):
     """
     Test final output schema.
@@ -109,6 +117,7 @@ def test_handle_sku_mach_detail_output_columns(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -139,6 +148,10 @@ def test_handle_sku_mach_detail_calls_invoked_functions(monkeypatch):
         sku_view,
         mocks,
     )
+    pqc_merge_mock = patch_merge_pqc_to_mach_dialog(
+        monkeypatch,
+        sku_view,
+    )
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -153,6 +166,11 @@ def test_handle_sku_mach_detail_calls_invoked_functions(monkeypatch):
     mocks["filterShutdownMach"].assert_called_once()
     assert mocks["estimate_mes_output_prs"].call_count == len(raw_df)
     assert mocks["estimate_st_output_prs"].call_count == len(result)
+    _assert_merge_pqc_to_mach_dialog_called_once(
+        pqc_merge_mock,
+        "2026-05-01 00:00:00",
+        1,
+    )
 
 
 def test_handle_sku_mach_detail_empty_df(monkeypatch):
@@ -172,6 +190,10 @@ def test_handle_sku_mach_detail_empty_df(monkeypatch):
         sku_view,
         mocks,
     )
+    pqc_merge_mock = patch_merge_pqc_to_mach_dialog(
+        monkeypatch,
+        sku_view,
+    )
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -186,6 +208,7 @@ def test_handle_sku_mach_detail_empty_df(monkeypatch):
     mocks["filterShutdownMach"].assert_not_called()
     mocks["estimate_mes_output_prs"].assert_not_called()
     mocks["estimate_st_output_prs"].assert_not_called()
+    pqc_merge_mock.assert_not_called()
 
 
 def test_handle_sku_mach_detail_shift_start_time_is_string(monkeypatch):
@@ -204,6 +227,7 @@ def test_handle_sku_mach_detail_shift_start_time_is_string(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -235,6 +259,7 @@ def test_handle_sku_mach_detail_filters_by_style_without_size(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -268,6 +293,7 @@ def test_handle_sku_mach_detail_no_matching_style_returns_empty_with_schema(
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -298,6 +324,7 @@ def test_handle_sku_mach_detail_calculates_metrics(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -341,6 +368,7 @@ def test_handle_sku_mach_detail_comment_good_and_low_eff(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -372,6 +400,7 @@ def test_handle_sku_mach_detail_sorts_by_mach_id(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -408,6 +437,7 @@ def test_handle_sku_mach_detail_filter_shutdown_mach_affects_rows(
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -440,6 +470,7 @@ def test_handle_sku_mach_detail_invalid_style_code_is_excluded(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -471,6 +502,7 @@ def test_handle_sku_mach_detail_style_argument_is_case_sensitive(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -505,6 +537,10 @@ def test_handle_sku_mach_detail_filtered_empty_returns_empty_with_schema(
         sku_view,
         mocks,
     )
+    pqc_merge_mock = patch_merge_pqc_to_mach_dialog(
+        monkeypatch,
+        sku_view,
+    )
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -514,6 +550,7 @@ def test_handle_sku_mach_detail_filtered_empty_returns_empty_with_schema(
     )
 
     assert result.empty
+    pqc_merge_mock.assert_not_called()
 
 
 def test_handle_sku_mach_detail_nan_discard_prs_becomes_none(monkeypatch):
@@ -532,6 +569,7 @@ def test_handle_sku_mach_detail_nan_discard_prs_becomes_none(monkeypatch):
         sku_view,
         mocks,
     )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
