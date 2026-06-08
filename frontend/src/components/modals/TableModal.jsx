@@ -490,7 +490,7 @@ export function PQCStaffDetailTableModal({open, onClose, rec, metaData}) {
         >
             <DialogTitle>
                 <Typography variant='h6' component='div'>
-                    {metaData.name}'s records at shift {metaData.date_time}
+                    {metaData.role} {metaData.name}'s records at shift {metaData.date_time}
                 </Typography>
             </DialogTitle>
             <DialogContent>

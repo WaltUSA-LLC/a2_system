@@ -181,7 +181,8 @@ function PQCStaffView() {
                 const records = resp.data.content ?? [];
                 setModalRec(records);
                 setMetaData({date_time: params.row.Shift_Start_Time, 
-                    name: name,})
+                    name: name,
+                    role: params.row.Role,})
             }
         ).catch((err) => {
             console.error(err);
