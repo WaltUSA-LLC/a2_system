@@ -31,6 +31,14 @@ function PQCStaffView() {
             headerAlign: 'center',
         },
         {
+            field: 'Role',
+            headerName: 'Role',
+            flex: 1,
+            type: 'string',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
             field: 'pqc_cnt',
             headerName: 'Checks',
             flex: 1,
@@ -41,19 +49,21 @@ function PQCStaffView() {
         },
         {
             field: 'start_check',
-            headerName: '1st Check',
+            headerName: 'Start',
             flex: 1,
             type: 'string',
             align: 'center',
             headerAlign: 'center',
+            description: '1st Check Time'
         },
         {
             field: 'end_check',
-            headerName: 'Last Check',
+            headerName: 'End',
             flex: 1,
             type: 'string',
             align: 'center',
             headerAlign: 'center',
+            description: 'Last Check Time'
         },
         {
             field: 'avg_adj_diff',

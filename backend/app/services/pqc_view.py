@@ -8,7 +8,8 @@ def _extract_pqc_data(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = extract_base_data(PQCExtractor, start_time, end_time, shift)
     df["Date"] = pd.to_datetime(df["Date"]).dt.date
     df["Shift_Start_Time"] = pd.to_datetime(df["Date"].astype(str) + " " + df["Shift"].astype(str))
-    df["Name"] = df["Name"].str.split("-").str[1].str.strip()
+    df["Role"] = df["Role_Name"].str.split("-").str[0].str.strip()
+    df["Name"] = df["Role_Name"].str.split("-").str[1].str.strip()
     df = df.drop(columns=["Date", "Shift"])
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().upper() if isinstance(x, str) and x.strip() else None)
     return df
@@ -19,7 +20,7 @@ def handle_pqc_view_by_staff(start_time:str, end_time:str, shift:int)->pd.DataFr
     if len(df)==0:
         return pd.DataFrame()
     
-    df = df.groupby(["Shift_Start_Time", "Name"], as_index=False).agg(
+    df = df.groupby(["Shift_Start_Time", "Name", "Role"], as_index=False).agg(
         pqc_cnt=("MachID", "size"),
         start_check = ("DateRec", "min"),
         end_check = ("DateRec", "max"),
