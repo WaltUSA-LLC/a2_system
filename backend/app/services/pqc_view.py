@@ -16,6 +16,8 @@ def _extract_pqc_data(start_time:str, end_time:str, shift:int)->pd.DataFrame:
 
 def handle_pqc_view_by_staff(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = _extract_pqc_data(start_time, end_time, shift)
+    if len(df)==0:
+        return pd.DataFrame()
     
     df = df.groupby(["Shift_Start_Time", "Name"], as_index=False).agg(
         pqc_cnt=("MachID", "size"),
