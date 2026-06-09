@@ -56,6 +56,7 @@ def handle_pqc_view_by_staff_detail(start_time:str, shift:int, name:str)->pd.Dat
     df["DateRec"] = df["DateRec"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["Style_Code"] = df["Style_Code"].str.strip()
     df = df.reset_index(names="id")
+    df = df.replace([np.nan, np.inf, -np.inf], None)
     return df
 
 
