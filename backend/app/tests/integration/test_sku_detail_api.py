@@ -77,6 +77,7 @@ EXPECTED_COLUMNS = [
     "MES_prs",
     "NAU_prs",
     "Discard_prs",
+    "Discard_percent",
     "ON_Time",
     "OFF_Time",
     "ON_Time_Occupation",
@@ -378,6 +379,7 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
 
     assert good["MES_prs"] == 8
     assert good["Discard_prs"] == 1
+    assert good["Discard_percent"] == pytest.approx(0.143)
     assert good["ON_Time_Occupation"] == pytest.approx(0.8)
     assert good["Mach_Efficiency"] == pytest.approx(1.6)
     assert good["Comment"] == "Good"
@@ -386,6 +388,7 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
 
     assert low["MES_prs"] == 1
     assert low["Discard_prs"] == 2
+    assert low["Discard_percent"] == pytest.approx(0.286)
     assert low["ON_Time_Occupation"] == pytest.approx(0.5)
     assert low["Mach_Efficiency"] == pytest.approx(0.2)
     assert low["Comment"] == "Low Ef"
@@ -394,6 +397,7 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
 
     assert rounded_low["MES_prs"] == 1
     assert rounded_low["Discard_prs"] == 3
+    assert rounded_low["Discard_percent"] == pytest.approx(0.75)
     assert rounded_low["ON_Time_Occupation"] == pytest.approx(0.667)
     assert rounded_low["Mach_Efficiency"] == pytest.approx(0.333)
     assert rounded_low["Comment"] == "Low Ef"

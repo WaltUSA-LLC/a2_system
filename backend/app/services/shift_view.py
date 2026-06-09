@@ -29,6 +29,7 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     s_nau_prs = df_on_mach.groupby("Shift_Start_Time")["NAU_prs"].sum()
     s_mes_prs = df_on_mach.groupby("Shift_Start_Time")["MES_prs"].sum()
     s_discard_prs = df_on_mach.groupby("Shift_Start_Time")["Discard_prs"].sum()
+    s_discard_percent = (s_discard_prs/(s_nau_prs+s_discard_prs)).round(3)
     s_st_prs = df_on_mach.groupby("Shift_Start_Time")["ST_prs"].sum()  # need to be fixed
     s_eff = (s_mes_prs / s_st_prs).round(3) # need to be fixed
 
@@ -42,6 +43,7 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
                              "NAU_prs": s_nau_prs,
                              "MES_prs": s_mes_prs,
                              "Discard_prs": s_discard_prs,
+                             "Discard_percent": s_discard_percent,
                              "ST_prs": s_st_prs,
                              "eff": s_eff,
                              "Time_Occupation": s_time_ocup
@@ -69,12 +71,13 @@ def handle_shift_mach_detail(start_time:str, shift:int)->pd.DataFrame:
     df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
 
     df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
+    df["Discard_percent"] = (df["Discard_prs"] / (df["NAU_prs"]+df["Discard_prs"])).round(3)
     df["ON_Time_Occupation"] = (df["ON_Time"] / (df["ON_Time"] + df["OFF_Time"])).round(3)
     df["Mach_Efficiency"] = (df["MES_prs"]/df["ST_prs"]).round(3)
     df["Comment"] = ""
     df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
     df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
-    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "Discard_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
+    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "Discard_prs", "Discard_percent", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
     
     df = merge_pqc_to_mach_dialog(df, start_time, shift)
     df = df.reset_index(names="id")

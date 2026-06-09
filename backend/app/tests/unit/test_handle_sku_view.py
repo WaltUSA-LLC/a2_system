@@ -36,6 +36,9 @@ Test cases for handle_sku_view:
 
 12. Current NaN Discard_prs behavior
     - Verify pandas groupby sum skips NaN Discard_prs values in current code.
+
+13. Zero Discard_percent denominator behavior
+    - Verify zero NAU_prs and zero Discard_prs becomes None.
 """
 
 
@@ -59,6 +62,7 @@ from app.tests.mocks.handle_sku_view_mocks import (
     make_sku_df_with_invalid_style_code,
     make_sku_df_with_nan_discard_prs,
     make_sku_df_with_nan_st_prs,
+    make_sku_df_with_zero_discard_denominator,
     make_sku_df_with_zero_st_prs,
 )
 
@@ -71,6 +75,7 @@ EXPECTED_COLUMNS = [
     "NAU_prs",
     "MES_prs",
     "Discard_prs",
+    "Discard_percent",
     "ON_Time_Occupation",
     "Efficiency",
 ]
@@ -227,6 +232,7 @@ def test_handle_sku_view_normal_grouping(monkeypatch):
     assert row["NAU_prs"] == 8
     assert row["MES_prs"] == 11
     assert row["Discard_prs"] == 6
+    assert row["Discard_percent"] == pytest.approx(0.429)
     assert row["ON_Time_Occupation"] == pytest.approx(170 / 200)
     assert row["Efficiency"] == pytest.approx(11 / 30)
 
@@ -267,6 +273,7 @@ def test_handle_sku_view_multiple_sku_multiple_shift(monkeypatch):
     assert abc_shift_1["NAU_prs"] == 6
     assert abc_shift_1["MES_prs"] == 8
     assert abc_shift_1["Discard_prs"] == 3
+    assert abc_shift_1["Discard_percent"] == pytest.approx(0.333)
     assert abc_shift_1["ON_Time_Occupation"] == pytest.approx(160 / 180)
     assert abc_shift_1["Efficiency"] == pytest.approx(8 / 20)
 
@@ -274,6 +281,7 @@ def test_handle_sku_view_multiple_sku_multiple_shift(monkeypatch):
     assert xyz_shift_1["NAU_prs"] == 7
     assert xyz_shift_1["MES_prs"] == 4
     assert xyz_shift_1["Discard_prs"] == 3
+    assert xyz_shift_1["Discard_percent"] == pytest.approx(0.3)
     assert xyz_shift_1["ON_Time_Occupation"] == pytest.approx(80 / 100)
     assert xyz_shift_1["Efficiency"] == pytest.approx(4 / 10)
 
@@ -281,6 +289,7 @@ def test_handle_sku_view_multiple_sku_multiple_shift(monkeypatch):
     assert abc_shift_2["NAU_prs"] == 3
     assert abc_shift_2["MES_prs"] == 6
     assert abc_shift_2["Discard_prs"] == 4
+    assert abc_shift_2["Discard_percent"] == pytest.approx(0.571)
     assert abc_shift_2["ON_Time_Occupation"] == pytest.approx(90 / 100)
     assert abc_shift_2["Efficiency"] == pytest.approx(6 / 10)
 
@@ -320,6 +329,7 @@ def test_handle_sku_view_filter_shutdown_mach_affects_discard_aggregation(
     assert len(result) == 1
     row = result.iloc[0]
     assert row["Discard_prs"] == 4
+    assert row["Discard_percent"] == pytest.approx(0.5)
     assert mocks["estimate_mes_output_prs"].call_count == 2
     assert mocks["estimate_st_output_prs"].call_count == 2
 
@@ -424,6 +434,39 @@ def test_handle_sku_view_nan_discard_prs_current_behavior(monkeypatch):
     assert len(result) == 1
     row = result.iloc[0]
     assert row["Discard_prs"] == 1
+    assert row["Discard_percent"] == pytest.approx(0.143)
+
+
+def test_handle_sku_view_zero_discard_denominator_becomes_none(monkeypatch):
+    """
+    If NAU_prs + Discard_prs is 0, Discard_percent becomes NaN.
+    The final replace should convert NaN to None.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        sku_view,
+        make_sku_df_with_zero_discard_denominator(),
+    )
+
+    mocks = make_call_counting_mocks()
+    patch_common_dependencies(
+        monkeypatch,
+        sku_view,
+        mocks,
+    )
+    patch_merge_pqc_to_sku_view(monkeypatch, sku_view)
+
+    result = sku_view.handle_sku_view(
+        start_time="2026-05-01 00:00:00",
+        end_time="2026-05-02 00:00:00",
+        shift=1,
+    )
+
+    assert len(result) == 1
+    row = result.iloc[0]
+    assert row["NAU_prs"] == 0
+    assert row["Discard_prs"] == 0
+    assert row["Discard_percent"] is None
 
 
 def test_handle_sku_view_infinite_efficiency_becomes_none(monkeypatch):

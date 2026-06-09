@@ -4,6 +4,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
+import Tooltip from "@mui/material/Tooltip";
 import { DataGrid } from '@mui/x-data-grid';
 
 import { formatSeconds, minuteFilterOperators, hourFilterOperators, renderHeaderWithUnit } from "../utils";
@@ -242,12 +243,30 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
             headerAlign: 'center',
         },
         {
-            field: 'Discard_prs',
-            renderHeader: () => renderHeaderWithUnit('Discard', 'PRS'),
+            field: 'Discard_percent',
+            renderHeader: () => renderHeaderWithUnit('Discard', '%'),
             flex: 1,
             type: 'number',
             align: 'center',
             headerAlign: 'center',
+            valueGetter: (value) => value * 100,
+            renderCell: ({ row, value }) => {
+                            const discardPrs = row.Discard_prs ?? "N/A";
+                            return (
+                                <Tooltip title={`Discard: ${discardPrs} prs`} arrow>
+                                    <span>{value.toFixed(1)}%</span>
+                                </Tooltip>
+                            );
+            },
+        },
+         {
+            field: 'pqc_cnt',
+            headerName: 'Checks',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'PQC checks',
         },
         {
             field: 'defects',
@@ -257,15 +276,6 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
             align: 'center',
             headerAlign: 'center',
             description: 'PQC defects',
-        },
-        {
-            field: 'pqc_cnt',
-            headerName: 'Checks',
-            flex: 1,
-            type: 'number',
-            align: 'center',
-            headerAlign: 'center',
-            description: 'PQC checks',
         },
         {
             field: "ON_Time",

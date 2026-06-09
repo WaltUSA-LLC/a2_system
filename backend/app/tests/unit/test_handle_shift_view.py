@@ -36,6 +36,9 @@ Test cases for handle_shift_view:
 
 12. Current NaN Discard_prs behavior
     - Verify pandas groupby sum skips NaN Discard_prs values in current code.
+
+13. Zero Discard_percent denominator behavior
+    - Verify zero NAU_prs and zero Discard_prs becomes None.
 """
 
 
@@ -63,6 +66,7 @@ from app.tests.mocks.handle_shift_view_mocks import (
     make_shift_df_with_duplicate_mach,
     make_shift_df_with_nan_discard_prs,
     make_shift_df_with_nan_st_prs,
+    make_shift_df_with_zero_discard_denominator,
     make_shift_df_with_zero_st_prs,
     make_shift_df_with_zero_time,
 )
@@ -74,6 +78,7 @@ EXPECTED_COLUMNS = [
     "NAU_prs",
     "MES_prs",
     "Discard_prs",
+    "Discard_percent",
     "ST_prs",
     "eff",
     "Time_Occupation",
@@ -266,6 +271,7 @@ def test_handle_shift_view_single_shift_aggregation(monkeypatch):
     assert row["NAU_prs"] == 8
     assert row["MES_prs"] == 11
     assert row["Discard_prs"] == 6
+    assert row["Discard_percent"] == pytest.approx(0.429)
     assert row["ST_prs"] == 30
     assert row["eff"] == pytest.approx(0.367)
     assert row["Time_Occupation"] == pytest.approx(170/200)
@@ -307,6 +313,7 @@ def test_handle_shift_view_multiple_shift_aggregation(monkeypatch):
     assert shift_1["NAU_prs"] == 6
     assert shift_1["MES_prs"] == 8
     assert shift_1["Discard_prs"] == 3
+    assert shift_1["Discard_percent"] == pytest.approx(0.333)
     assert shift_1["ST_prs"] == 20
     assert shift_1["eff"] == pytest.approx(0.4)
     assert shift_1["Time_Occupation"] == pytest.approx(0.889)
@@ -314,6 +321,7 @@ def test_handle_shift_view_multiple_shift_aggregation(monkeypatch):
     assert shift_2["NAU_prs"] == 10
     assert shift_2["MES_prs"] == 10
     assert shift_2["Discard_prs"] == 7
+    assert shift_2["Discard_percent"] == pytest.approx(0.412)
     assert shift_2["ST_prs"] == 30
     assert shift_2["eff"] == pytest.approx(0.333)
     assert shift_2["Time_Occupation"] == pytest.approx(0.75)
@@ -350,6 +358,7 @@ def test_handle_shift_view_duplicate_mach_counted_once(monkeypatch):
     assert row["NAU_prs"] == 12
     assert row["MES_prs"] == 18
     assert row["Discard_prs"] == 6
+    assert row["Discard_percent"] == pytest.approx(0.333)
     assert row["ST_prs"] == 30
 
 
@@ -392,6 +401,7 @@ def test_handle_shift_view_filter_shutdown_mach_affects_aggregation(
     assert row["NAU_prs"] == 9
     assert row["MES_prs"] == 12
     assert row["Discard_prs"] == 4
+    assert row["Discard_percent"] == pytest.approx(0.308)
     assert row["ST_prs"] == 30
     assert row["eff"] == pytest.approx(0.4)
     assert row["Time_Occupation"] == pytest.approx(0.8)
@@ -572,3 +582,37 @@ def test_handle_shift_view_nan_discard_prs_current_behavior(monkeypatch):
     assert len(result) == 1
     row = result.iloc[0]
     assert row["Discard_prs"] == 1
+    assert row["Discard_percent"] == pytest.approx(0.143)
+
+
+def test_handle_shift_view_zero_discard_denominator_becomes_none(monkeypatch):
+    """
+    If NAU_prs + Discard_prs is 0, Discard_percent becomes NaN.
+    The final replace should convert NaN to None.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        shift_view,
+        make_shift_df_with_zero_discard_denominator(),
+    )
+
+    mocks = make_call_counting_mocks()
+    patch_common_dependencies(
+        monkeypatch,
+        shift_view,
+        mocks,
+    )
+    patch_merge_pqc_to_shift_view(monkeypatch, shift_view)
+    patch_merge_staff_info_to_view(monkeypatch, shift_view)
+
+    result = shift_view.handle_shift_view(
+        start_time="2026-05-01 00:00:00",
+        end_time="2026-05-02 00:00:00",
+        shift=1,
+    )
+
+    assert len(result) == 1
+    row = result.iloc[0]
+    assert row["NAU_prs"] == 0
+    assert row["Discard_prs"] == 0
+    assert row["Discard_percent"] is None

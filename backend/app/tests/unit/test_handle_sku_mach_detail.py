@@ -44,6 +44,9 @@ Test cases for handle_sku_mach_detail:
 
 14. NaN Discard_prs handling
     - Verify NaN Discard_prs is converted to None.
+
+15. Zero Discard_percent denominator behavior
+    - Verify zero NAU_prs and zero Discard_prs becomes None.
 """
 
 
@@ -66,6 +69,7 @@ from app.tests.mocks.handle_sku_mach_detail_mocks import (
     make_sku_mach_detail_df_for_metrics_and_comments,
     make_sku_mach_detail_df_with_invalid_style_code,
     make_sku_mach_detail_df_with_nan_discard_prs,
+    make_sku_mach_detail_df_with_zero_discard_denominator,
     make_sku_mach_detail_df_without_matching_style,
     make_unsorted_sku_mach_detail_df,
 )
@@ -78,6 +82,7 @@ EXPECTED_COLUMNS = [
         "MES_prs",
         "NAU_prs",
         "Discard_prs",
+        "Discard_percent",
         "ON_Time",
         "OFF_Time",
         "ON_Time_Occupation",
@@ -337,16 +342,19 @@ def test_handle_sku_mach_detail_calculates_metrics(monkeypatch):
 
     assert result_by_mach.loc["M1", "MES_prs"] == 8
     assert result_by_mach.loc["M1", "Discard_prs"] == 1
+    assert result_by_mach.loc["M1", "Discard_percent"] == pytest.approx(0.143)
     assert result_by_mach.loc["M1", "ON_Time_Occupation"] == pytest.approx(0.8)
     assert result_by_mach.loc["M1", "Mach_Efficiency"] == pytest.approx(0.8)
 
     assert result_by_mach.loc["M2", "MES_prs"] == 7
     assert result_by_mach.loc["M2", "Discard_prs"] == 2
+    assert result_by_mach.loc["M2", "Discard_percent"] == pytest.approx(0.286)
     assert result_by_mach.loc["M2", "ON_Time_Occupation"] == pytest.approx(0.5)
     assert result_by_mach.loc["M2", "Mach_Efficiency"] == pytest.approx(0.7)
 
     assert result_by_mach.loc["M3", "MES_prs"] == 1
     assert result_by_mach.loc["M3", "Discard_prs"] == 3
+    assert result_by_mach.loc["M3", "Discard_percent"] == pytest.approx(0.75)
     assert result_by_mach.loc["M3", "ON_Time_Occupation"] == pytest.approx(0.333)
     assert result_by_mach.loc["M3", "Mach_Efficiency"] == pytest.approx(0.333)
 
@@ -411,6 +419,7 @@ def test_handle_sku_mach_detail_sorts_by_mach_id(monkeypatch):
 
     assert list(result["MachID"]) == ["M1", "M2", "M3"]
     assert list(result["Discard_prs"]) == [1, 2, 3]
+    assert list(result["Discard_percent"]) == pytest.approx([0.143, 0.333, 0.375])
 
 
 def test_handle_sku_mach_detail_filter_shutdown_mach_affects_rows(
@@ -449,6 +458,7 @@ def test_handle_sku_mach_detail_filter_shutdown_mach_affects_rows(
     assert len(result) == 1
     assert list(result["MachID"]) == ["M1"]
     assert list(result["Discard_prs"]) == [2]
+    assert list(result["Discard_percent"]) == pytest.approx([0.333])
     assert mocks["estimate_mes_output_prs"].call_count == 2
     assert mocks["estimate_st_output_prs"].call_count == 1
 
@@ -581,3 +591,39 @@ def test_handle_sku_mach_detail_nan_discard_prs_becomes_none(monkeypatch):
     row = result.iloc[0]
 
     assert row["Discard_prs"] is None
+    assert row["Discard_percent"] is None
+
+
+def test_handle_sku_mach_detail_zero_discard_denominator_becomes_none(
+    monkeypatch,
+):
+    """
+    If NAU_prs + Discard_prs is 0, Discard_percent becomes NaN.
+    The final replace should convert NaN to None.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        sku_view,
+        make_sku_mach_detail_df_with_zero_discard_denominator(),
+    )
+
+    mocks = make_call_counting_mocks()
+    patch_common_dependencies(
+        monkeypatch,
+        sku_view,
+        mocks,
+    )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, sku_view)
+
+    result = sku_view.handle_sku_mach_detail(
+        start_time="2026-05-01 00:00:00",
+        end_time="2026-05-02 00:00:00",
+        shift=1,
+        style="ABC",
+    )
+
+    assert len(result) == 1
+    row = result.iloc[0]
+    assert row["NAU_prs"] == 0
+    assert row["Discard_prs"] == 0
+    assert row["Discard_percent"] is None

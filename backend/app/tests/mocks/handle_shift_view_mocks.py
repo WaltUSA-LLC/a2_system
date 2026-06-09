@@ -178,3 +178,22 @@ def make_shift_df_with_nan_discard_prs() -> pd.DataFrame:
             "Discard_prs": [1, np.nan],
         }
     )
+
+
+def make_shift_df_with_zero_discard_denominator() -> pd.DataFrame:
+    shift_time = pd.Timestamp("2026-05-01 07:00:00")
+
+    return pd.DataFrame(
+        {
+            "Style_Code": ["abc red"],
+            "Shift_Start_Time": [shift_time],
+            "MachID": ["M1"],
+            "ON_Time": [100],
+            "OFF_Time": [0],
+            "Avg_Cycle": [10],
+            "Weight": [5],
+            "Prs_Weight": [1000],
+            "NAU_prs": [0],
+            "Discard_prs": [0],
+        }
+    )

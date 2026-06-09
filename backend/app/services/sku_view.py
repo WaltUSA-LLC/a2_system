@@ -33,6 +33,7 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df_nau_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["NAU_prs"].sum()
     df_mes_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["MES_prs"].sum()
     df_discard_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["Discard_prs"].sum()
+    df_discard_percent = (df_discard_prs/(df_nau_prs+df_discard_prs)).round(3)
     df_st_prs = df.groupby(["Style_Code", "Shift_Start_Time"])["ST_prs"].agg(lambda s: np.nan if s.isna().any() else s.sum())
     df_sku_eff = df_mes_prs/df_st_prs
 
@@ -40,6 +41,7 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
                 "NAU_prs": df_nau_prs,
                 "MES_prs": df_mes_prs,
                 "Discard_prs": df_discard_prs,
+                "Discard_percent": df_discard_percent,
                 "ON_Time_Occupation": df_on_time_occupation,
                 "Efficiency":df_sku_eff})
     df_sku.reset_index(inplace=True)
@@ -71,13 +73,13 @@ def handle_sku_mach_detail(start_time:str, end_time:str, shift:int, style:str)->
     df["Shift_Start_Time"] = df["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["ST_prs"] = df[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
     df["ON_Time_Occupation"] = (df["ON_Time"] / (df["ON_Time"] + df["OFF_Time"])).round(3)
-    #df["Real_prs"] = df[["NAU_prs", "ST_prs", "MES_prs", "ON_Time", "Discard_prs", "Avg_Cycle"]].apply(validate_throughput, axis=1)
     df["Mach_Efficiency"] = (df["MES_prs"]/df["ST_prs"]).round(3)
+    df["Discard_percent"] = (df["Discard_prs"] / (df["NAU_prs"]+df["Discard_prs"])).round(3)
     #df.loc[df["ON_Time"]==0, "Mach_Efficiency"] = np.nan
     df["Comment"] = ""
     df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
     df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
-    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "MES_prs", "NAU_prs", "Discard_prs", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
+    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "MES_prs", "NAU_prs", "Discard_prs", "Discard_percent", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
     df = merge_pqc_to_mach_dialog(df, start_time, shift)
     df = df.reset_index(names="id")
     df = df.replace([np.nan, np.inf, -np.inf], None)

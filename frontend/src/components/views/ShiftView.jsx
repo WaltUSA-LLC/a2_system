@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from "axios";
+import Tooltip from "@mui/material/Tooltip";
 
 import TableView from "./TableView"
 import { ShiftChartModal } from '../modals/ChartModal';
@@ -49,20 +50,29 @@ function ShiftView() {
             headerAlign: 'center',
         },
         {
-            field: 'Discard_prs',
-            renderHeader: () => renderHeaderWithUnit('Discard', 'PRS'),
-            flex: 1,
-            type: 'number',
-            align: 'center',
-            headerAlign: 'center',
-        },
-        {
             field: 'ST_prs',
             renderHeader: () => renderHeaderWithUnit('ST', 'PRS'),
             flex: 1,
             type: 'number',
             align: 'center',
             headerAlign: 'center',
+        },
+        {
+            field: 'Discard_percent',
+            renderHeader: () => renderHeaderWithUnit('Discard', '%'),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            valueGetter: (value) => value * 100,
+            renderCell: ({ row, value }) => {
+                const discardPrs = row.Discard_prs ?? "N/A";
+                return (
+                    <Tooltip title={`Discard: ${discardPrs} prs`} arrow>
+                        <span>{value.toFixed(1)}%</span>
+                    </Tooltip>
+                );
+            },
         },
         {
             field: 'eff',
@@ -85,15 +95,6 @@ function ShiftView() {
             valueFormatter: (value) => `${value.toFixed(1)}%`,
         },
         {
-            field: 'defects',
-            renderHeader: () => renderHeaderWithUnit('Defect', 'PRS'),
-            flex: 1,
-            type: 'number',
-            align: 'center',
-            headerAlign: 'center',
-            description: 'PQC defects',
-        },
-        {
             field: 'pqc_cnt',
             headerName: 'Checks',
             flex: 1,
@@ -101,6 +102,15 @@ function ShiftView() {
             align: 'center',
             headerAlign: 'center',
             description: 'PQC checks',
+        },
+        {
+            field: 'defects',
+            renderHeader: () => renderHeaderWithUnit('Defect', 'PRS'),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'PQC defects',
         },
         {
             field: 'KO',

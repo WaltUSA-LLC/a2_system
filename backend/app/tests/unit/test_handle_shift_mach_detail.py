@@ -37,6 +37,9 @@ Test cases for handle_shift_mach_detail:
 
 12. Null and infinite value handling
     - Verify zero-time, zero-ST, NaN-ST, and NaN-Discard current behavior.
+
+13. Zero Discard_percent denominator behavior
+    - Verify zero NAU_prs and zero Discard_prs becomes None.
 """
 
 
@@ -63,6 +66,7 @@ from app.tests.mocks.handle_shift_mach_detail_mocks import (
     make_shift_mach_detail_df_with_duplicate_mach,
     make_shift_mach_detail_df_with_nan_discard_prs,
     make_shift_mach_detail_df_with_nan_st_prs,
+    make_shift_mach_detail_df_with_zero_discard_denominator,
     make_shift_mach_detail_df_with_zero_time,
     make_unsorted_shift_mach_detail_df,
 )
@@ -77,6 +81,7 @@ EXPECTED_COLUMNS = [
     "MES_prs",
     "NAU_prs",
     "Discard_prs",
+    "Discard_percent",
     "ON_Time",
     "OFF_Time",
     "ON_Time_Occupation",
@@ -289,16 +294,19 @@ def test_handle_shift_mach_detail_calculates_metrics(monkeypatch):
 
     assert result_by_mach.loc["M_GOOD", "MES_prs"] == 9
     assert result_by_mach.loc["M_GOOD", "Discard_prs"] == 1
+    assert result_by_mach.loc["M_GOOD", "Discard_percent"] == pytest.approx(0.125)
     assert result_by_mach.loc["M_GOOD", "ON_Time_Occupation"] == pytest.approx(0.9)
     assert result_by_mach.loc["M_GOOD", "Mach_Efficiency"] == pytest.approx(0.9)
 
     assert result_by_mach.loc["M_BOUNDARY", "MES_prs"] == 8
     assert result_by_mach.loc["M_BOUNDARY", "Discard_prs"] == 2
+    assert result_by_mach.loc["M_BOUNDARY", "Discard_percent"] == pytest.approx(0.25)
     assert result_by_mach.loc["M_BOUNDARY", "ON_Time_Occupation"] == pytest.approx(0.8)
     assert result_by_mach.loc["M_BOUNDARY", "Mach_Efficiency"] == pytest.approx(0.8)
 
     assert result_by_mach.loc["M_LOW", "MES_prs"] == 1
     assert result_by_mach.loc["M_LOW", "Discard_prs"] == 3
+    assert result_by_mach.loc["M_LOW", "Discard_percent"] == pytest.approx(0.75)
     assert result_by_mach.loc["M_LOW", "ON_Time_Occupation"] == pytest.approx(0.333)
     assert result_by_mach.loc["M_LOW", "Mach_Efficiency"] == pytest.approx(0.333)
 
@@ -368,6 +376,7 @@ def test_handle_shift_mach_detail_filter_shutdown_mach_affects_rows(
     assert len(result) == 2
     assert list(result["MachID"]) == ["M_KEEP_1", "M_KEEP_2"]
     assert list(result["Discard_prs"]) == [1, 3]
+    assert list(result["Discard_percent"]) == pytest.approx([0.143, 0.5])
     assert "M_STOP" not in set(result["MachID"])
     assert mocks["estimate_mes_output_prs"].call_count == 2
     assert mocks["estimate_st_output_prs"].call_count == 2
@@ -441,6 +450,7 @@ def test_handle_shift_mach_detail_duplicate_mach_rows_are_preserved(
     assert list(result["Weight"]) == [7, 5, 6]
     assert list(result["NAU_prs"]) == [5, 3, 4]
     assert list(result["Discard_prs"]) == [1, 3, 2]
+    assert list(result["Discard_percent"]) == pytest.approx([0.167, 0.5, 0.333])
 
 
 def test_handle_shift_mach_detail_ascending_row_order(monkeypatch):
@@ -468,6 +478,7 @@ def test_handle_shift_mach_detail_ascending_row_order(monkeypatch):
 
     assert list(result["MachID"]) == ["M1", "M2", "M3"]
     assert list(result["Discard_prs"]) == [1, 2, 3]
+    assert list(result["Discard_percent"]) == pytest.approx([0.143, 0.333, 0.375])
 
 
 def test_handle_shift_mach_detail_zero_time_becomes_none(monkeypatch):
@@ -557,3 +568,37 @@ def test_handle_shift_mach_detail_nan_discard_prs_becomes_none(monkeypatch):
     row = result.iloc[0]
 
     assert row["Discard_prs"] is None
+    assert row["Discard_percent"] is None
+
+
+def test_handle_shift_mach_detail_zero_discard_denominator_becomes_none(
+    monkeypatch,
+):
+    """
+    If NAU_prs + Discard_prs is 0, Discard_percent becomes NaN.
+    The final replace should convert NaN to None.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        shift_view,
+        make_shift_mach_detail_df_with_zero_discard_denominator(),
+    )
+
+    mocks = make_call_counting_mocks()
+    patch_common_dependencies(
+        monkeypatch,
+        shift_view,
+        mocks,
+    )
+    patch_merge_pqc_to_mach_dialog(monkeypatch, shift_view)
+
+    result = shift_view.handle_shift_mach_detail(
+        start_time="2026-05-01 00:00:00",
+        shift=1,
+    )
+
+    assert len(result) == 1
+    row = result.iloc[0]
+    assert row["NAU_prs"] == 0
+    assert row["Discard_prs"] == 0
+    assert row["Discard_percent"] is None
