@@ -522,3 +522,155 @@ export function PQCStaffDetailTableModal({open, onClose, rec, metaData}) {
         </Dialog>
     );
 }
+
+
+export function PQCSKUDetailTableModal({open, onClose, rec, metaData}) {
+    const columns = [
+        {
+            field: 'MachID',
+            headerName: 'Mach ID',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'pqc_cnt',
+            headerName: 'Checks',
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'PQC checks',
+        },
+        {
+            field: 'defects',
+            renderHeader: (params) => renderHeaderWithUnit('Defect', 'PRS', params.colDef.description),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'PQC defects',
+        },
+        {
+            field: 'toeHole',
+            renderHeader: (params) => renderHeaderWithUnit('Hole', 'PCS', params.colDef.description),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'brokenNDL',
+            renderHeader: (params) => renderHeaderWithUnit('N-Brok', 'PCS', params.colDef.description),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Needle Broken',
+        },
+        {
+            field: 'missNDL',
+            renderHeader: (params) => renderHeaderWithUnit('N-Miss', 'PCS', params.colDef.description),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Needle Missing',
+        },
+        {
+            field: 'missYarn',
+            renderHeader: (params) => renderHeaderWithUnit('Y-Miss', 'PCS', params.colDef.description),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Yarn Miss',
+        },
+        {
+            field: 'fanYarn',
+            renderHeader: (params) => renderHeaderWithUnit('Y-Rtn', 'PCS', params.colDef.description),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Yarn Return',
+        },
+        {
+            field: 'feisha',
+            renderHeader: (params) => renderHeaderWithUnit('Y-Fly', 'PCS', params.colDef.description),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Yarn Fly',
+        },
+        {
+            field: 'logoIssue',
+            renderHeader: (params) => renderHeaderWithUnit('Logo', 'PCS', params.colDef.description),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+            description: 'Logo Issue',
+        },
+        {
+            field: 'dirty',
+            renderHeader: (params) => renderHeaderWithUnit('Stain', 'PCS', params.colDef.description),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
+            field: 'other',
+            renderHeader: (params) => renderHeaderWithUnit('Other', 'PCS', params.colDef.description),
+            flex: 1,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+    ];
+
+
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            maxWidth="xl"
+        >
+            <DialogTitle>
+                <Typography variant='h6' component='div'>
+                    Style {metaData.style} at shift {metaData.date_time}
+                </Typography>
+            </DialogTitle>
+            <DialogContent>
+                <Box sx={{ height: 700, width: '100%' }}>
+                    <DataGrid
+                        rows={rec}
+                        columns={columns}
+                        initialState={{
+                            pagination: {
+                                paginationModel: {
+                                    pageSize: 10,
+                                },
+                            },
+                        }}
+                        pageSizeOptions={[10, 20, 30]}
+                        disableRowSelectionOnClick
+                        showToolbar
+                        sx={{
+                            '& .MuiDataGrid-columnHeaderTitle': {
+                                fontWeight: 'bold',
+                            },
+                        }}
+                    />
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Close</Button>
+            </DialogActions>
+        </Dialog>
+    );
+}

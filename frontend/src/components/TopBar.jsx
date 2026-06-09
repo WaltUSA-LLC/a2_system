@@ -126,6 +126,7 @@ function TopBar() {
                     }}
                 >
                     <MenuItem component={RouterLink} to="/pqc-view/staff" onClick={handleClosePQC}>By Staff</MenuItem>
+                    <MenuItem component={RouterLink} to="/pqc-view/sku" onClick={handleClosePQC}>By SKU</MenuItem>
                 </Menu>
             </Toolbar>
         </AppBar>

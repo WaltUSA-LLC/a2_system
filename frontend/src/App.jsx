@@ -8,6 +8,7 @@ import MachsView from './components/views/MachsView';
 import StopsViewByCode from './components/views/StopsViewByCode';
 import StopsViewByMach from './components/views/StopsViewByMach';
 import PQCStaffView from "./components/views/PQCStaffView";
+import PQCSKUView from "./components/views/PQCSKUView";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
                     <Route path="/stops-view/code" element={<StopsViewByCode />} />
                     <Route path="/stops-view/mach" element={<StopsViewByMach />} />
                     <Route path="/pqc-view/staff" element={<PQCStaffView />} />
+                    <Route path="/pqc-view/sku" element={<PQCSKUView />} />
                 </Routes>
             </Grid>
         </Grid>
