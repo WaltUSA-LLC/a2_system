@@ -49,14 +49,14 @@ function ShiftView() {
             align: 'center',
             headerAlign: 'center',
         },
-        {
-            field: 'ST_prs',
-            renderHeader: () => renderHeaderWithUnit('ST', 'PRS'),
-            flex: 1,
-            type: 'number',
-            align: 'center',
-            headerAlign: 'center',
-        },
+        // {
+        //     field: 'ST_prs',
+        //     renderHeader: () => renderHeaderWithUnit('ST', 'PRS'),
+        //     flex: 1,
+        //     type: 'number',
+        //     align: 'center',
+        //     headerAlign: 'center',
+        // },
         {
             field: 'Discard_percent',
             renderHeader: () => renderHeaderWithUnit('Discard', '%'),
@@ -65,6 +65,7 @@ function ShiftView() {
             align: 'center',
             headerAlign: 'center',
             valueGetter: (value) => value * 100,
+            valueFormatter: (value) => `${value.toFixed(1)}%`,
             renderCell: ({ row, value }) => {
                 const discardPrs = row.Discard_prs ?? "N/A";
                 return (

@@ -23,7 +23,10 @@ WITH mach_info AS(
         MIN(pm.DateStartShift) as Shift_Start_Time,
         pm.StyleCode as Style_Code,
         SUM(pm.Pieces) / 2 as NAU_prs,
-        SUM(pm.Discards) / 2 as Discard_prs,
+        SUM(CASE 
+                WHEN pm.Discards >= 0 THEN pm.Discards 
+                ELSE 0 
+            END) / 2 as Discard_prs,
         CAST(MIN(CASE WHEN pm.Cycle <> 0 THEN pm.Cycle END) AS INT) AS Avg_Cycle,
         SUM(pm.TimeOn) AS ON_Time,
         SUM(pm.TimeOff) AS OFF_Time
