@@ -80,11 +80,10 @@ SELECT
     s.Description AS Description,
     sm.DateRec AS Recover_time,
     sm.LastDateRec AS Stop_time
-FROM dbNautilus.dbo.STOPS_MONITOR AS sm, dbNautilus.dbo.STOPS AS s 
+FROM dbNautilus.dbo.STOPS_MONITOR AS sm LEFT JOIN dbNautilus.dbo.STOPS AS s ON sm.LastStopCode = s.StopCode 
 WHERE sm.LastDateRec > @Start
     AND sm.LastDateRec <=  @End
-    AND (sm.StopCode = 0 OR sm.LastStopCode <> 0)
-    AND sm.LastStopCode = s.StopCode 
+    AND (sm.StopCode = 0 OR sm.LastStopCode <> 0) 
 """
 
 
