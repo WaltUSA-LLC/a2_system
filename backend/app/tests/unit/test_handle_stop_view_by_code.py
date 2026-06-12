@@ -45,6 +45,9 @@ Test cases for handle_stop_view_by_code:
 14. Filtered-empty result
     - Verify shift filtering to zero rows returns empty post-aggregation
       outputs.
+
+15. NaN Description handling
+    - Verify NaN Description values are converted to Unknown.
 """
 
 from unittest.mock import Mock
@@ -61,6 +64,7 @@ from app.tests.mocks.handle_stop_view_by_code_mocks import (
     make_stop_view_by_code_chart_sorting_df,
     make_stop_view_by_code_df_with_duplicate_mach,
     make_stop_view_by_code_filtered_empty_after_shift_df,
+    make_stop_view_by_code_nan_description_df,
     make_stop_view_by_code_shift_boundary_df,
     make_stop_view_by_code_shift_filter_df,
     make_stop_view_by_code_sorting_df,
@@ -198,6 +202,37 @@ def test_handle_stop_view_by_code_trims_description(monkeypatch):
     row = result[result["Stop_code"] == 10].iloc[0]
     assert row["Description"] == "Jam"
     assert row["freq"] == 2
+
+
+def test_handle_stop_view_by_code_nan_description_becomes_unknown(monkeypatch):
+    """
+    NaN descriptions should be converted to Unknown before grouping and
+    included in table and chart outputs.
+    """
+    patch_extract_base_data(
+        monkeypatch,
+        stop_view,
+        make_stop_view_by_code_nan_description_df(),
+    )
+
+    result, chart_freq, chart_mach, chart_dur_sum, chart_dur_med = (
+        _call_handle_stop_view_by_code()
+    )
+
+    unknown_rows = result[result["Description"] == "Unknown"]
+
+    assert len(unknown_rows) == 1
+    row = unknown_rows.iloc[0]
+    assert row["Stop_code"] == 10
+    assert row["Mach_cnt"] == 1
+    assert row["freq"] == 1
+    assert row["dur_sum"] == pd.Timedelta(minutes=10)
+    assert row["dur_med"] == pd.Timedelta(minutes=10)
+
+    assert "Unknown" in set(chart_freq["Description"])
+    assert "Unknown" in set(chart_mach["Description"])
+    assert "Unknown" in set(chart_dur_sum["Description"])
+    assert "Unknown" in set(chart_dur_med["Description"])
 
 
 def test_handle_stop_view_by_code_duplicate_mach_counted_once(monkeypatch):

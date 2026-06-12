@@ -104,7 +104,7 @@ def make_stop_mach_detail_null_conversion_df() -> pd.DataFrame:
                 **_make_row(
                     1,
                     "ABC RED",
-                    None,
+                    float("nan"),
                     "2026-05-01 08:00:00",
                     minutes=10,
                     stop_code=10,

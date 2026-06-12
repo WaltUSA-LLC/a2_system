@@ -35,6 +35,15 @@ def make_base_stop_view_by_code_df() -> pd.DataFrame:
     )
 
 
+def make_stop_view_by_code_nan_description_df() -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            _make_row(10, float("nan"), "M1", "2026-05-01 08:00:00", 10),
+            _make_row(20, "Low Air", "M2", "2026-05-01 09:00:00", 20),
+        ]
+    )
+
+
 def make_stop_view_by_code_df_with_duplicate_mach() -> pd.DataFrame:
     return pd.DataFrame(
         [

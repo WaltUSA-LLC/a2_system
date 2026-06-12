@@ -23,6 +23,8 @@ def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFr
             pd.DataFrame(), \
             pd.DataFrame(), \
             pd.DataFrame()
+    
+    df["Description"] = df["Description"].fillna("Unknown")
     df["duration"] = df["Recover_time"] - df["Stop_time"]
     df["Shift_Start_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     if shift==1:
@@ -96,6 +98,7 @@ def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, s
     df = extract_base_data(StopExtractor, start_time, end_time)
     if len(df)==0:
         return pd.DataFrame()
+    df["Description"] = df["Description"].fillna("Unknown")
     df["duration"] = df["Recover_time"] - df["Stop_time"]
     df["Shift_Start_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)

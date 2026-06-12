@@ -45,7 +45,8 @@ Test cases for handle_stop_mach_detail:
     - Verify rows sort by Shift_Start_Time asc and duration desc.
 
 15. Null conversion
-    - Verify pandas null values are converted to Python None.
+    - Verify NaN Description values are converted to Unknown and other pandas
+      null values are converted to Python None.
 
 16. Filtered-empty result
     - Verify filtering all rows returns an empty result with schema.
@@ -385,9 +386,10 @@ def test_handle_stop_mach_detail_sorting(monkeypatch):
     assert list(result["id"]) == [0, 2, 1, 3]
 
 
-def test_handle_stop_mach_detail_null_values_become_none(monkeypatch):
+def test_handle_stop_mach_detail_nan_description_becomes_unknown_and_other_nulls_become_none(monkeypatch):
     """
-    Final null replacement in description should convert pandas null values to Python None.
+    NaN descriptions should become Unknown before final null replacement.
+    Other pandas null values should still become Python None.
     """
     patch_extract_base_data(
         monkeypatch,
@@ -398,7 +400,7 @@ def test_handle_stop_mach_detail_null_values_become_none(monkeypatch):
     result = _call_handle_stop_mach_detail(mach=1, style="ABC")
     row = result[result["Stop_code"] == 10].iloc[0]
 
-    assert row["Description"] is None
+    assert row["Description"] == "Unknown"
     assert row["Optional_Note"] is None
 
 
