@@ -200,10 +200,10 @@ def test_sku_api_single_sku_aggregation(monkeypatch):
     assert row["Style_Code"] == "ABC"
     assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
     assert row["Mach_cnt"] == 2
-    assert row["NAU_prs"] == 8
+    assert row["NAU_prs"] == 12
     assert row["MES_prs"] == 7
     assert row["Discard_prs"] == 6
-    assert row["Discard_percent"] == pytest.approx(0.429)
+    assert row["Discard_percent"] == pytest.approx(0.333)
     assert row["ON_Time_Occupation"] == pytest.approx(0.85)
     assert row["Efficiency"] == pytest.approx(0.7)
     assert row["defects"] == 2

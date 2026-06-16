@@ -18,7 +18,7 @@ def make_base_sku_df() -> pd.DataFrame:
             "Avg_Cycle": [10, 10, 10],
             "Weight": [3, 5, 3],
             "Prs_Weight": [1000, 1000, 1000],
-            "NAU_prs": [2, 4, 2],
+            "NAU_prs": [2, 4, 6],
             "Discard_prs": [1, 2, 3],
         }
     )
