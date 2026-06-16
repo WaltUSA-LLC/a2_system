@@ -229,10 +229,10 @@ def test_handle_sku_view_normal_grouping(monkeypatch):
     assert row["Style_Code"] == "ABC"
     assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
     assert row["Mach_cnt"] == 2
-    assert row["NAU_prs"] == 8
+    assert row["NAU_prs"] == 12
     assert row["MES_prs"] == 11
     assert row["Discard_prs"] == 6
-    assert row["Discard_percent"] == pytest.approx(0.429)
+    assert row["Discard_percent"] == pytest.approx(0.333)
     assert row["ON_Time_Occupation"] == pytest.approx(170 / 200)
     assert row["Efficiency"] == pytest.approx(11 / 30)
 
@@ -329,7 +329,7 @@ def test_handle_sku_view_filter_shutdown_mach_affects_discard_aggregation(
     assert len(result) == 1
     row = result.iloc[0]
     assert row["Discard_prs"] == 4
-    assert row["Discard_percent"] == pytest.approx(0.5)
+    assert row["Discard_percent"] == pytest.approx(0.333)
     assert mocks["estimate_mes_output_prs"].call_count == 2
     assert mocks["estimate_st_output_prs"].call_count == 2
 

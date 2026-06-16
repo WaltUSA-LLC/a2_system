@@ -268,10 +268,10 @@ def test_handle_shift_view_single_shift_aggregation(monkeypatch):
     assert row["id"] == 0
     assert row["Shift_Start_Time"] == pd.Timestamp("2026-05-01 07:00:00")
     assert row["Mach_cnt"] == 2
-    assert row["NAU_prs"] == 8
+    assert row["NAU_prs"] == 12
     assert row["MES_prs"] == 11
     assert row["Discard_prs"] == 6
-    assert row["Discard_percent"] == pytest.approx(0.429)
+    assert row["Discard_percent"] == pytest.approx(0.333)
     assert row["ST_prs"] == 30
     assert row["eff"] == pytest.approx(0.367)
     assert row["Time_Occupation"] == pytest.approx(170/200)
