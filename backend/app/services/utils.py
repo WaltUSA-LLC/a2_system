@@ -5,7 +5,8 @@ import numpy as np
 from extractors import AppConfig
 from extractors import BaseExtractor
 from extractors.utils import parse_start_date
-from cores.constants import ON_MACH_THRESHOLD
+from cores.constants import ON_MACH_THRESHOLD,\
+    NAU_PRS_THRESHOLD
 
 def estimate_mes_output_prs(rec: pd.Series) -> int:
     if pd.isna(rec["Prs_Weight"]) or rec["Prs_Weight"] == 0:
@@ -33,7 +34,7 @@ def clean_weight(df: pd.DataFrame) -> pd.DataFrame:
 
 def filterShutdownMach(df: pd.DataFrame) -> pd.DataFrame:
     cleaned_df = df.copy()
-    cleaned_df = cleaned_df[(cleaned_df["Weight"]>0)|(cleaned_df["NAU_prs"]>0)|(cleaned_df["ON_Time"]>ON_MACH_THRESHOLD)]
+    cleaned_df = cleaned_df[(cleaned_df["Weight"]>0)|(cleaned_df["NAU_prs"]>NAU_PRS_THRESHOLD)|(cleaned_df["ON_Time"]>ON_MACH_THRESHOLD)]
     return cleaned_df
 
 
