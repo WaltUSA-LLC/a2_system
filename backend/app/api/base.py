@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from app.services.mach_view import handle_mach_view
 from app.services.sku_view import handle_sku_view, handle_sku_mach_detail
 from app.services.shift_view import handle_shift_view, handle_shift_mach_detail
@@ -7,6 +7,7 @@ from app.services.stop_view import handle_stop_view_by_mach
 from app.services.stop_view import handle_stop_mach_detail
 from app.services.stop_view import handle_stop_code_detail
 from app.services.staff_info import fetch_staff_info_by_date_and_shift
+from app.services.staff_schedule import upload_staff_schedule
 from app.services.pqc_view import handle_pqc_view_by_staff,\
     handle_pqc_view_by_staff_detail,\
     handle_pqc_view_by_sku,\
@@ -88,3 +89,37 @@ def get_pqc_sku(start:str, end:str, shift: int):
 def get_pqc_sku_detail(start:str, shift: int, style:str):
     df = handle_pqc_sku_detail(start, shift, style)
     return {"content": df.to_dict(orient="records")}
+
+
+@router.post("/uploads/staff")
+async def upload_knit_schedule(
+    file: UploadFile = File(...),
+    year: int = Form(...),
+    month: int = Form(...),
+):
+    try:
+        result = await upload_staff_schedule(
+            file=file,
+            year=year,
+            month=month,
+        )
+
+        return result
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=str(e),
+        )
+
+    except FileNotFoundError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File error: {str(e)}",
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to import knit schedule: {str(e)}",
+        )

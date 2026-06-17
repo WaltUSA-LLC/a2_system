@@ -81,6 +81,9 @@ function TopBar() {
                     >
                         PQC
                     </Button>
+                    <Button color='inherit' component={RouterLink} to="/upload">
+                        Upload
+                    </Button>
                 </Stack>
                 <Menu
                     anchorEl={anchorElStop}

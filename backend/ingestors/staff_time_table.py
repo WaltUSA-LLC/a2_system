@@ -1,15 +1,17 @@
 import os
+import logging
 from datetime import datetime, time
 from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Connection
 
 
 EXCEL_PATH = Path(__file__).with_name("schedule.xlsx")
 ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
+logger = logging.getLogger(__name__)
 
 
 ROLE_MAP = {
@@ -22,18 +24,8 @@ ROLE_MAP = {
 MONTH={1:"Jan", 2:"Feb", 3:"Mar", 4:"April", 5:"May",\
        6:"Jun", 7:"Jul", 8:"Aug", 9:"Sep", 10:"Oct", 11:"Nov", 12:"Dec"}
 
-def clear_knit_schedule(
-    year: int,
-    month: int,
-    database_url: str | None = None,
-    engine: Engine | None = None,
-) -> int:
-    """
-    Delete ShiftOperator rows for one calendar month.
 
-    The month range is inclusive at the start and exclusive at the next month,
-    so it works for months with 28, 29, 30, or 31 days.
-    """
+def _month_range(year: int, month: int) -> tuple[datetime, datetime]:
     if month < 1 or month > 12:
         raise ValueError("month must be between 1 and 12")
 
@@ -43,14 +35,20 @@ def clear_knit_schedule(
     else:
         next_month_start = datetime(year, month + 1, 1)
 
-    owns_engine = engine is None
-    if engine is None:
-        load_dotenv(ENV_PATH)
-        resolved_database_url = database_url or os.getenv("DATABASE_URL")
-        if not resolved_database_url:
-            raise ValueError("DATABASE_URL is missing. Set it in .env or pass database_url.")
-        engine = create_engine(resolved_database_url)
+    return month_start, next_month_start
 
+
+def _clear_knit_schedule(
+    conn: Connection,
+    month_start: datetime,
+    next_month_start: datetime,
+) -> int:
+    """
+    Delete ShiftOperator rows for one calendar month.
+
+    The month range is inclusive at the start and exclusive at the next month,
+    so it works for months with 28, 29, 30, or 31 days.
+    """
     delete_stmt = text(
         """
         DELETE FROM dbA2.dbo.ShiftOperator
@@ -59,24 +57,19 @@ def clear_knit_schedule(
         """
     )
 
-    try:
-        with engine.begin() as conn:
-            result = conn.execute(
-                delete_stmt,
-                {
-                    "month_start": month_start,
-                    "next_month_start": next_month_start,
-                },
-            )
-        if result.rowcount is None or result.rowcount < 0:
-            return 0
-        return result.rowcount
-    finally:
-        if owns_engine:
-            engine.dispose()
+    result = conn.execute(
+        delete_stmt,
+        {
+            "month_start": month_start,
+            "next_month_start": next_month_start,
+        },
+    )
+    if result.rowcount is None or result.rowcount < 0:
+        return 0
+    return result.rowcount
 
 
-def parse_knit_schedule_excel(excel_path: str | Path, sheet_name: str) -> pd.DataFrame:
+def _parse_knit_schedule_excel(excel_path: str | Path, sheet_name: str) -> pd.DataFrame:
     """
     Parse schedule Excel sheet into long format:
     ShiftStartTime | OperatorID
@@ -99,7 +92,8 @@ def parse_knit_schedule_excel(excel_path: str | Path, sheet_name: str) -> pd.Dat
     records = []
     current_date = None
 
-    for _, row in data.iterrows():
+    for row_idx, row in data.iterrows():
+        excel_row = row_idx + 1
         raw_date = row.iloc[0]       # Date column
         shift_type = row.iloc[2]     # Day / Night column
 
@@ -107,10 +101,10 @@ def parse_knit_schedule_excel(excel_path: str | Path, sheet_name: str) -> pd.Dat
             current_date = pd.to_datetime(raw_date).date()
 
         if current_date is None:
-            continue
+            raise ValueError(f"missing schedule date at row {excel_row}")
 
         if pd.isna(shift_type):
-            continue
+            raise ValueError(f"missing shift type at row {excel_row}")
 
         shift_type = str(shift_type).strip()
 
@@ -119,21 +113,28 @@ def parse_knit_schedule_excel(excel_path: str | Path, sheet_name: str) -> pd.Dat
         elif shift_type == "Night":
             shift_start_time = datetime.combine(current_date, time(19, 0, 0))
         else:
+            logger.warning(
+                "Skipping sheet %s row %s: unsupported shift type %r.",
+                sheet_name,
+                excel_row,
+                shift_type,
+            )
             continue
 
         # the first three are Date / week / Shift separately
         for col_idx in range(3, df.shape[1]):
+            excel_col = col_idx + 1
             role_raw = role_row.iloc[col_idx]
             operator_name_raw = name_row.iloc[col_idx]
             operator_id_raw = id_row.iloc[col_idx]
 
             # ignore for role
             if pd.isna(role_raw):
-                continue
+                raise ValueError(f"missing role header at col {excel_col}")
+                
             role_raw = str(role_raw).strip()
             if role_raw not in ROLE_MAP:
-                continue
-
+                raise ValueError(f"unsupported role header {role_raw} at col {excel_col}")
             # ignore TIME/TTL for name
             if pd.notna(operator_name_raw):
                 operator_name = str(operator_name_raw).strip()
@@ -142,11 +143,11 @@ def parse_knit_schedule_excel(excel_path: str | Path, sheet_name: str) -> pd.Dat
 
             # must have OperatorID
             if pd.isna(operator_id_raw):
-                continue
+                raise ValueError(f"no operator id header at col {excel_col}")
             try:
                 operator_id = int(operator_id_raw)
             except ValueError:
-                continue
+                raise ValueError(f"operator id invalid at col {excel_col}")
 
             cell_value = row.iloc[col_idx]
             if pd.notna(cell_value) and cell_value == 1:
@@ -156,8 +157,7 @@ def parse_knit_schedule_excel(excel_path: str | Path, sheet_name: str) -> pd.Dat
                         "OperatorID": operator_id,
                         "RoleName": ROLE_MAP[role_raw],
                     }
-                )
-
+                )             
     result = pd.DataFrame(records, columns=["ShiftStartTime", "OperatorID", "RoleName"])
 
     result = result.drop_duplicates(
@@ -167,17 +167,19 @@ def parse_knit_schedule_excel(excel_path: str | Path, sheet_name: str) -> pd.Dat
     return result
 
 
-def write_shift_operators_to_db(
-    schedule_df: pd.DataFrame,
-    database_url: str | None = None,
-    engine: Engine | None = None,
+def write_staff_schedule_to_db(
+    year: int,
+    month: int,
+    excel_path: str | Path = EXCEL_PATH,
 ) -> int:
     """
-    Write parsed schedule rows into ShiftOperator.
+    Write one month of parsed schedule rows into ShiftOperator.
 
-    Existing (ShiftStartTime, OperatorID) rows are skipped so this can be
-    safely rerun for the same spreadsheet.
+    Existing rows for the month are cleared before writing the parsed rows.
     """
+    month_start, next_month_start = _month_range(year, month)
+    schedule_df = _parse_knit_schedule_excel(excel_path, MONTH[month])
+
     required_columns = {"ShiftStartTime", "OperatorID", "RoleName"}
     missing_columns = required_columns - set(schedule_df.columns)
     if missing_columns:
@@ -189,8 +191,6 @@ def write_shift_operators_to_db(
         .dropna()
         .drop_duplicates(subset=["ShiftStartTime", "OperatorID", "RoleName"])
     )
-    if records_df.empty:
-        return 0
 
     records = [
         {
@@ -201,13 +201,11 @@ def write_shift_operators_to_db(
         for row in records_df.itertuples(index=False)
     ]
 
-    owns_engine = engine is None
-    if engine is None:
-        load_dotenv(ENV_PATH)
-        resolved_database_url = database_url or os.getenv("DATABASE_URL")
-        if not resolved_database_url:
-            raise ValueError("DATABASE_URL is missing. Set it in .env or pass database_url.")
-        engine = create_engine(resolved_database_url)
+    load_dotenv(ENV_PATH)
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        raise ValueError("DATABASE_URL is missing. Set it in .env.")
+    engine = create_engine(database_url)
 
     insert_stmt = text(
         """
@@ -225,20 +223,19 @@ def write_shift_operators_to_db(
 
     try:
         with engine.begin() as conn:
+            _clear_knit_schedule(conn, month_start, next_month_start)
+            if not records:
+                return 0
             result = conn.execute(insert_stmt, records)
         if result.rowcount is None or result.rowcount < 0:
             return len(records)
         return result.rowcount
     finally:
-        if owns_engine:
-            engine.dispose()
+        engine.dispose()
 
 
 if __name__ == "__main__":
     year = 2026
-    for month in range(1,6):
-        clear_knit_schedule(year, month)
-        schedule_df = parse_knit_schedule_excel(EXCEL_PATH, MONTH[month])
-        inserted_count = write_shift_operators_to_db(schedule_df)
-        print(f"{year}-{month}: Total parsed records: {len(schedule_df)}")
+    for month in range(1,3):
+        inserted_count = write_staff_schedule_to_db(year, month)
         print(f"{year}-{month}: Inserted records: {inserted_count}")
