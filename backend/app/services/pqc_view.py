@@ -3,6 +3,7 @@ import numpy as np
 from fastapi import HTTPException
 from extractors import PQCExtractor
 from app.services.utils import extract_base_data
+from cores.constants import PQC_FREQ_THRESHOLD
 
 
 def _extract_pqc_data(start_time:str, end_time:str, shift:int)->pd.DataFrame:
@@ -77,7 +78,7 @@ def handle_pqc_view_by_staff(start_time:str, end_time:str, shift:int)->pd.DataFr
         pqc_cnt=("MachID", "size"),
         start_check = ("DateRec", "min"),
         end_check = ("DateRec", "max"),
-        avg_adj_diff=("DateRec", lambda x: x.sort_values().diff().mean()),
+        avg_adj_diff=("DateRec", lambda x: x.sort_values().diff()[lambda s: s > pd.Timedelta(minutes=PQC_FREQ_THRESHOLD)].mean()),
         toeHole=("toeHole", "sum"),
         brokenNDL=("brokenNDL", "sum"),
         missNDL=("missNDL", "sum"),
