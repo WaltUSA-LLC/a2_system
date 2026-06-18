@@ -11,7 +11,7 @@ def _extract_pqc_data(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df["Shift_Start_Time"] = pd.to_datetime(df["Date"].astype(str) + " " + df["Shift"].astype(str))
     df["Role"] = df["Role_Name"].str.split("-").str[0].str.strip()
     df["Name"] = df["Role_Name"].str.split("-").str[1].str.strip()
-    df = df.drop(columns=["Date", "Shift"])
+    df = df.drop(columns=["Date", "Shift", "Role_Name"])
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().upper() if isinstance(x, str) and x.strip() else None)
     return df
 

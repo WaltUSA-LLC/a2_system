@@ -40,7 +40,7 @@ from app.tests.mocks.handle_shift_view_mocks import (
     make_empty_shift_df,
     make_multi_shift_df,
 )
-from app.tests.mocks.pqc_view_mocks import (
+from app.tests.mocks.extract_pqc_data_output_mocks import (
     make_base_pqc_shift_df,
     make_multi_pqc_shift_df,
 )

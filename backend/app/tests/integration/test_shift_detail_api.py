@@ -47,7 +47,7 @@ from app.tests.mocks.handle_shift_mach_detail_mocks import (
     make_shift_mach_detail_df_for_metrics_and_comments,
     make_shift_mach_detail_df_with_duplicate_mach,
 )
-from app.tests.mocks.pqc_view_mocks import (
+from app.tests.mocks.extract_pqc_data_output_mocks import (
     make_base_pqc_mach_detail_df,
     make_metrics_pqc_mach_detail_df,
 )

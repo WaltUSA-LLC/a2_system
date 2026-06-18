@@ -1,5 +1,8 @@
 import pandas as pd
 
+"""
+mimic data output of _extract_pqc_data
+"""
 
 def make_base_pqc_shift_df():
     shift_time = pd.Timestamp("2026-05-01 07:00:00")
