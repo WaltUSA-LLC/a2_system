@@ -167,10 +167,10 @@ function ShiftView() {
                 const staff = resp.data.staff ?? [];
                 setModalRec(records);
                 setMetaData({date_time: params.row.Shift_Start_Time, 
-                    ko: staff[0].KO ? staff[0].KO : "None", 
-                    tech: staff[0].Tech ? staff[0].Tech : "None", 
-                    creeler: staff[0].Creeler ? staff[0].Creeler : "None", 
-                    yarner: staff[0].Yarner ? staff[0].Yarner : "None"})
+                    ko: staff[0]?.KO ?? "None", 
+                    tech: staff[0]?.Tech ?? "None", 
+                    creeler: staff[0]?.Creeler ?? "None", 
+                    yarner: staff[0]?.Yarner ?? "None"})
             }
         ).catch((err) => {
             console.error(err);
