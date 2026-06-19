@@ -8,6 +8,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
+import CircularProgress from '@mui/material/CircularProgress';
 import { IconButton, Tooltip } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import AutoGraphOutlinedIcon from '@mui/icons-material/AutoGraphOutlined';
@@ -165,7 +166,9 @@ function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDow
             </Box>
 
             {loading ? (
-                <div>Loading...</div>
+                <Box sx={{ height: 700, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CircularProgress enableTrackSlot />
+                </Box>
             ) : (
                 <Box sx={{ height: 700, width: '100%' }}>
                     <DataGrid
