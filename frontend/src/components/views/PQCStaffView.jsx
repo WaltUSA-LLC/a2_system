@@ -73,7 +73,7 @@ function PQCStaffView() {
             align: 'center',
             headerAlign: 'center',
             valueFormatter: (value) => {
-                if (value == "NaT") return '';
+                if (!value) return '';
                 return formatSeconds(value);
             },
             filterOperators: minuteFilterOperators,

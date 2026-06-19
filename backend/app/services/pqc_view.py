@@ -92,6 +92,10 @@ def handle_pqc_view_by_staff(start_time:str, end_time:str, shift:int)->pd.DataFr
 
     df["defects"] = df[["toeHole", "brokenNDL", "missNDL", "fanYarn", \
                         "missYarn", "logoIssue", "dirty", "feisha", "other"]].apply(lambda rec: sum(rec),axis=1)
+    df["avg_adj_diff"] = df["avg_adj_diff"].astype(object).where(
+        df["avg_adj_diff"].notna(),
+        None,
+    )
     df["start_check"] = df["start_check"].dt.strftime("%H:%M:%S")
     df["end_check"] = df["end_check"].dt.strftime("%H:%M:%S")
     
