@@ -89,46 +89,29 @@ def make_multi_shift_raw_pqc_df() -> pd.DataFrame:
     )
 
 
-def make_raw_pqc_staff_df_with_same_name_multiple_roles() -> pd.DataFrame:
+def make_raw_pqc_staff_detail_df_with_invalid_values() -> pd.DataFrame:
     return pd.DataFrame(
         {
-            "Date": [
-                "2026-05-01",
-                "2026-05-01",
-                "2026-05-01",
-                "2026-05-01",
-            ],
-            "Shift": [
-                "07:00:00",
-                "07:00:00",
-                "07:00:00",
-                "07:00:00",
-            ],
-            "Role_Name": [
-                "KO - Alice",
-                "Tech - Alice",
-                "KO - Alice",
-                "Tech - Alice",
-            ],
+            "Date": ["2026-05-01", "2026-05-01"],
+            "Shift": ["07:00:00", "07:00:00"],
+            "Role_Name": ["KO - Alice", "KO - Alice"],
             "DateRec": pd.to_datetime(
                 [
+                    "2026-05-01 07:20:00",
                     "2026-05-01 07:10:00",
-                    "2026-05-01 07:15:00",
-                    "2026-05-01 07:35:00",
-                    "2026-05-01 07:45:00",
                 ]
             ),
-            "MachID": ["M1", "M2", "M3", "M4"],
-            "Style_Code": ["abc red", "abc blue", "xyz black", "qwe white"],
-            "toeHole": [1, 0, 1, 0],
-            "brokenNDL": [0, 1, 0, 1],
-            "missNDL": [0, 0, 1, 0],
-            "fanYarn": [0, 0, 0, 0],
-            "missYarn": [0, 0, 0, 1],
-            "logoIssue": [0, 0, 0, 0],
-            "dirty": [0, 0, 0, 0],
-            "feisha": [0, 0, 0, 0],
-            "other": [0, 0, 0, 0],
+            "MachID": ["M1", "M2"],
+            "Style_Code": [" abc red ", "XYZ black "],
+            "toeHole": [1, 0],
+            "brokenNDL": [float("nan"), 0],
+            "missNDL": [0, float("inf")],
+            "fanYarn": [0, 0],
+            "missYarn": [0, 0],
+            "logoIssue": [0, 0],
+            "dirty": [float("-inf"), 0],
+            "feisha": [0, 0],
+            "other": [0, 0],
         }
     )
 

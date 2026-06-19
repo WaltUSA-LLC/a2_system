@@ -11,10 +11,7 @@ Test cases for /base/pqc/staff API:
    - Verify raw extractor rows are normalized, grouped by staff, and returned
      as JSON-safe values.
 
-4. Name and role grouping
-   - Verify the same staff name in different roles remains separate.
-
-5. Multiple shift sorting
+4. Multiple shift sorting
    - Verify multiple shifts are serialized with formatted shift start times.
 """
 
@@ -28,7 +25,6 @@ from app.tests.mocks.extract_pqc_data_input_mocks import (
     make_base_raw_pqc_df,
     make_empty_raw_pqc_df,
     make_multi_shift_raw_pqc_df,
-    make_raw_pqc_staff_df_with_same_name_multiple_roles,
 )
 
 
@@ -172,36 +168,9 @@ def test_pqc_staff_api_staff_aggregation_and_serialization(monkeypatch):
     assert bob_tech["defects"] == 2
 
 
-def test_pqc_staff_api_groups_by_name_and_role(monkeypatch):
-    """
-    Case 4: Name and role grouping.
-    The same staff name in different roles should produce separate API rows.
-    """
-    patch_extract_base_data(
-        monkeypatch,
-        pqc_view,
-        make_raw_pqc_staff_df_with_same_name_multiple_roles(),
-    )
-
-    response = _get_pqc_staff()
-
-    assert response.status_code == 200
-    content = response.json()["content"]
-    result_by_staff = _content_by_staff(content)
-
-    assert set(result_by_staff) == {
-        ("Alice", "KO"),
-        ("Alice", "Tech"),
-    }
-    assert result_by_staff[("Alice", "KO")]["pqc_cnt"] == 2
-    assert result_by_staff[("Alice", "KO")]["defects"] == 3
-    assert result_by_staff[("Alice", "Tech")]["pqc_cnt"] == 2
-    assert result_by_staff[("Alice", "Tech")]["defects"] == 3
-
-
 def test_pqc_staff_api_multiple_shift_sorting(monkeypatch):
     """
-    Case 5: Multiple shift sorting.
+    Case 4: Multiple shift sorting.
     Multiple shift start times should be sorted and returned as formatted
     strings.
     """

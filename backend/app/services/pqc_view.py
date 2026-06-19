@@ -110,6 +110,9 @@ def handle_pqc_view_by_staff_detail(start_time:str, shift:int, name:str)->pd.Dat
     df = df[df["Name"]==name]
 
     df = df[["DateRec", "MachID", "Style_Code", "toeHole", "brokenNDL", "missNDL", "fanYarn", "missYarn", "logoIssue", "dirty", "feisha", "other"]]
+    if len(df)==0:
+        return df.reset_index(names="id")
+
     df = df.sort_values(["DateRec"])
     df["DateRec"] = df["DateRec"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df["Style_Code"] = df["Style_Code"].str.strip()
