@@ -3,7 +3,7 @@ Test cases for /base/shift/detail API:
 
 1. Output schema
    - Verify the API returns machine-detail, PQC, and staff records with
-     expected fields.
+     expected fields and machine-line values.
 
 2. Extractor arguments
    - Verify extract_base_data receives MESExtractor, start as both start/end,
@@ -27,6 +27,7 @@ Test cases for /base/shift/detail API:
 8. Empty staff schedule
    - Verify an empty staff schedule returns empty staff while preserving
      machine-detail content.
+
 """
 
 import pytest
@@ -65,6 +66,7 @@ client = TestClient(app)
 
 EXPECTED_COLUMNS = [
     "id",
+    "LineID",
     "MachID",
     "Shift_Start_Time",
     "Style_Code",
@@ -83,11 +85,35 @@ EXPECTED_COLUMNS = [
 ]
 
 
+def _make_base_numeric_pqc_mach_detail_df():
+    df = make_base_pqc_mach_detail_df()
+    df["MachID"] = df["MachID"].replace(
+        {
+            "M1": 1,
+            "M2": 2,
+            "M3": 43,
+        }
+    )
+    return df
+
+
+def _make_numeric_metrics_pqc_mach_detail_df():
+    df = make_metrics_pqc_mach_detail_df()
+    df["MachID"] = df["MachID"].replace(
+        {
+            "M_GOOD": 1,
+            "M_BOUNDARY": 2,
+            "M_LOW": 3,
+        }
+    )
+    return df
+
+
 def test_shift_detail_api_output_columns(monkeypatch):
     """
     Case 1: Output schema.
     Verify the API returns machine-detail and staff records with expected
-    fields.
+    fields and machine-line values.
     """
     patch_extract_base_data(
         monkeypatch,
@@ -102,7 +128,7 @@ def test_shift_detail_api_output_columns(monkeypatch):
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_mach_detail_df(),
+        _make_base_numeric_pqc_mach_detail_df(),
     )
 
     response = client.get(
@@ -121,6 +147,14 @@ def test_shift_detail_api_output_columns(monkeypatch):
     assert list(payload.keys()) == ["content", "staff"]
     assert len(content) == 3
     assert list(content[0].keys()) == EXPECTED_COLUMNS
+    assert {
+        record["MachID"]: record["LineID"]
+        for record in content
+    } == {
+        1: 1,
+        2: 2,
+        43: 3,
+    }
     assert len(staff) == 1
     assert list(staff[0].keys()) == STAFF_ROLE_COLUMNS
 
@@ -144,7 +178,7 @@ def test_shift_detail_api_detail_and_staff_lookup_arguments(monkeypatch):
     pqc_extract_mock = patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_mach_detail_df(),
+        _make_base_numeric_pqc_mach_detail_df(),
     )
 
     response = client.get(
@@ -192,7 +226,7 @@ def test_shift_detail_api_empty_df(monkeypatch):
     pqc_extract_mock = patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_mach_detail_df(),
+        _make_base_numeric_pqc_mach_detail_df(),
     )
 
     response = client.get(
@@ -225,7 +259,7 @@ def test_shift_detail_api_metrics_and_comments(monkeypatch):
     should reflect machine efficiency.
     """
     df = make_shift_mach_detail_df_for_metrics_and_comments()
-    df.loc[df["MachID"] == "M_LOW", ["ON_Time", "OFF_Time", "Avg_Cycle", "Weight"]] = [
+    df.loc[df["MachID"] == 3, ["ON_Time", "OFF_Time", "Avg_Cycle", "Weight"]] = [
         90,
         10,
         10,
@@ -245,7 +279,7 @@ def test_shift_detail_api_metrics_and_comments(monkeypatch):
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_metrics_pqc_mach_detail_df(),
+        _make_numeric_metrics_pqc_mach_detail_df(),
     )
 
     response = client.get(
@@ -264,8 +298,8 @@ def test_shift_detail_api_metrics_and_comments(monkeypatch):
         for record in content
     }
 
-    good = result_by_mach["M_GOOD"]
-    low = result_by_mach["M_LOW"]
+    good = result_by_mach[1]
+    low = result_by_mach[3]
 
     assert good["MES_prs"] == 9
     assert good["Discard_prs"] == 1
@@ -304,7 +338,7 @@ def test_shift_detail_api_duplicate_mach_rows_preserved(monkeypatch):
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_mach_detail_df(),
+        _make_base_numeric_pqc_mach_detail_df(),
     )
 
     response = client.get(
@@ -321,7 +355,7 @@ def test_shift_detail_api_duplicate_mach_rows_preserved(monkeypatch):
     m1_records = [
         record
         for record in content
-        if record["MachID"] == "M1"
+        if record["MachID"] == 1
     ]
 
     assert len(content) == 3
@@ -352,7 +386,7 @@ def test_shift_detail_api_night_shift_staff(monkeypatch):
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_mach_detail_df(),
+        _make_base_numeric_pqc_mach_detail_df(),
     )
 
     response = client.get(
@@ -395,7 +429,7 @@ def test_shift_detail_api_no_matching_staff_returns_empty_staff(
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_mach_detail_df(),
+        _make_base_numeric_pqc_mach_detail_df(),
     )
 
     response = client.get(
@@ -431,7 +465,7 @@ def test_shift_detail_api_empty_staff_schedule_returns_empty_staff(
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_mach_detail_df(),
+        _make_base_numeric_pqc_mach_detail_df(),
     )
 
     response = client.get(

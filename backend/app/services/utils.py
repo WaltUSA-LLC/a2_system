@@ -6,7 +6,8 @@ from extractors import AppConfig
 from extractors import BaseExtractor
 from extractors.utils import parse_start_date
 from cores.constants import ON_MACH_THRESHOLD,\
-    NAU_PRS_THRESHOLD
+    NAU_PRS_THRESHOLD,\
+    NUM_MACH_IN_ZONE
 
 def estimate_mes_output_prs(rec: pd.Series) -> int:
     if pd.isna(rec["Prs_Weight"]) or rec["Prs_Weight"] == 0:
@@ -50,6 +51,27 @@ def distributeWeightForSameMach(df: pd.DataFrame) -> pd.DataFrame:
     )
     #print(cleaned_df[cleaned_df["MachID"]==100])
     return cleaned_df
+
+def determine_mach_line(machID: int) -> int | None:
+    if machID <= 0:
+        return None
+    if not isinstance(machID, int):
+        return None
+
+    if machID<=NUM_MACH_IN_ZONE and machID%2==1:
+        return 1
+    elif machID<=NUM_MACH_IN_ZONE and machID%2==0:
+        return 2
+    elif machID<=NUM_MACH_IN_ZONE*2 and machID%2==1:
+        return 3
+    elif machID<=NUM_MACH_IN_ZONE*2 and machID%2==0:
+        return 4
+    elif machID<=NUM_MACH_IN_ZONE*3 and machID%2==1:
+        return 5
+    elif machID<=NUM_MACH_IN_ZONE*3 and machID%2==0:
+        return 6
+    else:
+        return None
 
 
 def extract_base_data(extractor_cls: type[BaseExtractor], start_time:str, end_time:str, shift:int=0)->pd.DataFrame:

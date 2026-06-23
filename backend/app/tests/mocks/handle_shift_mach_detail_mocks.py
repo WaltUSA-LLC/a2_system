@@ -13,7 +13,7 @@ def make_base_shift_mach_detail_df() -> pd.DataFrame:
         {
             "Style_Code": ["abc red", "ABC blue", "xyz black"],
             "Shift_Start_Time": [shift_time, shift_time, shift_time],
-            "MachID": ["M1", "M2", "M3"],
+            "MachID": [1, 2, 43],
             "ON_Time": [80, 60, 90],
             "OFF_Time": [20, 40, 10],
             "Avg_Cycle": [10, 10, 10],
@@ -32,7 +32,7 @@ def make_shift_mach_detail_df_for_metrics_and_comments() -> pd.DataFrame:
         {
             "Style_Code": ["abc red", "ABC blue", "abc green"],
             "Shift_Start_Time": [shift_time, shift_time, shift_time],
-            "MachID": ["M_GOOD", "M_BOUNDARY", "M_LOW"],
+            "MachID": [1, 2, 3],
             "ON_Time": [90, 80, 1],
             "OFF_Time": [10, 20, 2],
             "Avg_Cycle": [10, 10, 3],
@@ -51,7 +51,7 @@ def make_shift_mach_detail_df_for_filter_shutdown() -> pd.DataFrame:
         {
             "Style_Code": ["abc red", "ABC blue", "xyz black"],
             "Shift_Start_Time": [shift_time, shift_time, shift_time],
-            "MachID": ["M_KEEP_1", "M_STOP", "M_KEEP_2"],
+            "MachID": [1, 2, 43],
             "ON_Time": [100, 50, 60],
             "OFF_Time": [0, 50, 40],
             "Avg_Cycle": [10, 10, 20],
@@ -71,7 +71,7 @@ def make_shift_mach_detail_df_that_filters_to_empty() -> pd.DataFrame:
         {
             "Style_Code": ["abc red", "ABC blue"],
             "Shift_Start_Time": [shift_time, shift_time],
-            "MachID": ["M_STOP_1", "M_STOP_2"],
+            "MachID": [1, 2],
             "ON_Time": [100, 80],
             "OFF_Time": [0, 20],
             "Avg_Cycle": [10, 10],
@@ -91,7 +91,7 @@ def make_shift_mach_detail_df_with_duplicate_mach() -> pd.DataFrame:
         {
             "Style_Code": ["abc red", "ABC blue", "abc green"],
             "Shift_Start_Time": [shift_time, shift_time, shift_time],
-            "MachID": ["M1", "M2", "M1"],
+            "MachID": [1, 2, 1],
             "ON_Time": [70, 60, 50],
             "OFF_Time": [30, 40, 50],
             "Avg_Cycle": [10, 10, 10],
@@ -110,7 +110,7 @@ def make_unsorted_shift_mach_detail_df() -> pd.DataFrame:
         {
             "Style_Code": ["abc red", "ABC blue", "ABC green"],
             "Shift_Start_Time": [shift_time, shift_time, shift_time],
-            "MachID": ["M3", "M1", "M2"],
+            "MachID": [2, 3, 1],
             "ON_Time": [70, 80, 60],
             "OFF_Time": [30, 20, 40],
             "Avg_Cycle": [10, 10, 10],
@@ -129,7 +129,7 @@ def make_shift_mach_detail_df_with_zero_time() -> pd.DataFrame:
         {
             "Style_Code": ["abc red"],
             "Shift_Start_Time": [shift_time],
-            "MachID": ["M1"],
+            "MachID": [1],
             "ON_Time": [0],
             "OFF_Time": [0],
             "Avg_Cycle": [10],
@@ -148,7 +148,7 @@ def make_shift_mach_detail_df_with_nan_st_prs() -> pd.DataFrame:
         {
             "Style_Code": ["abc red"],
             "Shift_Start_Time": [shift_time],
-            "MachID": ["M1"],
+            "MachID": [1],
             "ON_Time": [100],
             "OFF_Time": [0],
             "Avg_Cycle": [np.nan],
@@ -167,7 +167,7 @@ def make_shift_mach_detail_df_with_nan_discard_prs() -> pd.DataFrame:
         {
             "Style_Code": ["abc red"],
             "Shift_Start_Time": [shift_time],
-            "MachID": ["M1"],
+            "MachID": [1],
             "ON_Time": [100],
             "OFF_Time": [0],
             "Avg_Cycle": [10],
@@ -186,7 +186,7 @@ def make_shift_mach_detail_df_with_zero_discard_denominator() -> pd.DataFrame:
         {
             "Style_Code": ["abc red"],
             "Shift_Start_Time": [shift_time],
-            "MachID": ["M1"],
+            "MachID": [1],
             "ON_Time": [100],
             "OFF_Time": [0],
             "Avg_Cycle": [10],

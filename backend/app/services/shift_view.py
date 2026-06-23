@@ -6,7 +6,8 @@ from app.services.utils import extract_base_data, \
     estimate_st_output_prs, \
     estimate_mes_output_prs, \
     distributeWeightForSameMach, \
-    filterShutdownMach
+    filterShutdownMach, \
+    determine_mach_line
 from app.services.staff_info import merge_staff_info_to_view
 from app.services.pqc_view import merge_pqc_to_shift_view, merge_pqc_to_mach_dialog
 
@@ -77,10 +78,11 @@ def handle_shift_mach_detail(start_time:str, shift:int)->pd.DataFrame:
     df["Comment"] = ""
     df.loc[df["Mach_Efficiency"] >= 0.8, "Comment"] = "Good"
     df.loc[df["Mach_Efficiency"] < 0.8, "Comment"] = "Low Ef"
-    df = df[["MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "Discard_prs", "Discard_percent", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
+    df["LineID"] = df["MachID"].apply(determine_mach_line)
+    df = df[["LineID", "MachID", "Shift_Start_Time", 'Style_Code', "Weight", "MES_prs", "NAU_prs", "Discard_prs", "Discard_percent", "ON_Time", "OFF_Time", "ON_Time_Occupation", "Mach_Efficiency", "Comment"]]
     
     df = merge_pqc_to_mach_dialog(df, start_time, shift)
     df = df.reset_index(names="id")
     df = df.replace([np.nan, np.inf, -np.inf], None)
-    df = df.sort_values(by="MachID", ascending=True)
+    df = df.sort_values(by=["LineID", "MachID"], ascending=[True, True])
     return df

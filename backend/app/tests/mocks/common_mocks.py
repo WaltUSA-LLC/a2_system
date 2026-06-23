@@ -107,6 +107,25 @@ def patch_get_staff_schedule_table(monkeypatch, module, df: pd.DataFrame):
     return mock_get_staff_schedule_table
 
 
+def patch_determine_mach_line(monkeypatch, module):
+    """
+    Patch determine_mach_line inside the module under test.
+    """
+
+    def fake_determine_mach_line(mach_id):
+        return 1
+
+    mock_determine_mach_line = Mock(side_effect=fake_determine_mach_line)
+
+    monkeypatch.setattr(
+        module,
+        "determine_mach_line",
+        mock_determine_mach_line,
+    )
+
+    return mock_determine_mach_line
+
+
 def patch_merge_pqc_to_mach_dialog(monkeypatch, module):
     """
     Patch merge_pqc_to_mach_dialog inside the module under test.

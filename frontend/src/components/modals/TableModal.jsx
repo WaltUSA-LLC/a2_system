@@ -211,9 +211,17 @@ export function CodeStopTableModal({open, onClose, rec, metaData}){
 export function MachDetailTableModal({open, onClose, rec, metaData}){
     const columns = [
         {
+            field: 'LineID',
+            headerName: 'Line ID',
+            flex: 0.7,
+            type: 'number',
+            align: 'center',
+            headerAlign: 'center',
+        },
+        {
             field: 'MachID',
             headerName: 'Mach ID',
-            flex: 1,
+            flex: 0.7,
             type: 'number',
             align: 'center',
             headerAlign: 'center',
@@ -262,7 +270,7 @@ export function MachDetailTableModal({open, onClose, rec, metaData}){
          {
             field: 'pqc_cnt',
             headerName: 'Checks',
-            flex: 1,
+            flex: 0.7,
             type: 'number',
             align: 'center',
             headerAlign: 'center',

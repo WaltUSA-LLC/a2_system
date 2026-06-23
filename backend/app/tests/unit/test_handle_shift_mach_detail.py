@@ -33,7 +33,7 @@ Test cases for handle_shift_mach_detail:
     - Verify repeated MachID rows are preserved and not aggregated.
 
 11. Row order
-    - Verify output preserves source row order after filtering.
+    - Verify output is sorted by LineID and then MachID.
 
 12. Null and infinite value handling
     - Verify zero-time, zero-ST, NaN-ST, and NaN-Discard current behavior.
@@ -53,6 +53,7 @@ import app.services.shift_view as shift_view
 from app.tests.mocks.common_mocks import (
     make_call_counting_mocks,
     patch_common_dependencies,
+    patch_determine_mach_line,
     patch_extract_base_data,
     patch_merge_pqc_to_mach_dialog,
 )
@@ -74,6 +75,7 @@ from app.tests.mocks.handle_shift_mach_detail_mocks import (
 
 EXPECTED_COLUMNS = [
     "id",
+    "LineID",
     "MachID",
     "Shift_Start_Time",
     "Style_Code",
@@ -182,6 +184,10 @@ def test_handle_shift_mach_detail_calls_invoked_functions(monkeypatch):
         monkeypatch,
         shift_view,
     )
+    determine_mach_line_mock = patch_determine_mach_line(
+        monkeypatch,
+        shift_view,
+    )
 
     result = shift_view.handle_shift_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -194,6 +200,11 @@ def test_handle_shift_mach_detail_calls_invoked_functions(monkeypatch):
     mocks["filterShutdownMach"].assert_called_once()
     assert mocks["estimate_mes_output_prs"].call_count == len(raw_df)
     assert mocks["estimate_st_output_prs"].call_count == len(raw_df)
+    assert determine_mach_line_mock.call_count == len(raw_df)
+    assert [
+        call.args[0]
+        for call in determine_mach_line_mock.call_args_list
+    ] == raw_df["MachID"].tolist()
     _assert_merge_pqc_to_mach_dialog_called_once(
         pqc_merge_mock,
         "2026-05-01 00:00:00",
@@ -292,23 +303,23 @@ def test_handle_shift_mach_detail_calculates_metrics(monkeypatch):
 
     result_by_mach = result.set_index("MachID")
 
-    assert result_by_mach.loc["M_GOOD", "MES_prs"] == 9
-    assert result_by_mach.loc["M_GOOD", "Discard_prs"] == 1
-    assert result_by_mach.loc["M_GOOD", "Discard_percent"] == pytest.approx(0.125)
-    assert result_by_mach.loc["M_GOOD", "ON_Time_Occupation"] == pytest.approx(0.9)
-    assert result_by_mach.loc["M_GOOD", "Mach_Efficiency"] == pytest.approx(0.9)
+    assert result_by_mach.loc[1, "MES_prs"] == 9
+    assert result_by_mach.loc[1, "Discard_prs"] == 1
+    assert result_by_mach.loc[1, "Discard_percent"] == pytest.approx(0.125)
+    assert result_by_mach.loc[1, "ON_Time_Occupation"] == pytest.approx(0.9)
+    assert result_by_mach.loc[1, "Mach_Efficiency"] == pytest.approx(0.9)
 
-    assert result_by_mach.loc["M_BOUNDARY", "MES_prs"] == 8
-    assert result_by_mach.loc["M_BOUNDARY", "Discard_prs"] == 2
-    assert result_by_mach.loc["M_BOUNDARY", "Discard_percent"] == pytest.approx(0.25)
-    assert result_by_mach.loc["M_BOUNDARY", "ON_Time_Occupation"] == pytest.approx(0.8)
-    assert result_by_mach.loc["M_BOUNDARY", "Mach_Efficiency"] == pytest.approx(0.8)
+    assert result_by_mach.loc[2, "MES_prs"] == 8
+    assert result_by_mach.loc[2, "Discard_prs"] == 2
+    assert result_by_mach.loc[2, "Discard_percent"] == pytest.approx(0.25)
+    assert result_by_mach.loc[2, "ON_Time_Occupation"] == pytest.approx(0.8)
+    assert result_by_mach.loc[2, "Mach_Efficiency"] == pytest.approx(0.8)
 
-    assert result_by_mach.loc["M_LOW", "MES_prs"] == 1
-    assert result_by_mach.loc["M_LOW", "Discard_prs"] == 3
-    assert result_by_mach.loc["M_LOW", "Discard_percent"] == pytest.approx(0.75)
-    assert result_by_mach.loc["M_LOW", "ON_Time_Occupation"] == pytest.approx(0.333)
-    assert result_by_mach.loc["M_LOW", "Mach_Efficiency"] == pytest.approx(0.333)
+    assert result_by_mach.loc[3, "MES_prs"] == 1
+    assert result_by_mach.loc[3, "Discard_prs"] == 3
+    assert result_by_mach.loc[3, "Discard_percent"] == pytest.approx(0.75)
+    assert result_by_mach.loc[3, "ON_Time_Occupation"] == pytest.approx(0.333)
+    assert result_by_mach.loc[3, "Mach_Efficiency"] == pytest.approx(0.333)
 
 
 def test_handle_shift_mach_detail_comment_good_and_low_eff(monkeypatch):
@@ -337,9 +348,9 @@ def test_handle_shift_mach_detail_comment_good_and_low_eff(monkeypatch):
 
     result_by_mach = result.set_index("MachID")
 
-    assert result_by_mach.loc["M_GOOD", "Comment"] == "Good"
-    assert result_by_mach.loc["M_BOUNDARY", "Comment"] == "Good"
-    assert result_by_mach.loc["M_LOW", "Comment"] == "Low Ef"
+    assert result_by_mach.loc[1, "Comment"] == "Good"
+    assert result_by_mach.loc[2, "Comment"] == "Good"
+    assert result_by_mach.loc[3, "Comment"] == "Low Ef"
 
 
 def test_handle_shift_mach_detail_filter_shutdown_mach_affects_rows(
@@ -374,10 +385,10 @@ def test_handle_shift_mach_detail_filter_shutdown_mach_affects_rows(
     )
 
     assert len(result) == 2
-    assert list(result["MachID"]) == ["M_KEEP_1", "M_KEEP_2"]
+    assert list(result["MachID"]) == [1, 43]
     assert list(result["Discard_prs"]) == [1, 3]
     assert list(result["Discard_percent"]) == pytest.approx([0.143, 0.5])
-    assert "M_STOP" not in set(result["MachID"])
+    assert 2 not in set(result["MachID"])
     assert mocks["estimate_mes_output_prs"].call_count == 2
     assert mocks["estimate_st_output_prs"].call_count == 2
 
@@ -446,7 +457,7 @@ def test_handle_shift_mach_detail_duplicate_mach_rows_are_preserved(
     )
 
     assert len(result) == 3
-    assert list(result["MachID"]) == ["M1", "M1", "M2"]
+    assert list(result["MachID"]) == [1, 1, 2]
     assert list(result["Weight"]) == [7, 5, 6]
     assert list(result["NAU_prs"]) == [5, 3, 4]
     assert list(result["Discard_prs"]) == [1, 3, 2]
@@ -455,7 +466,7 @@ def test_handle_shift_mach_detail_duplicate_mach_rows_are_preserved(
 
 def test_handle_shift_mach_detail_ascending_row_order(monkeypatch):
     """
-    Current behavior: output ascending preserves row order by MachID.
+    Output should sort by LineID first and MachID second.
     """
     patch_extract_base_data(
         monkeypatch,
@@ -476,9 +487,9 @@ def test_handle_shift_mach_detail_ascending_row_order(monkeypatch):
         shift=1,
     )
 
-    assert list(result["MachID"]) == ["M1", "M2", "M3"]
-    assert list(result["Discard_prs"]) == [1, 2, 3]
-    assert list(result["Discard_percent"]) == pytest.approx([0.143, 0.333, 0.375])
+    assert list(result["MachID"]) == [1, 3, 2]
+    assert list(result["Discard_prs"]) == [2, 1, 3]
+    assert list(result["Discard_percent"]) == pytest.approx([0.333, 0.143, 0.375])
 
 
 def test_handle_shift_mach_detail_zero_time_becomes_none(monkeypatch):
