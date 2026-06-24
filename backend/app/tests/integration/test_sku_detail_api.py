@@ -3,7 +3,7 @@ Test cases for /base/sku/detail API:
 
 1. Output schema
    - Verify the API returns SKU machine-detail, PQC, and staff records with
-     expected fields.
+     expected fields and machine-line values.
 
 2. Detail and staff lookup arguments
    - Verify extract_base_data receives MESExtractor, start, end, and shift,
@@ -71,6 +71,7 @@ client = TestClient(app)
 
 EXPECTED_COLUMNS = [
     "id",
+    "LineID",
     "MachID",
     "Shift_Start_Time",
     "Style_Code",
@@ -88,11 +89,35 @@ EXPECTED_COLUMNS = [
 ]
 
 
+def _make_base_numeric_pqc_sku_mach_detail_df():
+    df = make_base_pqc_sku_mach_detail_df()
+    df["MachID"] = df["MachID"].replace(
+        {
+            "M1": 1,
+            "M2": 2,
+            "M3": 3,
+        }
+    )
+    return df
+
+
+def _make_numeric_metrics_pqc_sku_mach_detail_df():
+    df = make_metrics_pqc_sku_mach_detail_df()
+    df["MachID"] = df["MachID"].replace(
+        {
+            "M1": 1,
+            "M2": 2,
+            "M3": 3,
+        }
+    )
+    return df
+
+
 def test_sku_detail_api_output_columns(monkeypatch):
     """
     Case 1: Output schema.
     Verify the API returns SKU machine-detail and staff records with expected
-    fields.
+    fields and machine-line values.
     """
     patch_extract_base_data(
         monkeypatch,
@@ -107,7 +132,7 @@ def test_sku_detail_api_output_columns(monkeypatch):
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_sku_mach_detail_df(),
+        _make_base_numeric_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -128,6 +153,13 @@ def test_sku_detail_api_output_columns(monkeypatch):
     assert list(payload.keys()) == ["content", "staff"]
     assert len(content) == 2
     assert list(content[0].keys()) == EXPECTED_COLUMNS
+    assert {
+        record["MachID"]: record["LineID"]
+        for record in content
+    } == {
+        1: 1,
+        2: 2,
+    }
     assert len(staff) == 1
     assert list(staff[0].keys()) == STAFF_ROLE_COLUMNS
 
@@ -152,7 +184,7 @@ def test_sku_detail_api_detail_and_staff_lookup_arguments(monkeypatch):
     pqc_extract_mock = patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_sku_mach_detail_df(),
+        _make_base_numeric_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -202,7 +234,7 @@ def test_sku_detail_api_empty_df(monkeypatch):
     pqc_extract_mock = patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_sku_mach_detail_df(),
+        _make_base_numeric_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -249,7 +281,7 @@ def test_sku_detail_api_filters_by_style_without_size(monkeypatch):
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_sku_mach_detail_df(),
+        _make_base_numeric_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -274,10 +306,10 @@ def test_sku_detail_api_filters_by_style_without_size(monkeypatch):
         for record in content
     }
 
-    assert result_by_mach["M1"]["defects"] == 1
-    assert result_by_mach["M1"]["pqc_cnt"] == 1
-    assert result_by_mach["M2"]["defects"] == 2
-    assert result_by_mach["M2"]["pqc_cnt"] == 2
+    assert result_by_mach[1]["defects"] == 1
+    assert result_by_mach[1]["pqc_cnt"] == 1
+    assert result_by_mach[2]["defects"] == 2
+    assert result_by_mach[2]["pqc_cnt"] == 2
 
 
 def test_sku_detail_api_no_matching_style_returns_empty(monkeypatch):
@@ -298,7 +330,7 @@ def test_sku_detail_api_no_matching_style_returns_empty(monkeypatch):
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_sku_mach_detail_df(),
+        _make_base_numeric_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -332,8 +364,8 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
     should reflect machine efficiency.
     """
     df = make_sku_mach_detail_df_for_metrics_and_comments()
-    df.loc[df["MachID"] == "M2", "Weight"] = 1
-    df.loc[df["MachID"] == "M3", ["ON_Time", "OFF_Time", "Avg_Cycle"]] = [
+    df.loc[df["MachID"] == 2, "Weight"] = 1
+    df.loc[df["MachID"] == 3, ["ON_Time", "OFF_Time", "Avg_Cycle"]] = [
         4,
         2,
         1,
@@ -352,7 +384,7 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_metrics_pqc_sku_mach_detail_df(),
+        _make_numeric_metrics_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -373,9 +405,9 @@ def test_sku_detail_api_metrics_and_comments(monkeypatch):
         for record in content
     }
 
-    good = result_by_mach["M1"]
-    low = result_by_mach["M2"]
-    rounded_low = result_by_mach["M3"]
+    good = result_by_mach[1]
+    low = result_by_mach[2]
+    rounded_low = result_by_mach[3]
 
     assert good["MES_prs"] == 8
     assert good["Discard_prs"] == 1
@@ -423,7 +455,7 @@ def test_sku_detail_api_night_shift_staff(monkeypatch):
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_sku_mach_detail_df(),
+        _make_base_numeric_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -468,7 +500,7 @@ def test_sku_detail_api_no_matching_staff_returns_empty_staff(
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_sku_mach_detail_df(),
+        _make_base_numeric_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(
@@ -506,7 +538,7 @@ def test_sku_detail_api_empty_staff_schedule_returns_empty_staff(
     patch_extract_pqc_data(
         monkeypatch,
         pqc_view,
-        make_base_pqc_sku_mach_detail_df(),
+        _make_base_numeric_pqc_sku_mach_detail_df(),
     )
 
     response = client.get(

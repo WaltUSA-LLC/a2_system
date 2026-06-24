@@ -28,7 +28,7 @@ Test cases for handle_sku_mach_detail:
    - Verify Mach_Efficiency >= 0.8 is Good and < 0.8 is Low Ef.
 
 9. Machine sorting
-   - Verify output rows are sorted by MachID and retain their Discard_prs.
+   - Verify output rows are sorted by LineID and then MachID.
 
 10. Invalid Style_Code handling
     - Verify empty or None Style_Code values are excluded without error.
@@ -59,6 +59,7 @@ import app.services.sku_view as sku_view
 from app.tests.mocks.common_mocks import (
     make_call_counting_mocks,
     patch_common_dependencies,
+    patch_determine_mach_line,
     patch_extract_base_data,
     patch_merge_pqc_to_mach_dialog,
 )
@@ -76,6 +77,7 @@ from app.tests.mocks.handle_sku_mach_detail_mocks import (
 
 EXPECTED_COLUMNS = [
         "id",
+        "LineID",
         "MachID",
         "Shift_Start_Time",
         "Style_Code",
@@ -96,7 +98,7 @@ def _filter_all_shutdown_mach(df):
 
 
 def _filter_m2_shutdown_mach(df):
-    return df[df["MachID"] != "M2"].copy()
+    return df[df["MachID"] != 2].copy()
 
 
 def _assert_merge_pqc_to_mach_dialog_called_once(mock, start_time, shift):
@@ -157,6 +159,10 @@ def test_handle_sku_mach_detail_calls_invoked_functions(monkeypatch):
         monkeypatch,
         sku_view,
     )
+    determine_mach_line_mock = patch_determine_mach_line(
+        monkeypatch,
+        sku_view,
+    )
 
     result = sku_view.handle_sku_mach_detail(
         start_time="2026-05-01 00:00:00",
@@ -171,6 +177,11 @@ def test_handle_sku_mach_detail_calls_invoked_functions(monkeypatch):
     mocks["filterShutdownMach"].assert_called_once()
     assert mocks["estimate_mes_output_prs"].call_count == len(raw_df)
     assert mocks["estimate_st_output_prs"].call_count == len(result)
+    assert determine_mach_line_mock.call_count == len(result)
+    assert [
+        call.args[0]
+        for call in determine_mach_line_mock.call_args_list
+    ] == [2, 1]
     _assert_merge_pqc_to_mach_dialog_called_once(
         pqc_merge_mock,
         "2026-05-01 00:00:00",
@@ -340,23 +351,23 @@ def test_handle_sku_mach_detail_calculates_metrics(monkeypatch):
 
     result_by_mach = result.set_index("MachID")
 
-    assert result_by_mach.loc["M1", "MES_prs"] == 8
-    assert result_by_mach.loc["M1", "Discard_prs"] == 1
-    assert result_by_mach.loc["M1", "Discard_percent"] == pytest.approx(0.143)
-    assert result_by_mach.loc["M1", "ON_Time_Occupation"] == pytest.approx(0.8)
-    assert result_by_mach.loc["M1", "Mach_Efficiency"] == pytest.approx(0.8)
+    assert result_by_mach.loc[1, "MES_prs"] == 8
+    assert result_by_mach.loc[1, "Discard_prs"] == 1
+    assert result_by_mach.loc[1, "Discard_percent"] == pytest.approx(0.143)
+    assert result_by_mach.loc[1, "ON_Time_Occupation"] == pytest.approx(0.8)
+    assert result_by_mach.loc[1, "Mach_Efficiency"] == pytest.approx(0.8)
 
-    assert result_by_mach.loc["M2", "MES_prs"] == 7
-    assert result_by_mach.loc["M2", "Discard_prs"] == 2
-    assert result_by_mach.loc["M2", "Discard_percent"] == pytest.approx(0.286)
-    assert result_by_mach.loc["M2", "ON_Time_Occupation"] == pytest.approx(0.5)
-    assert result_by_mach.loc["M2", "Mach_Efficiency"] == pytest.approx(0.7)
+    assert result_by_mach.loc[2, "MES_prs"] == 7
+    assert result_by_mach.loc[2, "Discard_prs"] == 2
+    assert result_by_mach.loc[2, "Discard_percent"] == pytest.approx(0.286)
+    assert result_by_mach.loc[2, "ON_Time_Occupation"] == pytest.approx(0.5)
+    assert result_by_mach.loc[2, "Mach_Efficiency"] == pytest.approx(0.7)
 
-    assert result_by_mach.loc["M3", "MES_prs"] == 1
-    assert result_by_mach.loc["M3", "Discard_prs"] == 3
-    assert result_by_mach.loc["M3", "Discard_percent"] == pytest.approx(0.75)
-    assert result_by_mach.loc["M3", "ON_Time_Occupation"] == pytest.approx(0.333)
-    assert result_by_mach.loc["M3", "Mach_Efficiency"] == pytest.approx(0.333)
+    assert result_by_mach.loc[3, "MES_prs"] == 1
+    assert result_by_mach.loc[3, "Discard_prs"] == 3
+    assert result_by_mach.loc[3, "Discard_percent"] == pytest.approx(0.75)
+    assert result_by_mach.loc[3, "ON_Time_Occupation"] == pytest.approx(0.333)
+    assert result_by_mach.loc[3, "Mach_Efficiency"] == pytest.approx(0.333)
 
 
 def test_handle_sku_mach_detail_comment_good_and_low_eff(monkeypatch):
@@ -387,14 +398,14 @@ def test_handle_sku_mach_detail_comment_good_and_low_eff(monkeypatch):
 
     result_by_mach = result.set_index("MachID")
 
-    assert result_by_mach.loc["M1", "Comment"] == "Good"
-    assert result_by_mach.loc["M2", "Comment"] == "Low Ef"
-    assert result_by_mach.loc["M3", "Comment"] == "Low Ef"
+    assert result_by_mach.loc[1, "Comment"] == "Good"
+    assert result_by_mach.loc[2, "Comment"] == "Low Ef"
+    assert result_by_mach.loc[3, "Comment"] == "Low Ef"
 
 
-def test_handle_sku_mach_detail_sorts_by_mach_id(monkeypatch):
+def test_handle_sku_mach_detail_sorts_by_line_then_mach_id(monkeypatch):
     """
-    Output rows should be sorted by MachID ascending.
+    Output rows should be sorted by LineID and then MachID ascending.
     """
     patch_extract_base_data(
         monkeypatch,
@@ -417,9 +428,9 @@ def test_handle_sku_mach_detail_sorts_by_mach_id(monkeypatch):
         style="ABC",
     )
 
-    assert list(result["MachID"]) == ["M1", "M2", "M3"]
-    assert list(result["Discard_prs"]) == [1, 2, 3]
-    assert list(result["Discard_percent"]) == pytest.approx([0.143, 0.333, 0.375])
+    assert list(result["MachID"]) == [1, 3, 2]
+    assert list(result["Discard_prs"]) == [2, 1, 3]
+    assert list(result["Discard_percent"]) == pytest.approx([0.333, 0.143, 0.375])
 
 
 def test_handle_sku_mach_detail_filter_shutdown_mach_affects_rows(
@@ -456,7 +467,7 @@ def test_handle_sku_mach_detail_filter_shutdown_mach_affects_rows(
     )
 
     assert len(result) == 1
-    assert list(result["MachID"]) == ["M1"]
+    assert list(result["MachID"]) == [1]
     assert list(result["Discard_prs"]) == [2]
     assert list(result["Discard_percent"]) == pytest.approx([0.333])
     assert mocks["estimate_mes_output_prs"].call_count == 2
@@ -491,7 +502,7 @@ def test_handle_sku_mach_detail_invalid_style_code_is_excluded(monkeypatch):
 
     assert len(result) == 1
     row = result.iloc[0]
-    assert row["MachID"] == "M3"
+    assert row["MachID"] == 3
     assert row["Style_Code"] == "ABC RED"
 
 

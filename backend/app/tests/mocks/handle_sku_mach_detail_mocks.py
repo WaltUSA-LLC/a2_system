@@ -13,7 +13,7 @@ def make_base_sku_mach_detail_df() -> pd.DataFrame:
         {
             "Style_Code": [" abc red", "ABC blue ", "xyz black"],
             "Shift_Start_Time": [shift_time, shift_time, shift_time],
-            "MachID": ["M2", "M1", "M3"],
+            "MachID": [2, 1, 3],
             "ON_Time": [80, 60, 90],
             "OFF_Time": [20, 40, 10],
             "Avg_Cycle": [10, 10, 10],
@@ -32,7 +32,7 @@ def make_sku_mach_detail_df_without_matching_style() -> pd.DataFrame:
         {
             "Style_Code": ["xyz black", "qwe white"],
             "Shift_Start_Time": [shift_time, shift_time],
-            "MachID": ["M1", "M2"],
+            "MachID": [1, 2],
             "ON_Time": [80, 70],
             "OFF_Time": [20, 30],
             "Avg_Cycle": [10, 10],
@@ -51,7 +51,7 @@ def make_sku_mach_detail_df_for_metrics_and_comments() -> pd.DataFrame:
         {
             "Style_Code": ["abc red", "ABC blue", "abc green"],
             "Shift_Start_Time": [shift_time, shift_time, shift_time],
-            "MachID": ["M1", "M2", "M3"],
+            "MachID": [1, 2, 3],
             "ON_Time": [80, 50, 1],
             "OFF_Time": [20, 50, 2],
             "Avg_Cycle": [10, 10, 3],
@@ -70,7 +70,7 @@ def make_unsorted_sku_mach_detail_df() -> pd.DataFrame:
         {
             "Style_Code": ["abc red", "ABC blue", "ABC green"],
             "Shift_Start_Time": [shift_time, shift_time, shift_time],
-            "MachID": ["M3", "M1", "M2"],
+            "MachID": [2, 3, 1],
             "ON_Time": [70, 80, 60],
             "OFF_Time": [30, 20, 40],
             "Avg_Cycle": [10, 10, 10],
@@ -89,7 +89,7 @@ def make_sku_mach_detail_df_with_invalid_style_code() -> pd.DataFrame:
         {
             "Style_Code": ["", None, "abc red"],
             "Shift_Start_Time": [shift_time, shift_time, shift_time],
-            "MachID": ["M1", "M2", "M3"],
+            "MachID": [1, 2, 3],
             "ON_Time": [100, 100, 80],
             "OFF_Time": [0, 0, 20],
             "Avg_Cycle": [10, 10, 10],
@@ -108,7 +108,7 @@ def make_sku_mach_detail_df_with_nan_discard_prs() -> pd.DataFrame:
         {
             "Style_Code": ["abc red"],
             "Shift_Start_Time": [shift_time],
-            "MachID": ["M1"],
+            "MachID": [1],
             "ON_Time": [100],
             "OFF_Time": [0],
             "Avg_Cycle": [10],
@@ -127,7 +127,7 @@ def make_sku_mach_detail_df_with_zero_discard_denominator() -> pd.DataFrame:
         {
             "Style_Code": ["abc red"],
             "Shift_Start_Time": [shift_time],
-            "MachID": ["M1"],
+            "MachID": [1],
             "ON_Time": [100],
             "OFF_Time": [0],
             "Avg_Cycle": [10],
