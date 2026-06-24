@@ -1,17 +1,10 @@
 import { useState } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import CircularProgress from '@mui/material/CircularProgress';
-import { IconButton, Tooltip } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import AutoGraphOutlinedIcon from '@mui/icons-material/AutoGraphOutlined';
+import ToolBar from './ToolBar';
 
 
 function formatDate(date) {
@@ -28,7 +21,7 @@ function getDateDiffInDays(startDate, endDate) {
     return (new Date(endDate) - new Date(startDate)) / millisecondsPerDay;
 }
 
-function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDownSelectedTime}){
+function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDownSelectedTime, hasChart=true}){
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const defaultDate = formatDate(yesterday);
@@ -106,64 +99,18 @@ function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDow
                     {dateRangeErrorMessage}
                 </Alert>
             </Snackbar>
-            <Box
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    mt:'15px',
-                    mb:'15px'
-                }}
-            >
-                <TextField
-                    label="Start Time"
-                    type="date"
-                    value={start}
-                    onChange={handleStartChange}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                />
-                <TextField
-                    label="End Time"
-                    type="date"
-                    value={end}
-                    onChange={handleEndChange}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                />
-                <FormControl>
-                    <InputLabel id="shift-label">Shift</InputLabel>
-                    <Select
-                        labelId="shift-label"
-                        value={shift}
-                        label="Shift"
-                        onChange={handleShiftChange}
-                    >
-                        <MenuItem value={0}>ALL</MenuItem>
-                        <MenuItem value={1}>DAY</MenuItem>
-                        <MenuItem value={2}>NIGHT</MenuItem>
-                    </Select>
-                </FormControl>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Button
-                        variant="contained"
-                        onClick={handleShowData}
-                        sx={{
-                            bgcolor: "primary.light",
-                            color: "primary.contrastText",
-                            "&:hover": {
-                            bgcolor: "primary.main",
-                            },
-                        }}
-                    >
-                        Show Data
-                    </Button>
-                    
-                    <Tooltip title="Chart" placement="right-start">
-                        <IconButton sx={{ visibility: hasData ? "visible" : "hidden", color:"primary.light"}} onClick={handleOpenChart}>
-                            <AutoGraphOutlinedIcon />
-                        </IconButton>
-                    </Tooltip>
-                    
-                </Box>
-            </Box>
+            <ToolBar
+                start={start}
+                end={end}
+                shift={shift}
+                hasData={hasData}
+                hasChart={hasChart}
+                handleStartChange={handleStartChange}
+                handleEndChange={handleEndChange}
+                handleShiftChange={handleShiftChange}
+                handleShowData={handleShowData}
+                handleOpenChart={handleOpenChart}
+            />
 
             {loading ? (
                 <Box sx={{ height: 700, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

@@ -175,7 +175,7 @@ function PQCSKUView() {
 
     return (
         <>
-            <TableView col={columns} rec={contentRec} loadData={loadData} handleRowClick={handleRowClick} />
+            <TableView col={columns} rec={contentRec} loadData={loadData} handleRowClick={handleRowClick} hasChart={false}/>
             {(tableOpen && modalRec) ? <PQCSKUDetailTableModal open={tableOpen} 
                                                                 onClose={()=>{setTableOpen(false); setModalRec(null)}} 
                                                                 rec={modalRec} 
