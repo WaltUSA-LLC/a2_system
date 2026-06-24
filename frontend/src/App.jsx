@@ -4,7 +4,6 @@ import { Grid } from "@mui/material";
 import TopBar from './components/TopBar';
 import ShiftView from "./components/views/ShiftView";
 import SKUView from './components/views/SKUView';
-import MachsView from './components/views/MachsView';
 import StopsViewByCode from './components/views/StopsViewByCode';
 import StopsViewByMach from './components/views/StopsViewByMach';
 import PQCStaffView from "./components/views/PQCStaffView";
@@ -20,7 +19,6 @@ function App() {
             </Grid>
             <Grid size={12}>
                 <Routes>
-                    {/* <Route path="/machs-view" element={<MachsView />} /> */}
                     <Route path="/sku-view" element={<SKUView />} />
                     <Route path="/shift-view" element={<ShiftView />} />
                     <Route path="/stops-view/code" element={<StopsViewByCode />} />
