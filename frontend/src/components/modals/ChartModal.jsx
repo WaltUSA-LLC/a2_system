@@ -148,6 +148,28 @@ function BarChartForCodeStop({ chartDataset, property }) {
     );
 }
 
+function BarChartForPQCStaffInPeriod({ chartDataset, property }) {
+    const vocab = {'defects':'Defect', 'pqc_cnt':'PQC Count'};
+    //console.log("data: ", chartDataset);
+    return (
+        chartDataset.length>0 &&<MuiBarChart
+            dataset={chartDataset}
+            xAxis={[{ label: vocab[property] }]}
+            yAxis={[{
+                scaleType: 'band',
+                dataKey: 'Name',
+                label: 'Name',
+                width: 90,
+            }]}
+            series={[{ dataKey: property, 
+                    label: vocab[property],}]}
+            layout="horizontal"
+            grid={{ vertical: true }}
+            height={400}
+        />
+    );
+}
+
 
 export function ShiftChartModal({ open, onClose, rec }) {
     const [selectedProperty, setSelectedProperty] = useState('');
@@ -488,6 +510,68 @@ export function CodeStopChartModal({ open, onClose, rec_freq,  rec_mach, rec_dur
                     <Button type='submit' variant="contained">Gen</Button>
                 </Box>
                 {chartDataset && <BarChartForCodeStop chartDataset={chartDataset} property={selectedProperty}/>}
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Close</Button>
+            </DialogActions>
+        </Dialog>
+    );
+}
+
+
+export function PQCStaffInPeriodChartModal({ open, onClose, rec}) {
+    const [selectedProperty, setSelectedProperty] = useState('');
+    const [chartDataset, setChartDataset] = useState([]);
+    const vocab = {'defects':'Defect (PCS)', 
+                   'pqc_cnt':'PQC Count', 
+                };
+        
+    const propertyOptions = Object.keys(rec[0] ?? {}).filter(
+        (property) => Object.keys(vocab).includes(property)
+    );
+
+    function handlePropertyChange(event) {
+        setSelectedProperty(event.target.value);
+        setChartDataset([]);
+    }
+
+    function handleGenChart(event) {
+        event.preventDefault();
+        const dataset = rec.map((record) => ({
+                            Name: record.Name,
+                            [selectedProperty]: Number(record[selectedProperty] ?? 0),
+                        }));
+        setChartDataset(dataset);
+    }
+
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            maxWidth="md"
+        >
+            <DialogTitle>Data Vis</DialogTitle>
+            <DialogContent>
+                <Box component="form" onSubmit={handleGenChart} sx={{ display: 'flex', gap: 2, pt: 1 }}>
+                    <FormControl fullWidth required>
+                        <InputLabel id="chart-property-label">Property</InputLabel>
+                        <Select
+                            labelId="chart-property-label"
+                            value={selectedProperty}
+                            label="Property"
+                            onChange={handlePropertyChange}
+                        >
+                            {propertyOptions.map((property) => (
+                                <MenuItem key={property} value={property}>
+                                    {vocab[property]}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <Button type='submit' variant="contained">Gen</Button>
+                </Box>
+                <BarChartForPQCStaffInPeriod chartDataset={chartDataset} property={selectedProperty}/>
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Close</Button>
