@@ -112,7 +112,7 @@ function PQCSKUView() {
         },
         {
             field: 'dirty',
-            headerName: 'Stain (PCS)',
+            headerName: 'Stain',
             renderHeader: (params) => renderHeaderWithUnit('Stain', 'PCS', params.colDef.description),
             flex: 1,
             type: 'number',
