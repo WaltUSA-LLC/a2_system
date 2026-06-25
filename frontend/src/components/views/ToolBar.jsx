@@ -14,6 +14,7 @@ function ToolBar({
     shift,
     hasData,
     hasChart,
+    hasShift,
     handleStartChange,
     handleEndChange,
     handleShiftChange,
@@ -43,19 +44,20 @@ function ToolBar({
                 onChange={handleEndChange}
                 slotProps={{ inputLabel: { shrink: true } }}
             />
-            <FormControl>
-                <InputLabel id="shift-label">Shift</InputLabel>
-                <Select
-                    labelId="shift-label"
-                    value={shift}
-                    label="Shift"
-                    onChange={handleShiftChange}
-                >
-                    <MenuItem value={0}>ALL</MenuItem>
-                    <MenuItem value={1}>DAY</MenuItem>
-                    <MenuItem value={2}>NIGHT</MenuItem>
-                </Select>
-            </FormControl>
+            {hasShift && 
+                <FormControl>
+                    <InputLabel id="shift-label">Shift</InputLabel>
+                    <Select
+                        labelId="shift-label"
+                        value={shift}
+                        label="Shift"
+                        onChange={handleShiftChange}
+                    >
+                        <MenuItem value={0}>ALL</MenuItem>
+                        <MenuItem value={1}>DAY</MenuItem>
+                        <MenuItem value={2}>NIGHT</MenuItem>
+                    </Select>
+                </FormControl>}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Button
                     variant="contained"

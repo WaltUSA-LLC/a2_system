@@ -8,6 +8,7 @@ from app.services.stop_view import handle_stop_code_detail
 from app.services.staff_info import fetch_staff_info_by_date_and_shift
 from app.services.staff_schedule import upload_staff_schedule
 from app.services.pqc_view import handle_pqc_view_by_staff,\
+    handle_pqc_view_by_staff_in_period, \
     handle_pqc_view_by_staff_detail,\
     handle_pqc_view_by_sku,\
     handle_pqc_sku_detail
@@ -68,6 +69,11 @@ def get_stop_by_code_detail(start:str, end:str, shift: int, stop_code:int):
 @router.get("/pqc/staff")
 def get_pqc_staff(start:str, end:str, shift: int):
     df = handle_pqc_view_by_staff(start, end, shift)
+    return {"content": df.to_dict(orient="records")}
+
+@router.get("/pqc/staff/period")
+def get_pqc_staff_in_period(start:str, end:str):
+    df = handle_pqc_view_by_staff_in_period(start, end)
     return {"content": df.to_dict(orient="records")}
 
 @router.get("/pqc/staff/detail")

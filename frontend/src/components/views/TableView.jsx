@@ -21,7 +21,7 @@ function getDateDiffInDays(startDate, endDate) {
     return (new Date(endDate) - new Date(startDate)) / millisecondsPerDay;
 }
 
-function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDownSelectedTime, hasChart=true}){
+function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDownSelectedTime, hasChart=true, hasShift=true}){
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const defaultDate = formatDate(yesterday);
@@ -105,6 +105,7 @@ function TableView({col, rec, loadData, handleOpenChart, handleRowClick, markDow
                 shift={shift}
                 hasData={hasData}
                 hasChart={hasChart}
+                hasShift={hasShift}
                 handleStartChange={handleStartChange}
                 handleEndChange={handleEndChange}
                 handleShiftChange={handleShiftChange}

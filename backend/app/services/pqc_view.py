@@ -69,6 +69,32 @@ def handle_pqc_sku_detail(start_time:str, shift:int, style:str)->pd.DataFrame:
     return df
 
 
+def handle_pqc_view_by_staff_in_period(start_time:str, end_time:str)->pd.DataFrame:
+    df = _extract_pqc_data(start_time, end_time, 0)
+    if len(df)==0:
+        return pd.DataFrame()
+    
+    df = df.groupby(["Name", "Role"], as_index=False).agg(
+        pqc_cnt=("MachID", "size"),
+        toeHole=("toeHole", "sum"),
+        brokenNDL=("brokenNDL", "sum"),
+        missNDL=("missNDL", "sum"),
+        fanYarn=("fanYarn", "sum"),
+        missYarn=("missYarn", "sum"),
+        logoIssue=("logoIssue", "sum"),
+        dirty=("dirty", "sum"),
+        feisha=("feisha", "sum"),
+        other=("other", "sum")
+    )
+
+    df["defects"] = df[["toeHole", "brokenNDL", "missNDL", "fanYarn", \
+                        "missYarn", "logoIssue", "dirty", "feisha", "other"]].apply(lambda rec: sum(rec),axis=1)
+    
+    df = df.sort_values(["Name"])
+    df = df.reset_index(names="id")
+    return df
+
+
 def handle_pqc_view_by_staff(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df = _extract_pqc_data(start_time, end_time, shift)
     if len(df)==0:

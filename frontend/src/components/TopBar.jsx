@@ -91,11 +91,11 @@ function TopBar() {
                     onClose={handleCloseStop}
                     anchorOrigin={{
                         vertical: 'bottom',
-                        horizontal: 'right'
+                        horizontal: 'center'
                     }}
                     transformOrigin={{
                         vertical: 'top',
-                        horizontal: 'right'
+                        horizontal: 'center'
                     }}
                     sx={{
                         '& .MuiMenuItem-root': {
@@ -114,11 +114,11 @@ function TopBar() {
                     onClose={handleClosePQC}
                     anchorOrigin={{
                         vertical: 'bottom',
-                        horizontal: 'right'
+                        horizontal: 'center'
                     }}
                     transformOrigin={{
                         vertical: 'top',
-                        horizontal: 'right'
+                        horizontal: 'center'
                     }}
                     sx={{
                         '& .MuiMenuItem-root': {
@@ -128,7 +128,8 @@ function TopBar() {
                         },
                     }}
                 >
-                    <MenuItem component={RouterLink} to="/pqc-view/staff" onClick={handleClosePQC}>By Staff</MenuItem>
+                    <MenuItem component={RouterLink} to="/pqc-view/staff" onClick={handleClosePQC}>By Staff (Shift)</MenuItem>
+                    <MenuItem component={RouterLink} to="/pqc-view/staff/period" onClick={handleClosePQC}>By Staff (Period)</MenuItem>
                     <MenuItem component={RouterLink} to="/pqc-view/sku" onClick={handleClosePQC}>By SKU</MenuItem>
                 </Menu>
             </Toolbar>
