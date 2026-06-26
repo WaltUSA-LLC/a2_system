@@ -108,7 +108,7 @@ DECLARE @End   DATETIME2(0) = :end_dt;
 DECLARE @Shift  INT = :shift;
 
 SELECT kcp.knitted AS Date, kcp.Shift AS Shift, MachineId AS MachID, 
-    ItemStyle AS Style_Code, Name AS Role_Name, toeHole, brokenNDL, missNDL, missYarn, fanYarn, logoIssue,
+    ItemStyle AS Style_Code, Name AS Role_Name, OperatorID, toeHole, brokenNDL, missNDL, missYarn, fanYarn, logoIssue,
     dirty, feisha, other, DateRec
 FROM operator_log.dbo.knitCHN_pqc kcp 
 WHERE kcp.Knitted >= CAST(@Start AS date) 

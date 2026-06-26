@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 from fastapi import HTTPException
 from extractors import PQCExtractor
+from extractors import StaffScheduleExtractor
 from app.services.utils import extract_base_data
-from cores.constants import PQC_FREQ_THRESHOLD
+from cores.constants import PQC_FREQ_THRESHOLD, DAY_SHIFT, NIGHT_SHIFT, DAY_SHIFT_START, NIGHT_SHIFT_START 
 
 
 def _extract_pqc_data(start_time:str, end_time:str, shift:int)->pd.DataFrame:
@@ -16,6 +17,27 @@ def _extract_pqc_data(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().upper() if isinstance(x, str) and x.strip() else None)
     return df
 
+
+def _add_staff_rec_not_pqc(start_time:str, end_time:str, df_pqc:pd.DataFrame)->pd.DataFrame:
+    df_staff = extract_base_data(StaffScheduleExtractor, start_time, end_time)
+    
+    missing_staff = df_staff[(~df_staff["ID"].isin(df_pqc["OperatorID"])) & (df_staff["RoleName"] != 'Tech')]
+
+    rec = missing_staff.rename(columns={
+        "ID": "OperatorID",
+        "FirstName": "Name",
+        "RoleName": "Role",
+    })
+
+    rec = rec[["OperatorID", "Name", "Role"]].drop_duplicates()
+
+    for col in df_pqc.columns:
+        if col not in rec.columns:
+            rec[col] = 0
+
+    rec = rec[df_pqc.columns]
+
+    return pd.concat([df_pqc, rec], ignore_index=True)    
 
 
 def handle_pqc_view_by_sku(start_time:str, end_time:str, shift:int)->pd.DataFrame:
@@ -74,7 +96,7 @@ def handle_pqc_view_by_staff_in_period(start_time:str, end_time:str)->pd.DataFra
     if len(df)==0:
         return pd.DataFrame()
     
-    df = df.groupby(["Name", "Role"], as_index=False).agg(
+    df = df.groupby(["OperatorID", "Name", "Role"], as_index=False).agg(
         pqc_cnt=("MachID", "size"),
         toeHole=("toeHole", "sum"),
         brokenNDL=("brokenNDL", "sum"),
@@ -86,9 +108,10 @@ def handle_pqc_view_by_staff_in_period(start_time:str, end_time:str)->pd.DataFra
         feisha=("feisha", "sum"),
         other=("other", "sum")
     )
-
     df["defects"] = df[["toeHole", "brokenNDL", "missNDL", "fanYarn", \
                         "missYarn", "logoIssue", "dirty", "feisha", "other"]].apply(lambda rec: sum(rec),axis=1)
+    
+    df = _add_staff_rec_not_pqc(start_time, end_time, df)
     
     df = df.sort_values(["Name"])
     df = df.reset_index(names="id")
