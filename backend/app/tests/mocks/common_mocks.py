@@ -24,6 +24,10 @@ def fake_estimate_st_output_prs(row: pd.Series) -> int | float:
     return row["Avg_Cycle"]
 
 
+def fake_enhance_mes_by_nau(df: pd.DataFrame) -> pd.Series:
+    return df["MES_prs"]
+
+
 def make_call_counting_mocks():
     return {
         "distributeWeightForSameMach": Mock(
@@ -40,6 +44,9 @@ def make_call_counting_mocks():
         ),
         "estimate_st_output_prs": Mock(
             side_effect=fake_estimate_st_output_prs
+        ),
+        "enhance_mes_by_nau": Mock(
+            side_effect=fake_enhance_mes_by_nau
         ),
     }
 
@@ -247,4 +254,9 @@ def patch_common_dependencies(monkeypatch, module, mocks: dict):
         module,
         "estimate_st_output_prs",
         mocks["estimate_st_output_prs"],
+    )
+    monkeypatch.setattr(
+        module,
+        "enhance_mes_by_nau",
+        mocks["enhance_mes_by_nau"],
     )

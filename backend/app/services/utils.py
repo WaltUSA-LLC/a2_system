@@ -1,3 +1,4 @@
+import logging
 import math
 import pandas as pd
 import numpy as np
@@ -8,6 +9,8 @@ from extractors.utils import parse_start_date
 from cores.constants import ON_MACH_THRESHOLD,\
     NAU_PRS_THRESHOLD,\
     NUM_MACH_IN_ZONE
+
+logger = logging.getLogger(__name__)
 
 def estimate_mes_output_prs(rec: pd.Series) -> int:
     if pd.isna(rec["Prs_Weight"]) or rec["Prs_Weight"] == 0:
@@ -72,6 +75,23 @@ def determine_mach_line(machID: int) -> int | None:
         return 6
     else:
         return None
+    
+def enhance_mes_by_nau(df:pd.DataFrame)->pd.Series:
+    df_on_mach = df.copy()
+    zero_mes_nau_by_mach = (
+        df_on_mach.loc[(df_on_mach["MES_prs"] == 0) & (df_on_mach["NAU_prs"] > 0), ["MachID", "NAU_prs"]]
+        .set_index("MachID")["NAU_prs"]
+        .to_dict()
+    )
+
+    if zero_mes_nau_by_mach:
+        logger.info("Replacing zero MES_prs with NAU_prs: %s", zero_mes_nau_by_mach)
+
+    df_on_mach["MES_prs"] = df_on_mach["MES_prs"].where(
+                                df_on_mach["MES_prs"] != 0,
+                                df_on_mach["NAU_prs"] 
+                            )
+    return df_on_mach["MES_prs"]
 
 
 def extract_base_data(extractor_cls: type[BaseExtractor], start_time:str, end_time:str, shift:int=0)->pd.DataFrame:

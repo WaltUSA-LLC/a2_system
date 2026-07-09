@@ -7,7 +7,8 @@ from app.services.utils import extract_base_data, \
     estimate_mes_output_prs, \
     distributeWeightForSameMach, \
     filterShutdownMach, \
-    determine_mach_line
+    determine_mach_line, \
+    enhance_mes_by_nau
 from app.services.staff_info import merge_staff_info_to_view
 from app.services.pqc_view import merge_pqc_to_shift_view, merge_pqc_to_mach_dialog
 
@@ -22,10 +23,8 @@ def handle_shift_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     if len(df_on_mach)==0:
         return pd.DataFrame()
     df_on_mach["MES_prs"] = df_on_mach[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
-    #df_on_mach["Shift_Start_Time"] = df_on_mach["Shift_Start_Time"].dt.strftime("%Y-%m-%d %H:%M:%S")
-
-    #df_on_mach = df[df["ON_Time"]>300]
     df_on_mach["ST_prs"] = df_on_mach[["Avg_Cycle", "ON_Time", "OFF_Time"]].apply(estimate_st_output_prs, axis=1)
+    df_on_mach["MES_prs"] = enhance_mes_by_nau(df_on_mach)
     # total throughput 
     s_nau_prs = df_on_mach.groupby("Shift_Start_Time")["NAU_prs"].sum()
     s_mes_prs = df_on_mach.groupby("Shift_Start_Time")["MES_prs"].sum()

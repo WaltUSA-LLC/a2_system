@@ -6,7 +6,8 @@ from app.services.utils import estimate_st_output_prs, \
     clean_weight, \
     filterShutdownMach, \
     distributeWeightForSameMach, \
-    determine_mach_line
+    determine_mach_line, \
+    enhance_mes_by_nau
 import pandas as pd
 import numpy as np
 
@@ -21,6 +22,7 @@ def handle_sku_view(start_time:str, end_time:str, shift:int)->pd.DataFrame:
     if len(df)==0:
         return pd.DataFrame()
     df["MES_prs"] = df[["Weight", "Prs_Weight"]].apply(estimate_mes_output_prs, axis=1)
+    df["MES_prs"] = enhance_mes_by_nau(df)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0].upper() if isinstance(x, str) and x.strip() else None)
     
     #count mach

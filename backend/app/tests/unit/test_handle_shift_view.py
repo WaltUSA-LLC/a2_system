@@ -178,6 +178,7 @@ def test_handle_shift_view_calls_invoked_functions(monkeypatch):
     mocks["distributeWeightForSameMach"].assert_called_once()
     mocks["clean_weight"].assert_called_once()
     mocks["filterShutdownMach"].assert_called_once()
+    mocks["enhance_mes_by_nau"].assert_called_once()
     assert mocks["estimate_mes_output_prs"].call_count == len(raw_df)
     assert mocks["estimate_st_output_prs"].call_count == len(raw_df)
     _assert_merge_staff_info_called_once(
@@ -233,6 +234,7 @@ def test_handle_shift_view_empty_df(monkeypatch):
     mocks["filterShutdownMach"].assert_not_called()
     mocks["estimate_mes_output_prs"].assert_not_called()
     mocks["estimate_st_output_prs"].assert_not_called()
+    mocks["enhance_mes_by_nau"].assert_not_called()
     pqc_merge_mock.assert_not_called()
     staff_merge_mock.assert_not_called()
 
