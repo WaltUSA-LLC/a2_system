@@ -2,6 +2,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.base import router as base
+from app.api.chat import router as chat
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("app").setLevel(logging.INFO)
@@ -21,6 +22,7 @@ app.add_middleware(
 )
 
 app.include_router(base, prefix="/base")
+app.include_router(chat, prefix="/agent")
 
 @app.get("/")
 def read_root():

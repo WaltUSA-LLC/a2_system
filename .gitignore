@@ -3,6 +3,7 @@ frontend/dist
 backend/.coverage
 backend/app/__pycache__
 backend/app/api/__pycache__
+backend/app/agent/__pycache__
 backend/app/services/__pycache__
 backend/app/tests/unit/__pycache__
 backend/app/tests/integration/__pycache__
