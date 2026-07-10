@@ -31,7 +31,7 @@ def estimate_st_output_prs(rec: pd.Series) -> int:
 def clean_weight(df: pd.DataFrame) -> pd.DataFrame:
     cleaned_df = df.copy()
     if "Weight" in cleaned_df.columns:
-        mask = (cleaned_df["Weight"] > 0) & (cleaned_df["Weight"] < 1)
+        mask = (cleaned_df["Weight"] > 0) & (cleaned_df["Weight"] < 0.1)
         cleaned_df.loc[mask, "Weight"] = 0
     return cleaned_df
 
