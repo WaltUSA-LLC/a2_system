@@ -8,7 +8,8 @@ from extractors import BaseExtractor
 from extractors.utils import parse_start_date
 from cores.constants import ON_MACH_THRESHOLD,\
     NAU_PRS_THRESHOLD,\
-    NUM_MACH_IN_ZONE
+    NUM_MACH_IN_ZONE, \
+    MES_WEIGH_THRESHOLD
 
 logger = logging.getLogger(__name__)
 
@@ -29,16 +30,17 @@ def estimate_st_output_prs(rec: pd.Series) -> int:
 
 
 def clean_weight(df: pd.DataFrame) -> pd.DataFrame:
+    #this function is optional now (could be removed)
     cleaned_df = df.copy()
     if "Weight" in cleaned_df.columns:
-        mask = (cleaned_df["Weight"] > 0) & (cleaned_df["Weight"] < 0.1)
+        mask = (cleaned_df["Weight"] > 0) & (cleaned_df["Weight"] < 0.01) # set to 0.01 just want not enhance by nau frequently
         cleaned_df.loc[mask, "Weight"] = 0
     return cleaned_df
 
 
 def filterShutdownMach(df: pd.DataFrame) -> pd.DataFrame:
     cleaned_df = df.copy()
-    cleaned_df = cleaned_df[(cleaned_df["Weight"]>0)|(cleaned_df["NAU_prs"]>NAU_PRS_THRESHOLD)|(cleaned_df["ON_Time"]>ON_MACH_THRESHOLD)]
+    cleaned_df = cleaned_df[(cleaned_df["Weight"]>MES_WEIGH_THRESHOLD)|(cleaned_df["NAU_prs"]>NAU_PRS_THRESHOLD)|(cleaned_df["ON_Time"]>ON_MACH_THRESHOLD)]
     return cleaned_df
 
 
@@ -79,7 +81,7 @@ def determine_mach_line(machID: int) -> int | None:
 def enhance_mes_by_nau(df:pd.DataFrame)->pd.Series:
     df_on_mach = df.copy()
     zero_mes_nau_by_mach = (
-        df_on_mach.loc[(df_on_mach["MES_prs"] == 0) & (df_on_mach["NAU_prs"] > 0), ["MachID", "NAU_prs"]]
+        df_on_mach.loc[(df_on_mach["Weight"] == 0) & (df_on_mach["NAU_prs"] > 0), ["MachID", "NAU_prs"]]
         .set_index("MachID")["NAU_prs"]
         .to_dict()
     )
@@ -88,7 +90,7 @@ def enhance_mes_by_nau(df:pd.DataFrame)->pd.Series:
         logger.info("Replacing zero MES_prs with NAU_prs: %s", zero_mes_nau_by_mach)
 
     df_on_mach["MES_prs"] = df_on_mach["MES_prs"].where(
-                                df_on_mach["MES_prs"] != 0,
+                                df_on_mach["Weight"] != 0,
                                 df_on_mach["NAU_prs"] 
                             )
     return df_on_mach["MES_prs"]

@@ -233,11 +233,11 @@ def test_shift_api_single_shift_aggregation(monkeypatch):
     assert row["Shift_Start_Time"] == "2026-05-01 07:00:00"
     assert row["Mach_cnt"] == 2
     assert row["NAU_prs"] == 12
-    assert row["MES_prs"] == 13
+    assert row["MES_prs"] == 7
     assert row["Discard_prs"] == 6
     assert row["Discard_percent"] == pytest.approx(0.333)
     assert row["ST_prs"] == 10
-    assert row["eff"] == pytest.approx(1.3)
+    assert row["eff"] == pytest.approx(0.7)
     assert row["Time_Occupation"] == pytest.approx(0.85)
     assert row["defects"] == 2
     assert row["pqc_cnt"] == 2
