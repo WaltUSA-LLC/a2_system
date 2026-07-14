@@ -4,6 +4,7 @@ import axios from "axios";
 import TableView from "./TableView";
 import { PQCStaffDetailTableModal } from '../modals/TableModal';
 import { formatSeconds, minuteFilterOperators, renderHeaderWithUnit } from "../utils";
+import { DAY_SHIFT_START } from "../../constants";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -172,7 +173,7 @@ function PQCStaffView() {
     function handleRowClick(params){
         //console.log("clicked row:", params.row);
         const [date, shift_time] = params.row.Shift_Start_Time.split(/\s+/);
-        const shift = shift_time==="07:00:00"? 1 : 2;
+        const shift = shift_time === DAY_SHIFT_START ? 1 : 2;
         const name = params.row.Name;
         //console.log(date);
         //console.log(shift);

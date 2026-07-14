@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { DAY_SHIFT_START } from "../../constants";
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -198,7 +199,7 @@ export function ShiftChartModal({ open, onClose, rec }) {
             if (!dataset[date]) {
                 dataset[date] = {};
             }
-            const shift = time === "07:00:00" ? "Day" : "Night";
+            const shift = time === DAY_SHIFT_START ? "Day" : "Night";
             dataset[date].date = date;
             dataset[date][shift] = Number(record[selectedProperty] ?? 0);
         });
@@ -282,7 +283,7 @@ export function SKUChartModal({ open, onClose, rec }) {
             if (!dataset[date]) {
                 dataset[date] = {};
             }
-            const shift = time === "07:00:00" ? "Day" : "Night";
+            const shift = time === DAY_SHIFT_START ? "Day" : "Night";
             dataset[date].date = date;
             dataset[date][shift] = Number(record[selectedProperty] ?? 0);
         });

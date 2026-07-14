@@ -6,6 +6,7 @@ import TableView from "./TableView"
 import { ShiftChartModal } from '../modals/ChartModal';
 import { MachDetailTableModal } from '../modals/TableModal';
 import { renderHeaderWithUnit } from "../utils";
+import { DAY_SHIFT_START } from "../../constants";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -158,7 +159,7 @@ function ShiftView() {
     function handleRowClick(params){
         //console.log("clicked row:", params.row);
         const [date, shift_time] = params.row.Shift_Start_Time.split(/\s+/);
-        const shift = shift_time==="07:00:00"? 1 : 2;
+        const shift = shift_time === DAY_SHIFT_START ? 1 : 2;
         //console.log(date);
         //console.log(shift);
         axios.get(`${API_BASE_URL}/base/shift/detail?start=${date}&shift=${shift}`).then(
