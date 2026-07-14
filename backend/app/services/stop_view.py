@@ -3,16 +3,17 @@ from datetime import time, timedelta
 from extractors import StopExtractor
 from app.services.utils import extract_base_data
 from app.services.staff_info import merge_staff_info_to_view
+from cores.constants import DAY_SHIFT_START_STR, NIGHT_SHIFT_START_STR
 
 def determin_start_shift_time(stop_time:pd.Timestamp)->str:
     date = stop_time.strftime("%Y-%m-%d %H:%M:%S").split()[0]
     pre_date = (stop_time-timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S").split()[0]
     if time(0,0,0) <= stop_time.time() <= time(7,0,0):
-        return pre_date+" 19:00:00"
+        return pre_date+" "+NIGHT_SHIFT_START_STR
     elif time(7,0,0) < stop_time.time() <= time(19,0,0):
-        return date+" 07:00:00"
+        return date+" "+DAY_SHIFT_START_STR
     else:
-        return date+" 19:00:00"
+        return date+" "+NIGHT_SHIFT_START_STR
 
 
 def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFrame:
@@ -28,9 +29,9 @@ def handle_stop_view_by_code(start_time:str, end_time:str, shift:int)->pd.DataFr
     df["duration"] = df["Recover_time"] - df["Stop_time"]
     df["Shift_Start_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     if shift==1:
-        df = df[df["Shift_Start_Time"].str.contains("07:00:00", na=False)]
+        df = df[df["Shift_Start_Time"].str.contains(DAY_SHIFT_START_STR, na=False)]
     elif shift==2:
-        df = df[df["Shift_Start_Time"].str.contains("19:00:00", na=False)]
+        df = df[df["Shift_Start_Time"].str.contains(NIGHT_SHIFT_START_STR, na=False)]
     else:
         pass
 
@@ -69,9 +70,9 @@ def handle_stop_view_by_mach(start_time:str, end_time:str, shift:int)->pd.DataFr
             pd.DataFrame()
     df["Shift_Start_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     if shift==1:
-        df = df[df["Shift_Start_Time"].str.contains("07:00:00", na=False)]
+        df = df[df["Shift_Start_Time"].str.contains(DAY_SHIFT_START_STR, na=False)]
     elif shift==2:
-        df = df[df["Shift_Start_Time"].str.contains("19:00:00", na=False)]
+        df = df[df["Shift_Start_Time"].str.contains(NIGHT_SHIFT_START_STR, na=False)]
     else:
         pass
     
@@ -103,11 +104,11 @@ def handle_stop_mach_detail(start_time:str, end_time:str, shift:int, mach:int, s
     df["Shift_Start_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
     if shift==1:
-        df = df[(df["Shift_Start_Time"].str.contains("07:00:00", na=False))&
+        df = df[(df["Shift_Start_Time"].str.contains(DAY_SHIFT_START_STR, na=False))&
                 (df["MachID"]==mach)&
                 (df["Style_Code"]==style)]
     elif shift==2:
-        df = df[(df["Shift_Start_Time"].str.contains("19:00:00", na=False))&
+        df = df[(df["Shift_Start_Time"].str.contains(NIGHT_SHIFT_START_STR, na=False))&
                 (df["MachID"]==mach)&
                 (df["Style_Code"]==style)]
     else:
@@ -131,10 +132,10 @@ def handle_stop_code_detail(start_time:str, end_time:str, shift:int, stop_code:i
     df["Shift_Start_Time"] = df["Stop_time"].apply(determin_start_shift_time)
     df["Style_Code"] = df["Style_Code"].apply(lambda x: x.strip().split()[0] if isinstance(x, str) and x.strip() else None)
     if shift==1:
-        df = df[(df["Shift_Start_Time"].str.contains("07:00:00", na=False))&
+        df = df[(df["Shift_Start_Time"].str.contains(DAY_SHIFT_START_STR, na=False))&
                 (df["Stop_code"]==stop_code)]
     elif shift==2:
-        df = df[(df["Shift_Start_Time"].str.contains("19:00:00", na=False))&
+        df = df[(df["Shift_Start_Time"].str.contains(NIGHT_SHIFT_START_STR, na=False))&
                 (df["Stop_code"]==stop_code)]
     else:
         df = df[(df["Stop_code"]==stop_code)]

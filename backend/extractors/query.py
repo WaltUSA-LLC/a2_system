@@ -1,3 +1,6 @@
+from cores.constants import DAY_SHIFT_START_STR, NIGHT_SHIFT_START_STR
+
+
 MES_QUERY = """
 DECLARE @Start DATETIME2(0) = :start_dt;
 DECLARE @End   DATETIME2(0) = DATEADD(HOUR, 24, @Start);
@@ -102,7 +105,7 @@ FROM specific_schedule AS ss JOIN dbA2.dbo.Operator AS op ON ss.OperatorID = op.
 """
 
 
-PQC_QUERY = """
+PQC_QUERY = f"""
 DECLARE @Start DATETIME2(0) = :start_dt;
 DECLARE @End   DATETIME2(0) = :end_dt;
 DECLARE @Shift  INT = :shift;
@@ -115,8 +118,8 @@ WHERE kcp.Knitted >= CAST(@Start AS date)
     AND kcp.Knitted <= CAST(@End AS date) 
     AND (@Shift = 0 or (CAST(kcp.Shift AS time) =
         CASE 
-            WHEN @Shift = 1 THEN CAST('07:00:00' AS time)
-            WHEN @Shift = 2 THEN CAST('19:00:00' AS time)
+            WHEN @Shift = 1 THEN CAST('{DAY_SHIFT_START_STR}' AS time)
+            WHEN @Shift = 2 THEN CAST('{NIGHT_SHIFT_START_STR}' AS time)
         END
     ))
 """
