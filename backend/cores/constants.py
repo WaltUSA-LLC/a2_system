@@ -3,10 +3,10 @@ from datetime import time
 # shift constants
 DAY_SHIFT = 1
 NIGHT_SHIFT = 2
-DAY_SHIFT_START = time(7, 0, 0)
-NIGHT_SHIFT_START = time(19, 0, 0)
-DAY_SHIFT_START_STR = "07:00:00"
-NIGHT_SHIFT_START_STR = "19:00:00"
+DAY_SHIFT_START = time(23, 0, 0)
+NIGHT_SHIFT_START = time(9, 30, 0)
+DAY_SHIFT_START_STR = "23:00:00"
+NIGHT_SHIFT_START_STR = "9:30:00"
 
 # mach on threshold
 ON_MACH_THRESHOLD = 3600

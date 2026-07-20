@@ -1,1 +1,1 @@
-export const DAY_SHIFT_START = "07:00:00";
+export const DAY_SHIFT_START = "23:00:00";
