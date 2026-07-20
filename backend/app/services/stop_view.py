@@ -8,9 +8,9 @@ from cores.constants import DAY_SHIFT_START_STR, NIGHT_SHIFT_START_STR
 def determin_start_shift_time(stop_time:pd.Timestamp)->str:
     date = stop_time.strftime("%Y-%m-%d %H:%M:%S").split()[0]
     pre_date = (stop_time-timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S").split()[0]
-    if time(0,0,0) <= stop_time.time() <= time(7,0,0):
-        return pre_date+" "+NIGHT_SHIFT_START_STR
-    elif time(7,0,0) < stop_time.time() <= time(19,0,0):
+    if time(0,0,0) <= stop_time.time() <= time(9,30,0):
+        return pre_date+" "+DAY_SHIFT_START_STR
+    elif time(23,0,0) < stop_time.time() <= time(23,59,59):
         return date+" "+DAY_SHIFT_START_STR
     else:
         return date+" "+NIGHT_SHIFT_START_STR
