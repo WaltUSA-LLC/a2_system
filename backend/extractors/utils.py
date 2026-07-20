@@ -3,10 +3,11 @@ from openpyxl.styles import Font, PatternFill
 from datetime import datetime
 from openpyxl.styles import Border, Side
 import pandas as pd
+from cores.constants import DAY_SHIFT_START_STR
 
 def parse_start_date(raw: str) -> datetime:
     # Accept YYYY-MM-DD
-    raw += "T07:00:00"
+    raw += "T"+DAY_SHIFT_START_STR
     try:
         return datetime.fromisoformat(raw) # ISO datetime strings like 2026-01-15T07:00:00
     except ValueError as exc:
