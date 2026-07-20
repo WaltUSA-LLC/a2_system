@@ -84,6 +84,9 @@ function TopBar() {
                     <Button color='inherit' component={RouterLink} to="/upload">
                         Upload
                     </Button>
+                    <Button color='inherit' component={RouterLink} to="/chat">
+                        AI Lab
+                    </Button>
                 </Stack>
                 <Menu
                     anchorEl={anchorElStop}

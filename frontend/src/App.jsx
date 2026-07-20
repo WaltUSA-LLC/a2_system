@@ -10,6 +10,7 @@ import PQCStaffView from "./components/views/PQCStaffView";
 import PQCStaffInPeriodView from "./components/views/PQCStaffInPeriodView";
 import PQCSKUView from "./components/views/PQCSKUView";
 import UploadView from "./components/views/UploadView";
+import AgentChatView from "./components/views/AgentChatView";
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
                     <Route path="/pqc-view/staff/period" element={<PQCStaffInPeriodView />} />
                     <Route path="/pqc-view/sku" element={<PQCSKUView />} />
                     <Route path="/upload" element={<UploadView />} />
+                    <Route path="/chat" element={<AgentChatView />} />
                 </Routes>
             </Grid>
         </Grid>

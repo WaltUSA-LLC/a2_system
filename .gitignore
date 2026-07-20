@@ -13,3 +13,4 @@ backend/extractors/__pycache__
 backend/ingestors/__pycache__
 backend/extractors/data_outputs/*
 .vscode
+.DS_Store
