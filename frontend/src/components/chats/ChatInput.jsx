@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import axios from "axios";
+import CircularProgress from '@mui/material/CircularProgress';
 import './ChatInput.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -12,6 +13,20 @@ export function ChatInput({ chatMessages, setChatMessages }) {
   }
 
   async function sendMessage() {
+    const newChatMessagesWithThink = [
+      ...chatMessages,
+      {
+        message: inputText,
+        sender: 'user',
+        id: crypto.randomUUID()
+      },
+      {
+        message: <CircularProgress size={20} />,
+        sender: 'robot',
+        id: crypto.randomUUID()
+      }
+    ];
+
     const newChatMessages = [
       ...chatMessages,
       {
@@ -21,8 +36,8 @@ export function ChatInput({ chatMessages, setChatMessages }) {
       }
     ];
 
-    setChatMessages(newChatMessages);
-
+    setChatMessages(newChatMessagesWithThink);
+    setInputText('');
     await axios.get(`${API_BASE_URL}/agent/chat`, {
                 params: {
                     msg:inputText
@@ -38,7 +53,6 @@ export function ChatInput({ chatMessages, setChatMessages }) {
                   id: crypto.randomUUID()
                 }
               ]);
-          setInputText('');
           }).catch((err) => {
               //setChartOpen(false);
               console.error(err);
@@ -50,7 +64,7 @@ export function ChatInput({ chatMessages, setChatMessages }) {
   return (
     <div className="chat-input-container">
       <input
-        placeholder="Send a message to Chatbot"
+        placeholder="Send a message to AI"
         size="30"
         onChange={saveInputText}
         value={inputText}
