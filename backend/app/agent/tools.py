@@ -24,6 +24,7 @@ def get_shift_summary(start_time: str, end_time: str, shift: int) -> str:
         shift: Shift number. Use 0 to show day and night shifts separately,
             1 to show the day shift, or 2 to show the night shift.
     """
+    print("Agent is using shift summary tool.")
     shift_summary = handle_shift_view(start_time, end_time, shift)
     return json.dumps(
         {"shift_summary": shift_summary.to_dict(orient="records")},
@@ -48,6 +49,7 @@ def get_shift_machine_details(start_time: str, shift: int) -> str:
         shift: Shift number. Use 0 to show day and night shifts separately,
             1 to show the day shift, or 2 to show the night shift.
     """
+    print("Agent is using shift machine details tool")
     if shift == 0:
         machine_details = pd.concat(
             [

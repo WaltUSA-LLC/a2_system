@@ -37,7 +37,10 @@ Answer using only the data returned by the tools. Keep the final answer concise.
 
 # initialize a commercial chat model (e.g., "openai:gpt-5-mini") 
 # or use a local model (e.g., "ollama:gpt-oss")
-model = init_chat_model("ollama:gpt-oss", temperature=0)
+model = init_chat_model("ollama:gpt-oss", 
+                        num_ctx=16384,
+                        num_predict=1024,
+                        temperature=0)
 
 agent = create_agent(
     model=model,
