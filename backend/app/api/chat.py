@@ -10,6 +10,7 @@ async def chat(msg: str = Query(..., min_length=1)):
         result = await agent.ainvoke(
             {"messages": [{"role": "user", "content": msg}]}
         )
+        #print(result)
         return {"feedback": result["messages"][-1].content}
     except Exception as exc:
         raise HTTPException(
