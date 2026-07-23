@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import axios from "axios";
+import Stack from '@mui/material/Stack';
+import SendIcon from '@mui/icons-material/Send';
+import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import './ChatInput.css';
+import TextField from '@mui/material/TextField';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -62,18 +65,34 @@ export function ChatInput({ chatMessages, setChatMessages }) {
   }
 
   return (
-    <div className="chat-input-container">
-      <input
+    <Stack direction="row"
+           spacing={3}
+           sx={{
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+    >
+      <TextField
         placeholder="Send a message to AI"
-        size="30"
         onChange={saveInputText}
         value={inputText}
-        className="chat-input"
+        sx={{
+          '& .MuiInputBase-input': {
+            padding: 1,
+          },
+        }}
+        fullWidth
       />
-      <button
+      <Button
         onClick={sendMessage}
-        className="send-button"
-      >Send</button>
-    </div>
+        variant="contained"
+        endIcon={<SendIcon />}
+        sx={{ height: '30px',
+          backgroundColor: "primary.light"
+        }}
+      >
+        Send
+      </Button>
+    </Stack>
   );
 }
