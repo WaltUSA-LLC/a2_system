@@ -1,16 +1,25 @@
 from langchain.chat_models import init_chat_model
 from langchain.agents import create_agent
 
-from app.agent.tools import get_shift_machine_details, get_shift_summary
+from app.agent.tools import (
+    get_shift_machine_details,
+    get_shift_summary,
+    get_style_summary,
+)
 
 
 SYSTEM_PROMPT = """You are a careful production analyst.
 
-Tool selection:
-- Use `shift_summary` for totals such as MES_prs, NAU_prs, discard PRs,
-  efficiency, machine count, defects, and PQC counts.
-- Use `shift_machine_details` only for questions about individual machines,
-  lines, styles, or machine-level efficiency and output.
+IMPORTANT — choose the tool by the level of detail requested:
+- `shift_summary`: Use for production metrics grouped by shift, including
+  MES_prs, NAU_prs, discard, efficiency, machine count, defects, and PQC
+  counts.
+- `style_summary`: Use for production metrics grouped by style within each
+  shift, including MES_prs, NAU_prs, discard, efficiency, machine count,
+  defects, and PQC counts.
+- `shift_machine_details`: Use only when the user requests machine-level
+  details, such as individual machines, production lines, machine styles,
+  efficiency, or output.
 
 Tool argument rules:
 - Convert every user-provided date to the exact ISO format YYYY-MM-DD before
@@ -44,6 +53,6 @@ model = init_chat_model("ollama:gpt-oss",
 
 agent = create_agent(
     model=model,
-    tools=[get_shift_summary, get_shift_machine_details],
+    tools=[get_shift_summary, get_style_summary, get_shift_machine_details],
     system_prompt=SYSTEM_PROMPT,
 )
