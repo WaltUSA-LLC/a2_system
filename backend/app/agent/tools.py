@@ -71,7 +71,6 @@ def get_shift_machine_details(start_time: str, shift: int) -> str:
     )
 
 
-
 @tool(
     "style_summary",
     parse_docstring=True,
@@ -99,5 +98,50 @@ def get_style_summary(start_time: str, end_time: str, shift: int) -> str:
     style_summary = handle_sku_view(start_time, end_time, shift)
     return json.dumps(
         {"style_summary": style_summary.to_dict(orient="records")},
+        default=str,
+    )
+
+
+@tool(
+    "style_machine_details",
+    parse_docstring=True,
+    description=(
+        "Retrieve machine-level production metrics for a specific style within "
+        "a shift. Use this tool for questions about the production lines and "
+        "individual machines running that style, including MES_prs, NAU_prs, "
+        "discard, on-time occupation, efficiency, and output."
+    ),
+)
+def get_style_machine_details(start_time: str, shift: int) -> str:
+    """Return machine-level production details for a style and shift.
+
+    The details include each machine's production line, style code, MES and
+    NAU production, discarded pairs and discard rate, on-time occupation,
+    efficiency, and performance comment.
+
+    Args:
+        start_time: Date to report in ``YYYY-MM-DD`` format.
+        shift: Shift to include: ``0`` for day and night shifts as separate
+            records, ``1`` for the day shift only, or ``2`` for the night
+            shift only.
+
+    Returns:
+        A JSON object encoded as a string, with machine-level records in the
+        ``machine_details`` array.
+    """
+    print("Agent is using style machine details tool")
+    if shift == 0:
+        machine_details = pd.concat(
+            [
+                handle_sku_mach_detail(start_time, 1),
+                handle_sku_mach_detail(start_time, 2),
+            ],
+            ignore_index=True,
+        )
+    else:
+        machine_details = handle_sku_mach_detail(start_time, shift)
+
+    return json.dumps(
+        {"machine_details": machine_details.to_dict(orient="records")},
         default=str,
     )
